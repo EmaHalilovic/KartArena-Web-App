@@ -1,0 +1,110 @@
+<app-header></app-header>
+
+<section class="hero">
+  <div class="bg"></div>
+  <div class="overlay"></div>
+
+  <div class="container content">
+    <div class="badge">KARTARENA PLATFORM</div>
+
+    <h1>
+      FEEL THE ADRENALINE
+    </h1>
+
+    <p>
+      Kroz jednostavnu karting web aplikaciju  istraži, rezerviši i upravljaj kartovima u par klikova.
+    </p>
+
+    <div class="actions">
+      <a class="btn primary" routerLink="/karts">Rezerviši svoju trku odmah</a>
+      <a class="btn" routerLink="/stats">Statistika</a>
+    </div>
+  </div>
+</section>
+
+<section class="features container">
+  <div class="feature">
+    <div class="ico">🏁</div>
+    <div class="ft">PREMIUM KVALITET</div>
+    <div class="fd">Najbolja karting platforma u regionu</div>
+  </div>
+
+  <div class="feature">
+    <div class="ico">🛡️</div>
+    <div class="ft">LICENCA I SIGURNOST</div>
+    <div class="fd">Licenciran software sa live update-om</div>
+  </div>
+
+  <div class="feature">
+    <div class="ico">🔍</div>
+    <div class="ft">CERTIFICIRANO OSOBLJE</div>
+    <div class="fd">Osoblje sa višegodišnjim iskustvom</div>
+  </div>
+
+  <div class="feature">
+    <div class="ico">📈</div>
+    <div class="ft">PRAĆENJE STATISTIKE</div>
+    <div class="fd">Praćenje lične i globalne statistike</div>
+  </div>
+</section>
+
+<section class="gallery container">
+  <button class="gbtn left" (click)="prevSlide()" aria-label="Prev">&#10094;</button>
+
+  <div class="gtrack" [style.transform]="'translateX(-' + (galleryIndex * 100) + '%)'">
+    <div class="gslide">
+      <img src="/assets/karting.jpg" alt="Karting 1" />
+    </div>
+    <div class="gslide">
+      <img src="/assets/fia-2.jpg" alt="Karting 2" />
+    </div>
+  </div>
+
+  <button class="gbtn right" (click)="nextSlide()" aria-label="Next">&#10095;</button>
+
+  <div class="gdots">
+    <button class="dot" [class.active]="galleryIndex === 0" (click)="setSlide(0)"></button>
+    <button class="dot" [class.active]="galleryIndex === 1" (click)="setSlide(1)"></button>
+  </div>
+</section>
+
+<section class="newsletter">
+  <div class="container nwrap">
+    <div class="ntitle">POČNI SADA I BUDI UVIJEK U TOKU!</div>
+    <a class="nbtn" href="#contact">PRIJAVI SE NA NAŠ NEWSLETTER</a>
+  </div>
+</section>
+
+<footer class="footer" id="contact">
+  <div class="container fgrid">
+    <div class="fbrand">
+      <img class="flogo" src="/assets/logo-red.png" alt="KartArena logo" />
+    </div>
+
+    <div class="fcols">
+      <div class="fcol">
+        <div class="fh">CIJENE</div>
+        <a href="#">Paket vožnji</a>
+        <a href="#">Individualne vožnje</a>
+      </div>
+
+      <div class="fcol">
+        <div class="fh">GRUPE</div>
+        <a href="#">Rezervacije</a>
+        <a href="#">Team building</a>
+      </div>
+
+      <div class="fcol">
+        <div class="fh">INFO</div>
+        <a href="#">Email</a>
+        <a href="#">Radno vrijeme</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container fbottom">
+    <div>📞 +387 12 123 123</div>
+    <div>✉️ info@kartarena.com</div>
+    <div>📍 88 000 Mostar</div>
+  </div>
+</footer>

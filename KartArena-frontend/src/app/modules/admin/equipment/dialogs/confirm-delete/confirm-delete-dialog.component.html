@@ -1,0 +1,32 @@
+<div class="dialog-shell">
+  <div class="dialog-header">
+    <div class="warning-badge">
+      <mat-icon>delete_forever</mat-icon>
+    </div>
+    <div>
+      <h2>{{ (data.titleKey || 'DIALOGS.TITLES.CONFIRM_DELETE') | translate }}</h2>
+      <p>Review this action before continuing.</p>
+    </div>
+  </div>
+
+  <div class="content">
+    <p class="message">
+      {{ (data.messageKey || 'DIALOGS.MESSAGES.CONFIRM_DELETE') | translate:{ name: data.name } }}
+    </p>
+
+    <div class="item-name" *ngIf="data.name">
+      <span>Selected item</span>
+      <strong>{{ data.name }}</strong>
+    </div>
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-stroked-button type="button" (click)="cancel()">
+      {{ (data.cancelKey || 'DIALOGS.BUTTONS.CANCEL') | translate }}
+    </button>
+    <button mat-flat-button color="warn" type="button" (click)="confirm()">
+      <mat-icon>delete</mat-icon>
+      {{ (data.confirmKey || 'DIALOGS.BUTTONS.DELETE') | translate }}
+    </button>
+  </div>
+</div>

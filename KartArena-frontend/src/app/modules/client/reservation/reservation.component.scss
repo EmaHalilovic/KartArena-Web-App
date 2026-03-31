@@ -1,0 +1,254 @@
+/* reservation.component.scss */
+
+.container {
+  padding: 22px 26px;
+  min-height: calc(100vh - 16px);
+  color: #f2f2f2;
+
+  /* ✅ čist crni background */
+  background: #0a0a0a;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+
+  /* “pit wall” top strip */
+  padding: 10px 12px;
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  position: relative;
+  overflow: hidden;
+
+  /* ✅ checker pattern samo u tankoj traci */
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 6px;
+    width: 100%;
+    background:
+      linear-gradient(45deg, rgba(255,255,255,0.18) 25%, transparent 25%),
+      linear-gradient(-45deg, rgba(255,255,255,0.18) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.18) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.18) 75%);
+    background-size: 18px 18px;
+    background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+    opacity: 0.35;
+  }
+
+  /* ✅ crvena accent linija lijevo */
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 0;
+    width: 3px;
+    background: #e10600;
+    opacity: 0.95;
+  }
+
+  h1 {
+    margin: 0;
+    padding-left: 8px; /* zbog crvene linije */
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+
+  button[mat-raised-button] {
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 10px;
+
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+
+    background: #e10600;
+    color: #fff;
+
+    box-shadow: 0 10px 24px rgba(225, 6, 0, 0.35);
+
+    mat-icon {
+      margin-right: 6px;
+    }
+
+    &:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+      transition: 140ms ease;
+    }
+  }
+}
+
+/* ===== LOADING & ERROR ===== */
+.loading {
+  display: grid;
+  place-items: center;
+  padding: 22px 0;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+
+  border-radius: 12px;
+  background: rgba(225, 6, 0, 0.10);
+  border: 1px solid rgba(225, 6, 0, 0.25);
+  color: #ffd4d4;
+
+  mat-icon {
+    color: #ff4b4b;
+  }
+}
+
+/* ===== TABLE CARD ===== */
+.table-wrap {
+  border-radius: 18px;
+  padding: 12px;
+
+  /* ✅ card crn (ne bijel) */
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.60);
+  overflow: hidden; /* da header/row radius lijepo sjedne */
+}
+
+/* Material table base */
+table.mat-mdc-table,
+table.mat-table {
+  width: 100%;
+  background: transparent !important;
+}
+
+/* ===== HEADER ROW ===== */
+.mat-mdc-header-row,
+.mat-header-row {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Header cells */
+.mat-mdc-header-cell,
+.mat-header-cell {
+  position: relative;
+
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+
+  padding: 10px 12px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+}
+
+/* ✅ mala crvena “tick” linija iznad svakog headera (kao što si imala, ali kontrolisano) */
+.mat-mdc-header-cell::after,
+.mat-header-cell::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 12px;
+  width: 3px;
+  background: #e10600;
+  opacity: 0.85;
+  border-radius: 2px;
+}
+
+/* ===== BODY ROWS ===== */
+.mat-mdc-cell,
+.mat-cell {
+  color: rgba(255, 255, 255, 0.86) !important;
+  font-size: 13px;
+
+  padding: 10px 12px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.mat-mdc-row,
+.mat-row {
+  transition: 140ms ease;
+}
+
+/* Row hover = crveni glow ali suptilno */
+.mat-mdc-row:hover,
+.mat-row:hover {
+  background: rgba(225, 6, 0, 0.08);
+}
+
+/* Dense rows height */
+:host ::ng-deep .mat-mdc-table .mat-mdc-row,
+:host ::ng-deep .mat-table .mat-row {
+  height: 44px;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+
+  button[mat-icon-button] {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: #fff;
+
+    &:hover:not([disabled]) {
+      background: rgba(225, 6, 0, 0.14);
+      border-color: rgba(225, 6, 0, 0.35);
+    }
+
+    &[disabled] {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* Remove mat elevation glow on dark */
+:host ::ng-deep .mat-elevation-z1,
+:host ::ng-deep .mat-elevation-z2 {
+  box-shadow: none !important;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .container {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+
+    button[mat-raised-button] {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .actions {
+    justify-content: flex-start;
+  }
+}

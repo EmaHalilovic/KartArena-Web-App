@@ -1,0 +1,97 @@
+<div class="container">
+  <div class="header-card mat-elevation-z2">
+    <div class="header-card-content">
+      <h1>KARTOVI</h1>
+
+      <div class="actions-container">
+        <mat-form-field class="search-field" appearance="fill">
+          <mat-label>Pretraga</mat-label>
+          <input
+            matInput
+            (keyup.enter)="onSearch()"
+            [(ngModel)]="request.search"
+            placeholder="Naziv / proizvođač..."
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-slide-toggle
+          [(ngModel)]="showOnlyEnabled"
+          (change)="onToggleEnabledFilter($event.checked)"
+        >
+          Samo aktivni
+        </mat-slide-toggle>
+
+        <button mat-raised-button color="primary" (click)="onCreate()">
+          <mat-icon>add</mat-icon>
+          Novi kart
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">Učitavanje...</div>
+  <div *ngIf="!isLoading && errorMessage" class="error">{{ errorMessage }}</div>
+
+  <div class="mat-elevation-z8" *ngIf="!isLoading && !errorMessage">
+    <table mat-table [dataSource]="items">
+
+      <ng-container matColumnDef="image">
+        <th mat-header-cell *matHeaderCellDef>Slika</th>
+        <td mat-cell *matCellDef="let item">
+          <img [src]="item.imageUrl || 'https://placehold.co/90x60'" style="width:90px;height:60px;object-fit:cover;border-radius:8px;">
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Naziv</th>
+        <td mat-cell *matCellDef="let item"><b>{{ item.name }}</b></td>
+      </ng-container>
+
+      <ng-container matColumnDef="manufacturer">
+        <th mat-header-cell *matHeaderCellDef>Proizvođač</th>
+        <td mat-cell *matCellDef="let item">{{ item.manufacturer || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="colour">
+        <th mat-header-cell *matHeaderCellDef>Boja</th>
+        <td mat-cell *matCellDef="let item">{{ item.colour || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="price">
+        <th mat-header-cell *matHeaderCellDef>Cijena/vožnja</th>
+        <td mat-cell *matCellDef="let item">{{ item.pricePerSession ?? '—' }} KM</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let item">
+          <mat-chip [color]="item.isEnabled ? 'primary' : 'warn'" selected>
+            {{ item.isEnabled ? 'Aktivan' : 'Neaktivan' }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Akcije</th>
+        <td mat-cell *matCellDef="let item">
+          <button mat-icon-button color="primary" (click)="onEdit(item)"><mat-icon>edit</mat-icon></button>
+          <button mat-icon-button color="warn" (click)="onDelete(item)"><mat-icon>delete</mat-icon></button>
+          <button mat-stroked-button (click)="onToggleStatus(item)">
+            {{ item.isEnabled ? 'Disable' : 'Enable' }}
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <mat-paginator
+      [length]="totalCount"
+      [pageSize]="request.paging.pageSize"
+      [pageIndex]="request.paging.page - 1"
+      (page)="onPageChange($event)"
+    ></mat-paginator>
+  </div>
+</div>

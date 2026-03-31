@@ -1,0 +1,338 @@
+// ====== DARK THEME (match the rest of the page) ======
+$ui-bg: #0f1115;
+$panel-bg: #131415;
+$panel-bg-2: #1b1e24;
+$panel-border: rgba(0, 0, 0, 0.08);
+$panel-border-strong: rgba(255, 255, 255, 0.12);
+
+$text: rgba(255, 255, 255, 0.92);
+$text-muted: rgba(255, 255, 255, 0.62);
+$sidebar-width: 280px;
+
+$accent: #ff2b2b;              // red like the rest of the page
+$accent-soft: rgba(255, 43, 43, 0.14);
+$hover: rgba(255, 255, 255, 0.06);
+$hover-2: rgba(255, 255, 255, 0.09);
+
+// Sidenav Container
+.sidenav-container {
+  height: 100vh;
+  width: 100%;
+  background: $ui-bg;
+
+  // Sidebar
+  .sidenav {
+    width: $sidebar-width;
+    background: $panel-bg;
+    border-right: 1px solid $panel-border;
+    box-shadow: 8px 0 24px rgba(0, 0, 0, 0.45);
+    display: flex;
+    flex-direction: column;
+
+    // Sidebar Header
+    .sidebar-header {
+      background: linear-gradient(180deg, $panel-bg 0%, $panel-bg-2 100%);
+      padding: 18px 16px;
+      border-bottom: 1px solid $panel-border;
+      position: relative;
+      overflow: hidden;
+
+      // remove the “bubbly” decorations (doesn't fit the dark UI)
+      &::before,
+      &::after {
+        display: none;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+
+        .user-avatar {
+          width: 44px;
+          height: 44px;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid $panel-border;
+          border-radius: 12px; // squircle to match modern dark UI
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: none;
+
+          mat-icon {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+            color: $text;
+          }
+        }
+
+        .user-details {
+          .user-email {
+            color: $text;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-shadow: none;
+          }
+
+          .user-role {
+            .role-chip {
+              width: auto;
+              height: 24px;
+              padding: 0 10px;
+              border-radius: 999px;
+              font-size: 11px;
+              font-weight: 700;
+              letter-spacing: 0.6px;
+              text-transform: uppercase;
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              border: 1px solid $panel-border;
+
+              mat-icon {
+                font-size: 14px;
+                width: 14px;
+                height: 14px;
+              }
+
+              // keep role colors but make them dark-friendly
+              &.admin {
+                background: rgba(239, 83, 80, 0.18);
+                color: rgba(255, 255, 255, 0.92);
+              }
+              &.manager {
+                background: rgba(255, 167, 38, 0.18);
+                color: rgba(255, 255, 255, 0.92);
+              }
+              &.employee {
+                background: rgba(102, 187, 106, 0.18);
+                color: rgba(255, 255, 255, 0.92);
+              }
+            }
+          }
+        }
+      }
+
+      // Language Selector
+      .language-selector {
+        .lang-button {
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid $panel-border;
+          border-radius: 12px;
+          color: $text;
+          width: 100%;
+          height: 42px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          transition: 0.2s ease;
+
+          &:hover {
+            background: $hover;
+            border-color: $panel-border-strong;
+          }
+
+          mat-icon {
+            margin-left: auto;
+            color: $text-muted;
+          }
+        }
+      }
+    }
+
+    // Navigation Menu
+    mat-nav-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 10px;
+
+      &::-webkit-scrollbar {
+        width: 8px;
+      }
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        &:hover {
+          background: rgba(255, 255, 255, 0.18);
+        }
+      }
+
+      .nav-section-title {
+        color: $text-muted;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 12px 10px 6px;
+        margin-top: 6px;
+      }
+
+      a[mat-list-item] {
+        border-radius: 14px;
+        margin-bottom: 6px;
+        height: 46px;
+        color: $text;
+        transition: 0.2s ease;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid transparent;
+
+        // red active indicator (like your page accents)
+        &::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 8px;
+          bottom: 8px;
+          width: 3px;
+          border-radius: 999px;
+          background: transparent;
+          transition: 0.2s ease;
+        }
+
+        mat-icon[matListItemIcon] {
+          color: $text-muted;
+          margin-right: 14px;
+          transition: 0.2s ease;
+        }
+
+        span[matListItemTitle],
+        .mdc-list-item__primary-text {
+          font-size: 14px;
+          font-weight: 600;
+          color: $text;
+        }
+
+        &:hover:not(.active) {
+          background: $hover;
+          border-color: $panel-border;
+
+          mat-icon[matListItemIcon] {
+            color: $text;
+            transform: none;
+          }
+        }
+
+        &.active {
+          background: linear-gradient(180deg, $accent-soft 0%, rgba(255, 255, 255, 0.04) 100%);
+          border-color: rgba(255, 43, 43, 0.28);
+
+          &::before {
+            background: $accent;
+          }
+
+          mat-icon[matListItemIcon] {
+            color: $accent;
+          }
+
+          span[matListItemTitle],
+          .mdc-list-item__primary-text {
+            color: $text;
+          }
+        }
+
+        // Logout item styled like danger button but still consistent
+        &.logout-item {
+          margin-top: auto;
+          background: rgba(255, 43, 43, 0.06);
+          border: 1px solid rgba(255, 43, 43, 0.18);
+
+          mat-icon[matListItemIcon] {
+            color: rgba(255, 43, 43, 0.9);
+          }
+
+          span[matListItemTitle],
+          .mdc-list-item__primary-text {
+            color: rgba(255, 255, 255, 0.92);
+          }
+
+          &:hover {
+            background: rgba(255, 43, 43, 0.10);
+            border-color: rgba(255, 43, 43, 0.30);
+            transform: none;
+
+            mat-icon[matListItemIcon] {
+              transform: none;
+            }
+          }
+        }
+      }
+
+      mat-divider {
+        margin: 14px 0;
+        background-color: $panel-border;
+      }
+    }
+  }
+
+  // Main Content
+  .main-content {
+    background: $ui-bg; // match page
+    min-height: 100vh;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      &:hover {
+        background: rgba(255, 255, 255, 0.18);
+      }
+    }
+  }
+}
+
+// Language Menu (dark)
+.mat-mdc-menu-panel {
+  max-width: 240px !important;
+  border-radius: 14px !important;
+  background: $panel-bg !important;
+  border: 1px solid $panel-border !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55) !important;
+
+  .mat-mdc-menu-content {
+    padding: 8px !important;
+
+    button.mat-mdc-menu-item {
+      border-radius: 12px;
+      margin-bottom: 6px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: $text;
+      transition: 0.2s ease;
+
+      .check-icon {
+        margin-left: auto;
+        color: $accent;
+      }
+
+      &.active-lang {
+        background: $hover-2;
+        border: 1px solid rgba(255, 255, 255, 0.10);
+      }
+
+      &:hover {
+        background: $hover;
+      }
+    }
+  }
+}
+
+// OPTIONAL: remove slide-in animation if it feels off vs rest of dark UI
+.sidenav {
+  animation: none;
+}

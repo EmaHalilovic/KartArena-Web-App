@@ -1,0 +1,323 @@
+{
+  "APP": {
+    "TITLE": "Dobrodošli u našu aplikaciju",
+    "DESCRIPTION": "Ovo je primjer lokalizacije."
+  },
+  "AUTH": {
+    "LOGIN": {
+      "TITLE": "Prijava",
+      "EMAIL_LABEL": "Email",
+      "EMAIL_PLACEHOLDER": "Unesite email",
+      "PASSWORD_LABEL": "Lozinka",
+      "PASSWORD_PLACEHOLDER": "Unesite lozinku",
+      "REMEMBER_ME": "Zapamti me",
+      "BUTTON": "Prijavi se",
+      "LOADING": "Prijavljivanje..."
+    },
+    "LOGOUT": {
+      "TITLE": "Odjava",
+      "MESSAGE": "Odjavljivanje sa sistema...",
+      "REDIRECT_IN": "Preusmjeravanje za {{seconds}}s"
+    }
+  },
+  "ADMIN_PANEL": {
+    "TITLE": "Admin Panel",
+    "ROLES": {
+      "ADMIN": "Administrator",
+      "MANAGER": "Menadžer",
+      "EMPLOYEE": "Zaposlenik"
+    },
+    "MENU": {
+      "EQUIPMENT": "OPREMA",
+      "RESERVATIONS": "REZERVACIJE",
+      "SYSTEM": "SISTEM",
+      "SETTINGS": "Postavke",
+      "LOGOUT": "Odjava",
+      "CATALOG":"KATALOG"
+    }
+    
+  },
+   "EQUIPMENT": {
+  "TITLE": "Oprema",
+  "SUBTITLE": "Upravljanje opremom",
+  "SEARCH_PLACEHOLDER": "Pretraži opremu",
+  "SEARCH_INPUT_PLACEHOLDER": "Unesite naziv opreme...",
+  "ONLY_ENABLED": "Samo aktivna",
+  "NEW": "Dodaj novu",
+  "LOADING": "Učitavanje opreme...",
+  "NO_DATA": "Nema opreme za prikaz",
+  "NO_DATA_FILTER": "Nema rezultata za pretragu",
+  "TABLE": {
+    "NAME": "Naziv",
+    "PRICE": "Cijena",
+    "QUANTITY": "Količina",
+    "SIZE": "Veličina",
+    "STATUS": "Status",
+    "IS_AVAILABLE": "Dostupnost",
+    "ACTIONS": "Akcije"
+  },
+  "ACTIONS": {
+    "EDIT": "Uredi",
+    "DELETE": "Obriši",
+    "ENABLE": "Aktiviraj",
+    "DISABLE": "Deaktiviraj"
+  },
+   "ADD": {
+      "TITLE": "Dodaj Novu Opremu",
+      "SAVING": "Čuvanje opreme..."
+    },
+    "EDIT": {
+      "TITLE": "Uredi Opremu",
+      "LOADING": "Učitavanje opreme..."
+    },
+   "FORM": {
+       "NAME": "Naziv Proizvoda",
+      "NAME_PLACEHOLDER": "Unesite naziv proizvoda",
+      "DESCRIPTION": "Opis Opreme",
+      "DESCRIPTION_PLACEHOLDER": "Unesite Opis opreme...",
+      "PRICE": "Cijena Opreme",
+      "PRICE_PLACEHOLDER": "Unesite Cijenu Opreme",
+      "QUANTITY": "Količina Opreme",
+      "QUANTITY_PLACEHOLDER": "Unesite Količinu Opreme",
+      "SIZE": "Veličina Opreme",
+      "SIZE_PLACEHOLDER": "Unesite Veličinu Opreme",
+      "IS_AVAILABLE": "Dostupnost Opreme",
+      "LOADING": "Učitavanje...",
+      "CANCEL": "Otkaži",
+      "SAVE": "Sačuvaj",
+      "UPDATE": "Ažuriraj"
+    },
+    "DIALOGS": {
+      "DELETE_TITLE": "Brisanje opreme",
+      "DELETE_MESSAGE": "Da li ste sigurni da želite obrisati opremu \"{{name}}\"?",
+      "CONFIRM_ENABLE": "Da li ste sigurni da želite aktivirati opremu \"{{name}}\"?",
+      "CONFIRM_DISABLE": "Da li ste sigurni da želite deaktivirati opremu \"{{name}}\"?",
+      "SUCCESS_CREATE": "Oprema uspješno kreirana.",
+      "SUCCESS_UPDATE": "Oprema uspješno ažurirana.",
+      "SUCCESS_DELETE": "Oprema uspješno obrisana.",
+      "SUCCESS_ENABLE": "Oprema \"{{name}}\" je uspješno aktivirana.",
+      "SUCCESS_DISABLE": "Oprema \"{{name}}\" je uspješno deaktivirana.",
+      "ERROR_CREATE": "Greška pri kreiranju opreme.",
+      "ERROR_UPDATE": "Greška pri ažuriranju opreme.",
+      "ERROR_DELETE": "Greška pri brisanju opreme.",
+      "ERROR_TOGGLE": "Greška pri promjeni statusa opreme \"{{name}}\"."
+    }
+},
+
+  "RESERVATION": {
+    "ID": "Korisnik ID",
+    "TITLE": "Rezervacije",
+    "USER": "Korisnik",
+    "TRACK": "Staza",
+    "KART": "Kart",
+    "START_TIME": "Vrijeme početka",
+    "END_TIME": "Vrijeme završetka",
+    "CREATE_TITLE": "Kreiranje rezervacije",
+    "SEARCH_PLACEHOLDER": "Pretraga",
+    "SEARCH_INPUT_PLACEHOLDER": "Unesite pojam i pritisnite Enter",
+    "ONLY_ACTIVE": "Samo aktivne",
+
+    "LOADING": "Učitavanje rezervacija...",
+
+    "NO_DATA": "Nema rezervacija.",
+    "NO_DATA_FILTER": "Nema rezultata za zadanu pretragu.",
+ "FIELDS": {
+   "USER_ID": "ID korisnika",
+   "TRACK_ID": "ID staze",
+   "KART_ID": "ID karta",
+   "DATE": "Datum",
+   "START_TIME": "Vrijeme početka",
+   "END_TIME": "Vrijeme završetka"
+ },
+  "EDIT_TITLE": "Uređivanje rezervacije",
+ "VALIDATION": {
+   "END_AFTER_START": "Vrijeme završetka mora biti nakon vremena početka"
+ },
+  "TABLE": {
+      "ID": "ID",
+      "USER": "Korisnik",
+      "TRACK": "Staza",
+      "KART": "Kart",
+      "DATE": "Datum",
+      "START": "Početak",
+      "END": "Kraj",
+      "STATUS": "Status",
+      "ACTIONS": "Akcije"
+    }
+  },
+  
+"CLIENT_PANEL": {
+    "ROLES": {
+      "ADMIN": "Administrator",
+      "MANAGER": "Menadžer",
+      "EMPLOYEE": "Zaposlenik"
+    },
+    "MENU": {
+      "CATALOG": "Katalog",
+      "RESERVATION": "Rezervacije",
+      "SYSTEM": "Sistem",
+      "SETTINGS": "Postavke",
+      "LOGOUT": "Odjava"
+    }
+  },
+
+
+  "COMMON": {
+    "YES": "Da",
+    "NO": "Ne",
+    "CANCEL": "Otkaži",
+    "SAVE": "Sačuvaj",
+    "DELETE": "Obriši",
+    "EDIT": "Uredi",
+    "CREATE": "Kreiraj",
+    "SEARCH": "Pretraži",
+    "LOADING": "Učitavanje...",
+    "ERROR": "Došlo je do greške",
+    "SUCCESS": "Uspjeh",
+    "WARNING": "Upozorenje",
+    "INFO": "Informacija",
+    "CLOSE": "Zatvori",
+    "CONFIRM": "Potvrdi",
+    "REFRESH": "Osvježi",
+    "RETRY": "Pokušaj Ponovo",
+    "CLEAR": "Očisti",
+    "RESET": "Resetuj",
+    "APPLY": "Primijeni",
+    "FILTER": "Filtriraj",
+    "SORT": "Sortiraj",
+    "EXPORT": "Izvezi",
+    "IMPORT": "Uvezi",
+    "DOWNLOAD": "Preuzmi",
+    "UPLOAD": "Učitaj",
+    "VIEW": "Pogledaj",
+    "DETAILS": "Detalji",
+    "BACK": "Nazad",
+    "NEXT": "Sljedeće",
+    "PREVIOUS": "Prethodno",
+    "FINISH": "Završi",
+    "SUBMIT": "Pošalji",
+    "UPDATE": "Ažuriraj",
+    "ADD": "Dodaj",
+    "REMOVE": "Ukloni",
+    "SELECT": "Odaberi",
+    "SELECT_ALL": "Odaberi Sve",
+    "DESELECT_ALL": "Poništi Sve",
+    "ACTIONS": "Akcije",
+    "STATUS": "Status",
+    "ACTIVE": "Aktivan",
+    "INACTIVE": "Neaktivan",
+    "ENABLED": "Omogućen",
+    "DISABLED": "Onemogućen",
+    "NAME": "Naziv",
+    "DESCRIPTION": "Opis",
+    "PRICE": "Cijena",
+    "TOTAL": "Ukupno",
+    "SUBTOTAL": "Međuzbroj",
+    "DISCOUNT": "Popust",
+    "QUANTITY": "Količina",
+    "DATE": "Datum",
+    "TIME": "Vrijeme",
+    "CREATED": "Kreirano",
+    "UPDATED": "Ažurirano",
+    "DELETED": "Obrisano",
+    "CREATED_AT": "Kreirano",
+    "UPDATED_AT": "Ažurirano",
+    "DELETED_AT": "Obrisano",
+    "CREATED_BY": "Kreirao",
+    "UPDATED_BY": "Ažurirao",
+    "ALL": "Sve",
+    "NONE": "Ništa",
+    "OTHER": "Ostalo",
+    "UNKNOWN": "Nepoznato",
+    "N_A": "N/D",
+    "OPTIONAL": "Opciono",
+    "REQUIRED": "Obavezno"
+  },
+  "DIALOGS": {
+    "TYPES": {
+      "INFO": "Informacija",
+      "SUCCESS": "Uspjeh",
+      "ERROR": "Greška",
+      "WARNING": "Upozorenje",
+      "QUESTION": "Pitanje"
+    },
+    "BUTTONS": {
+      "OK": "U redu",
+      "CANCEL": "Otkaži",
+      "YES": "Da",
+      "NO": "Ne",
+      "CLOSE": "Zatvori",
+      "DELETE": "Obriši",
+      "SAVE": "Sačuvaj",
+      "CONTINUE": "Nastavi",
+      "BACK": "Nazad"
+    },
+    "TITLES": {
+      "CONFIRM_DELETE": "Potvrdi Brisanje",
+      "CONFIRM_ACTION": "Potvrdi Akciju",
+      "UNSAVED_CHANGES": "Nesačuvane Izmjene",
+      "SUCCESS": "Uspjeh",
+      "ERROR": "Greška",
+      "WARNING": "Upozorenje",
+      "INFO": "Informacija"
+    },
+    "MESSAGES": {
+      "DELETE_CONFIRM": "Da li ste sigurni da želite obrisati \"{{name}}\"?",
+      "DELETE_WARNING": "Ova akcija se ne može poništiti.",
+      "UNSAVED_CHANGES": "Imate nesačuvane izmjene. Da li želite nastaviti?",
+      "SUCCESS_SAVE": "Podaci uspješno sačuvani.",
+      "SUCCESS_DELETE": "Stavka uspješno obrisana.",
+      "SUCCESS_UPDATE": "Podaci uspješno ažurirani.",
+      "ERROR_GENERIC": "Došlo je do greške. Molimo pokušajte ponovo.",
+      "ERROR_NETWORK": "Greška u mreži. Provjerite internet konekciju.",
+      "ARE_YOU_SURE": "Da li ste sigurni?"
+    }
+  },
+  "PAGINATION": {
+    "ITEMS_PER_PAGE": "Stavki po stranici",
+    "FIRST_PAGE": "Prva stranica",
+    "LAST_PAGE": "Posljednja stranica",
+    "NEXT_PAGE": "Sljedeća stranica",
+    "PREVIOUS_PAGE": "Prethodna stranica",
+    "PAGE": "Stranica",
+    "OF": "od",
+    "SHOWING": "Prikazano",
+    "TO": "do",
+    "RESULTS": "rezultata",
+    "NO_ITEMS": "Nema stavki za prikaz"
+  },
+  "VALIDATION": {
+    "REQUIRED": "Ovo polje je obavezno",
+    "REQUIRED_FIELD": "{{field}} je obavezno",
+    "EMAIL": "Unesite validnu email adresu",
+    "MIN_LENGTH": "Minimalna dužina je {{min}} znakova",
+    "MAX_LENGTH": "Maksimalna dužina je {{max}} znakova",
+    "MIN_VALUE": "Minimalna vrijednost je {{min}}",
+    "MAX_VALUE": "Maksimalna vrijednost je {{max}}",
+    "PATTERN": "Neispravan format",
+    "NUMBER": "Unesite validan broj",
+    "INTEGER": "Unesite cijeli broj",
+    "POSITIVE": "Vrijednost mora biti pozitivna",
+    "NEGATIVE": "Vrijednost mora biti negativna",
+    "URL": "Unesite validan URL",
+    "DATE": "Unesite validan datum",
+    "TIME": "Unesite validno vrijeme",
+    "PHONE": "Unesite validan broj telefona",
+    "PASSWORD_MATCH": "Lozinke se ne podudaraju",
+    "UNIQUE": "Ova vrijednost već postoji",
+    "CUSTOM": "Greška pri validaciji"
+  },
+  "ERRORS": {
+    "GENERIC": "Došlo je do greške. Pokušajte ponovo.",
+    "NETWORK": "Greška u mreži. Provjerite konekciju.",
+    "TIMEOUT": "Isteklo vrijeme zahtjeva. Pokušajte ponovo.",
+    "UNAUTHORIZED": "Niste autorizovani za ovu akciju.",
+    "FORBIDDEN": "Pristup zabranjen.",
+    "NOT_FOUND": "Resurs nije pronađen.",
+    "SERVER_ERROR": "Greška na serveru. Pokušajte kasnije.",
+    "BAD_REQUEST": "Neispravan zahtjev.",
+    "CONFLICT": "Ova akcija je u konfliktu sa postojećim podacima.",
+    "VALIDATION": "Provjerite formu za greške.",
+    "UNKNOWN": "Nepoznata greška."
+  }
+}

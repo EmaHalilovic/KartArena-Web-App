@@ -1,0 +1,51 @@
+<div class="dialog-shell">
+  <div class="dialog-header">
+    <h2>Add Equipment Item</h2>
+    <p>{{ data.equipmentName }}</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="dialog-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Item code</mat-label>
+      <input matInput formControlName="itemCode" placeholder="HEL-M-001" />
+      <mat-error *ngIf="form.get('itemCode')?.touched">{{ getErrorMessage('itemCode') }}</mat-error>
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          <mat-option value="Available">Available</mat-option>
+          <mat-option value="InUse">In use</mat-option>
+          <mat-option value="Maintenance">Maintenance</mat-option>
+          <mat-option value="Lost">Lost</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Purchase date</mat-label>
+        <input matInput [matDatepicker]="purchasePicker" formControlName="purchaseDate" />
+        <mat-datepicker-toggle matSuffix [for]="purchasePicker"></mat-datepicker-toggle>
+        <mat-datepicker #purchasePicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Last inspected</mat-label>
+      <input matInput [matDatepicker]="inspectionPicker" formControlName="lastInspectedAt" />
+      <mat-datepicker-toggle matSuffix [for]="inspectionPicker"></mat-datepicker-toggle>
+      <mat-datepicker #inspectionPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes</mat-label>
+      <textarea matInput formControlName="notes" rows="3"></textarea>
+      <mat-error *ngIf="form.get('notes')?.touched">{{ getErrorMessage('notes') }}</mat-error>
+    </mat-form-field>
+
+    <div class="dialog-actions">
+      <button type="button" mat-stroked-button (click)="close()">Cancel</button>
+      <button type="submit" mat-flat-button>Add item</button>
+    </div>
+  </form>
+</div>

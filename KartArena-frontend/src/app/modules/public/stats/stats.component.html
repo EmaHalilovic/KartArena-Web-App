@@ -1,0 +1,72 @@
+<app-header></app-header>
+
+<div class="container page">
+  <div class="top">
+    <div>
+      <h1>Statistika</h1>
+      <p class="muted">Pregled ključnih metrika i trendova (demo podaci).</p>
+    </div>
+    <button class="k-btn primary" (click)="exportReport()">Izvezi izvještaj</button>
+  </div>
+
+  <div class="cards">
+    <div class="k-card stat" *ngFor="let s of stats">
+      <div class="t">{{ s.title }}</div>
+      <div class="v">{{ s.value }}</div>
+      <div class="h">{{ s.hint }}</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="k-card box">
+      <div class="hd">Rezervacije po danima</div>
+      <apx-chart
+        class="chart"
+        [series]="lineSeries"
+        [chart]="lineChart"
+        [xaxis]="lineXAxis"
+        [yaxis]="lineYAxis"
+        [stroke]="lineStroke"
+        [dataLabels]="lineDataLabels"
+        [grid]="lineGrid"
+        [tooltip]="lineTooltip"
+        [legend]="lineLegend"
+      ></apx-chart>
+    </div>
+
+    <!-- ✅ donut centriran -->
+    <div class="k-card box donutBox">
+      <div class="hd">Tip kartova</div>
+
+      <div class="donutWrap">
+        <div class="chart">
+          <apx-chart
+            [series]="donutSeries"
+            [chart]="donutChart"
+            [labels]="donutLabels"
+            [legend]="donutLegend"
+            [plotOptions]="donutPlotOptions"
+            [dataLabels]="donutDataLabels"
+            [tooltip]="donutTooltip"
+            [fill]="donutFill"
+          ></apx-chart>
+        </div>
+      </div>
+    </div>
+
+    <div class="k-card box wide">
+      <div class="hd">Najpopularnije staze</div>
+      <apx-chart
+        class="chart"
+        [series]="barSeries"
+        [chart]="barChart"
+        [xaxis]="barXAxis"
+        [yaxis]="barYAxis"
+        [dataLabels]="barDataLabels"
+        [grid]="barGrid"
+        [tooltip]="barTooltip"
+        [legend]="barLegend"
+      ></apx-chart>
+    </div>
+  </div>
+</div>

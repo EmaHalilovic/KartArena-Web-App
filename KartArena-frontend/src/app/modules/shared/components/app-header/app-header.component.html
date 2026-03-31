@@ -1,0 +1,18 @@
+<header class="hdr">
+  <div class="container row">
+    <a class="brand" routerLink="/" aria-label="KartArena">
+      <img class="logo" src="assets/logo-red.png" alt="KartArena" />
+      <span class="name">Kart Arena</span>
+    </a>
+
+    <nav class="nav">
+      <a routerLink="/tracks" routerLinkActive="active">PREGLED STAZA</a>
+      <a routerLink="/karts" routerLinkActive="active">PREGLED KARTOVA</a>
+      <a routerLink="/prices" routerLinkActive="active">CIJENE</a>
+      <a [routerLink]="['/']" fragment="contact" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">KONTAKT</a>
+      <a routerLink="/stats" routerLinkActive="active">STATISTIKE</a>
+    </nav>
+
+    <a class="cta" routerLink="/reservations">REZERVACIJA</a>
+  </div>
+</header>

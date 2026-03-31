@@ -1,0 +1,104 @@
+<mat-sidenav-container class="admin-shell">
+  <mat-sidenav mode="side" [opened]="sidebarOpened" class="admin-sidenav">
+    <div class="sidenav-inner">
+      <div class="sidenav-main">
+        <div class="brand-block">
+          <div class="brand-icon">
+            <mat-icon>outlined_flag</mat-icon>
+          </div>
+          <div class="brand-text">
+            <div class="brand-title">KART ARENA</div>
+            <div class="brand-subtitle">Arena Management</div>
+          </div>
+        </div>
+
+        <div class="nav-scroll">
+          <div class="nav-group">
+            <div class="nav-group-title">Operations</div>
+
+            <a class="nav-item" routerLink="/admin/dashboard" routerLinkActive="active">
+              <mat-icon class="nav-icon">dashboard</mat-icon>
+              <span class="nav-label">Dashboard</span>
+            </a>
+
+            <a class="nav-item" routerLink="/admin/reservations" routerLinkActive="active">
+              <mat-icon class="nav-icon">calendar_month</mat-icon>
+              <span class="nav-label">Reservations</span>
+            </a>
+
+            <a class="nav-item" routerLink="/admin/karts" routerLinkActive="active">
+              <mat-icon class="nav-icon">directions_car</mat-icon>
+              <span class="nav-label">Karts</span>
+            </a>
+
+            <a class="nav-item" routerLink="/admin/equipment" routerLinkActive="active">
+              <mat-icon class="nav-icon">construction</mat-icon>
+              <span class="nav-label">Equipment</span>
+            </a>
+
+            <a class="nav-item" routerLink="/admin/payments" routerLinkActive="active">
+              <mat-icon class="nav-icon">credit_card</mat-icon>
+              <span class="nav-label">Payments</span>
+            </a>
+
+            <a class="nav-item" routerLink="/admin/customers" routerLinkActive="active">
+              <mat-icon class="nav-icon">groups_2</mat-icon>
+              <span class="nav-label">Customers</span>
+            </a>
+          </div>
+
+          <div class="nav-group">
+            <div class="nav-group-title">System</div>
+
+            <a class="nav-item" routerLink="/admin/settings" routerLinkActive="active">
+              <mat-icon class="nav-icon">settings</mat-icon>
+              <span class="nav-label">Settings</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="footer-avatar">AD</div>
+        <div class="footer-user">
+          <div class="footer-name">Admin</div>
+          <div class="footer-email">{{ auth.currentUser()?.email }}</div>
+        </div>
+      </div>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="admin-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button mat-icon-button class="icon-btn" type="button" (click)="toggleSidebar()">
+          <mat-icon>menu_open</mat-icon>
+        </button>
+      </div>
+
+      <div class="topbar-right">
+        <div class="system-status">
+          <span class="status-dot"></span>
+          <span>System Online</span>
+        </div>
+
+        <div class="language-switcher" aria-label="Language switcher">
+          <mat-icon class="lang-icon">translate</mat-icon>
+          <button
+            type="button"
+            class="lang-btn"
+            *ngFor="let lang of languages"
+            (click)="switchLanguage(lang.code)"
+            [class.active-lang]="currentLang === lang.code"
+          >
+            {{ lang.label }}
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-wrapper">
+      <router-outlet></router-outlet>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

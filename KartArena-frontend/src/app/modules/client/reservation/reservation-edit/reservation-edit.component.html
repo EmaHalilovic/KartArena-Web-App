@@ -1,0 +1,66 @@
+<div class="container">
+  <div class="header">
+    <h1>{{ 'RESERVATION.EDIT_TITLE' | translate }}</h1>
+  </div>
+
+  <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>User ID</mat-label>
+        <input matInput type="number" formControlName="userId" />
+        <mat-error *ngIf="form.get('userId')?.invalid">{{ err('userId') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Track ID</mat-label>
+        <input matInput type="number" formControlName="trackId" />
+        <mat-error *ngIf="form.get('trackId')?.invalid">{{ err('trackId') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Kart ID</mat-label>
+        <input matInput type="number" formControlName="kartId" />
+        <mat-error *ngIf="form.get('kartId')?.invalid">{{ err('kartId') }}</mat-error>
+      </mat-form-field>
+
+    <mat-form-field appearance="outline" class="half">
+  <mat-label>{{ 'RESERVATION.FIELDS.DATE' | translate }}</mat-label>
+  <input
+    matInput
+    [matDatepicker]="picker"
+    formControlName="reservationDate"
+  />
+  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+  <mat-datepicker #picker></mat-datepicker>
+</mat-form-field>
+    </div>
+
+    <div class="row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Start time</mat-label>
+        <input matInput type="time" formControlName="startTime" />
+        <mat-error *ngIf="form.get('startTime')?.invalid">{{ err('startTime') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>End time</mat-label>
+        <input matInput type="time" formControlName="endTime" />
+        <mat-error *ngIf="form.get('endTime')?.invalid">{{ err('endTime') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="actions">
+      <button type="button" mat-stroked-button (click)="onCancel()">
+        <mat-icon>close</mat-icon>
+        {{ 'COMMON.CANCEL' | translate }}
+      </button>
+
+      <button type="submit" mat-raised-button color="primary" [disabled]="isSaving">
+        <mat-icon>save</mat-icon>
+        {{ 'COMMON.SAVE' | translate }}
+      </button>
+    </div>
+  </form>
+</div>

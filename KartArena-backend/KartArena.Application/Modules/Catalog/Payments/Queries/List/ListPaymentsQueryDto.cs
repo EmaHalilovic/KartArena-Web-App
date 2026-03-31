@@ -1,0 +1,23 @@
+using KartArena.Domain.Entities.Payments;
+
+namespace KartArena.Application.Modules.Catalog.Payments.Queries.List;
+
+public sealed class ListPaymentsQueryDto
+{
+    public int Id { get; init; }
+
+    public string? CustomerName { get; init; }
+
+    public string? ReservationDate { get; init; }
+
+    public decimal Amount { get; init; }
+
+    public DateTime? PaymentDate { get; init; }
+
+    public string? PaymentTypeName { get; init; }
+
+    public PaymentStatus Status { get; init; }
+}
+
+
+

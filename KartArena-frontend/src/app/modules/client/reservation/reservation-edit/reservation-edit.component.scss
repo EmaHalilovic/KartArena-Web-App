@@ -1,0 +1,217 @@
+// ===== Dark UI tokens (match rest of app) =====
+$bg: #0f1115;
+$card: #14161b;
+$card-2: #101217;
+$border: rgba(255, 255, 255, 0.10);
+$border-strong: rgba(255, 255, 255, 0.14);
+
+$text: rgba(255, 255, 255, 0.92);
+$text-muted: rgba(255, 255, 255, 0.62);
+
+$accent: #ff2b2b; // red accent
+$accent-soft: rgba(255, 43, 43, 0.14);
+$hover: rgba(255, 255, 255, 0.06);
+
+// Page container
+.container {
+  min-height: 100%;
+  padding: 18px 22px;
+  background: transparent;
+  color: $text;
+}
+
+// Header
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+
+  h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    color: $text;
+    position: relative;
+    padding-left: 12px;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 3px;
+      bottom: 3px;
+      width: 4px;
+      border-radius: 999px;
+      background: $accent;
+      box-shadow: 0 0 0 6px $accent-soft;
+    }
+  }
+}
+
+// Form card
+.form {
+  background: linear-gradient(180deg, $card 0%, $card-2 100%);
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+// Rows & columns
+.row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+
+  &:last-of-type {
+    margin-bottom: 10px;
+  }
+}
+
+.half {
+  flex: 1;
+  min-width: 0;
+}
+
+// Actions
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid $border;
+
+  button {
+    border-radius: 12px;
+    height: 42px;
+    padding: 0 14px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+// ===== Angular Material overrides (scoped) =====
+:host ::ng-deep {
+  .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  // Outline field background + radius
+  .mat-mdc-form-field-appearance-outline .mat-mdc-text-field-wrapper {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 14px;
+  }
+
+  // Outline border default
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: $border !important;
+  }
+
+  // Hover border
+  .mat-mdc-form-field:hover .mdc-notched-outline__leading,
+  .mat-mdc-form-field:hover .mdc-notched-outline__notch,
+  .mat-mdc-form-field:hover .mdc-notched-outline__trailing {
+    border-color: $border-strong !important;
+  }
+
+  // Focus border accent (red)
+  .mat-focused .mdc-notched-outline__leading,
+  .mat-focused .mdc-notched-outline__notch,
+  .mat-focused .mdc-notched-outline__trailing {
+    border-color: rgba($accent, 0.85) !important;
+    box-shadow: 0 0 0 6px $accent-soft;
+  }
+
+  // Label + input colors
+  .mat-mdc-floating-label,
+  .mdc-floating-label {
+    color: $text-muted !important;
+    font-weight: 600;
+  }
+
+  .mat-focused .mat-mdc-floating-label,
+  .mat-focused .mdc-floating-label {
+    color: rgba($accent, 0.95) !important;
+  }
+
+  .mat-mdc-input-element {
+    color: $text !important;
+    caret-color: $accent;
+  }
+
+  .mat-mdc-input-element::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  // Error message
+  .mat-mdc-form-field-error {
+    color: rgba(255, 120, 120, 0.95) !important;
+    font-weight: 600;
+  }
+
+  // Datepicker + suffix icons
+  .mat-mdc-icon-button,
+  .mat-datepicker-toggle-default-icon {
+    color: $text-muted !important;
+  }
+
+  .mat-mdc-icon-button:hover {
+    background: $hover !important;
+  }
+
+  // Primary button (SAVE) -> red
+  .mat-mdc-raised-button.mat-primary {
+    background: $accent !important;
+    color: #ffffff !important;
+    box-shadow: 0 12px 26px rgba(255, 43, 43, 0.25) !important;
+  }
+
+  .mat-mdc-raised-button.mat-primary:hover {
+    filter: brightness(1.05);
+  }
+
+  // Stroked button (CANCEL)
+  .mat-mdc-outlined-button {
+    border-color: $border !important;
+    color: $text !important;
+  }
+
+  .mat-mdc-outlined-button:hover {
+    background: $hover !important;
+    border-color: $border-strong !important;
+  }
+}
+
+// Responsive
+@media (max-width: 900px) {
+  .container {
+    padding: 14px;
+  }
+
+  .form {
+    padding: 14px;
+  }
+
+  .row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
+}
