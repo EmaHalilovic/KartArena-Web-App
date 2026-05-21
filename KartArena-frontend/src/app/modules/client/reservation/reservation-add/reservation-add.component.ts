@@ -52,28 +52,28 @@ const date = this.toShortIsoDate(rawDate);
 const startTime: string = this.form.value.startTime; // "HH:mm"
 const endTime: string = this.form.value.endTime;     // "HH:mm"
 
-const command: CreateReservationCommand = {
-  userId: Number(this.form.value.userId),
-  trackId: Number(this.form.value.trackId),
-  kartId: Number(this.form.value.kartId),
-  reservationDate: date,
-  startTime: this.toIsoLocalDateTime(date, startTime),
-  endTime: this.toIsoLocalDateTime(date, endTime),
-};
+// const command: CreateReservationCommand = {
+//   userId: Number(this.form.value.userId),
+//   trackId: Number(this.form.value.trackId),
+//   kartId: Number(this.form.value.kartId),
+//   reservationDate: date,
+//   startTime: this.toIsoLocalDateTime(date, startTime),
+//   endTime: this.toIsoLocalDateTime(date, endTime),
+// };
 
 
-  this.api.create(command).subscribe({
-    next: () => {
-      this.stopLoading();
-      this.toaster.success('Reservation created successfully');
-      this.router.navigate(['/client/reservation']);
-    },
-    error: (err) => {
-      console.error('Create reservation error:', err);
-      console.error('Server body:', err?.error);
-      this.stopLoading('Failed to create reservation');
-    },
-  });
+  // this.api.create(command).subscribe({
+  //   next: () => {
+  //     this.stopLoading();
+  //     this.toaster.success('Reservation created successfully');
+  //     this.router.navigate(['/client/reservation']);
+  //   },
+  //   error: (err) => {
+  //     console.error('Create reservation error:', err);
+  //     console.error('Server body:', err?.error);
+  //     this.stopLoading('Failed to create reservation');
+  //   },
+  // });
 }
 
 private toShortIsoDate(date: string | Date): string {

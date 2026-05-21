@@ -1,49 +1,131 @@
-﻿
-using KartArena.Application.Modules.Catalog.Equipment.Queries.GetById;
+using KartArena.Application.Features.ReservationEmployeeAssignments.Commands.AssignReservationResources;
+using KartArena.Application.Features.ReservationEmployeeAssignments.Commands.RemoveReservationEmployeeAssignment;
+using KartArena.Application.Features.ReservationEmployeeAssignments.DTOs;
+using KartArena.Application.Features.ReservationEmployeeAssignments.Queries.GetAvailableEquipmentForReservation;
+using KartArena.Application.Features.ReservationEmployeeAssignments.Queries.GetReservationAssignmentsByReservationId;
 using KartArena.Application.Modules.Catalog.Reservations.Commands.Create;
 using KartArena.Application.Modules.Catalog.Reservations.Commands.Delete;
+using KartArena.Application.Modules.Catalog.Reservations.Commands.MarkCashPaymentAsPaid;
 using KartArena.Application.Modules.Catalog.Reservations.Commands.Update;
 using KartArena.Application.Modules.Catalog.Reservations.Queries.GetById;
 using KartArena.Application.Modules.Catalog.Reservations.Queries.List;
 
-namespace KartArena.API.Controllers
+namespace KartArena.Api.Controllers.Catalog
 {
     [AllowAnonymous]
+    [Route("reservations")]
     [ApiController]
-    [Route("reservation/controller")]
-    public class ReservationController(ISender sender) : ControllerBase
+    public sealed class ReservationsController(ISender sender) : ControllerBase
     {
         [HttpPost]
-        public async Task<ActionResult<int>> CreateReservation(CreateReservationCommand command, CancellationToken ct)
+        public async Task<ActionResult<int>> Create(
+            [FromBody] CreateReservationCommand command,
+            CancellationToken cancellationToken)
         {
-            if (command == null)
-                return BadRequest("Invalid request body.");
-            int id = await sender.Send(command, ct);
-            return Created("", new { id });
-        }
-        [HttpPut("{id:int}")]
-        public async Task UpdateReservation(int id, UpdateReservationCommand command, CancellationToken ct)
-        {
-            command.Id = id;
-            await sender.Send(command, ct);
-        }
-        [HttpDelete("{id:int}")]
-        public async Task DeleteReservation(int id, CancellationToken ct)
-        {
-            await sender.Send(new DeleteReservationCommand(id), ct);
-        }
-        [HttpGet("{id:int}")]
-        public async Task<GetReservationByIdQueryDto> GetById(int id, CancellationToken ct)
-        {
-            var reservation = await sender.Send(new GetReservationByIdQuery(id), ct);
-            return reservation; // if NotFoundException -> 404 via middleware
-        }
-        [HttpGet]
-        public async Task<PageResult<ListReservationsQueryDto>> List([FromQuery] ListReservationsQuery query, CancellationToken ct)
-        {
-            var result = await sender.Send(query, ct);
-            return result; // if NotFoundException -> 404 via middleware
+            var id = await sender.Send(command, cancellationToken);
+            return Ok(id);
         }
 
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<int>> Update(
+            int id,
+            [FromBody] UpdateReservationCommand command,
+            CancellationToken cancellationToken)
+        {
+            command.Id = id;
+            var result = await sender.Send(command, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            await sender.Send(new DeleteReservationCommand(id), cancellationToken);
+            return NoContent();
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<GetReservationByIdQueryDto>> GetById(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new GetReservationByIdQuery(id), cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<PageResult<ListReservationsQueryDto>>> List(
+            [FromQuery] ListReservationsQuery query,
+            CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpPut("{reservationId:int}/pay-cash")]
+        public async Task<ActionResult<int>> MarkCashPaymentAsPaid(
+            int reservationId,
+            [FromBody] MarkCashReservationPaymentAsPaidCommand command,
+            CancellationToken cancellationToken)
+        {
+            command.ReservationId = reservationId;
+            var result = await sender.Send(command, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("{reservationId:int}/assignments")]
+        public async Task<ActionResult<List<ReservationEmployeeAssignmentDto>>> GetAssignments(
+            int reservationId,
+            CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(
+                new GetReservationAssignmentsByReservationIdQuery { ReservationId = reservationId },
+                cancellationToken);
+
+            return Ok(result);
+        }
+
+        [HttpGet("{reservationId:int}/available-equipment")]
+        public async Task<ActionResult<List<AvailableEquipmentItemDto>>> GetAvailableEquipment(
+            int reservationId,
+            [FromQuery] int categoryId,
+            CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(
+                new GetAvailableEquipmentForReservationQuery
+                {
+                    ReservationId = reservationId,
+                    EquipmentTypeId = categoryId
+                },
+                cancellationToken);
+
+            return Ok(result);
+        }
+
+        [HttpPost("{reservationId:int}/assignments")]
+        public async Task<ActionResult<int>> SaveAssignments(
+            int reservationId,
+            [FromBody] AssignReservationResourcesCommand command,
+            CancellationToken cancellationToken)
+        {
+            command.ReservationId = reservationId;
+            var result = await sender.Send(command, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpDelete("assignments/{assignmentId:int}")]
+        public async Task<IActionResult> DeleteAssignment(
+            int assignmentId,
+            CancellationToken cancellationToken)
+        {
+            await sender.Send(
+                new RemoveReservationEmployeeAssignmentCommand { Id = assignmentId },
+                cancellationToken);
+
+            return NoContent();
+        }
     }
 }

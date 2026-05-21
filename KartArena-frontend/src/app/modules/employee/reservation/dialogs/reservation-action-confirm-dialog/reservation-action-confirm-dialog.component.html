@@ -1,0 +1,15 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon *ngIf="data.icon">{{ data.icon }}</mat-icon>
+  <span>{{ data.title }}</span>
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <p>{{ data.message }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" type="button" (click)="confirm()">
+    {{ data.confirmText }}
+  </button>
+</mat-dialog-actions>

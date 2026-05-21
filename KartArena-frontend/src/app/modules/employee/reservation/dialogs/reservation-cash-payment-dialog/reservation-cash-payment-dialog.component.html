@@ -1,0 +1,33 @@
+<h2 mat-dialog-title>Mark Cash Payment</h2>
+
+<mat-dialog-content class="dialog-content" [formGroup]="form">
+  <div class="summary">
+    <div>
+      <span class="label">Reservation</span>
+      <strong>{{ data.reservationCode }}</strong>
+    </div>
+    <div>
+      <span class="label">Customer</span>
+      <strong>{{ data.customerName }}</strong>
+    </div>
+    <div>
+      <span class="label">Amount</span>
+      <strong>{{ data.amount == null ? '-' : (data.amount | number : '1.2-2') }}</strong>
+    </div>
+  </div>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Transaction reference</mat-label>
+    <input matInput formControlName="transactionReference" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Note</mat-label>
+    <textarea matInput rows="4" formControlName="note"></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" type="button" (click)="confirm()">Confirm payment</button>
+</mat-dialog-actions>

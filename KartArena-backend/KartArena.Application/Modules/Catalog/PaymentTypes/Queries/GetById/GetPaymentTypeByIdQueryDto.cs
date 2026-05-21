@@ -13,5 +13,6 @@ public sealed class GetPaymentTypeByIdQueryDto
     public bool AllowedAtDesk { get; init; }
 
     public string? Description { get; init; }
+    public bool isEnabled { get; set; }
 
 }

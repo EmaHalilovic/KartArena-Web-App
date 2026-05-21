@@ -18,7 +18,7 @@ public sealed class GetPaymentTypeByIdQueryHandler(IAppDbContext context)
                 AllowedOnline = x.AllowedOnline,
                 AllowedAtDesk = x.AllowedAtDesk,
                 Description = x.Description,
-           
+                isEnabled=x.isEnabled
             })
             .FirstOrDefaultAsync(cancellationToken);
 

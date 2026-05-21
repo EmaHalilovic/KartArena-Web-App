@@ -1,0 +1,75 @@
+<div class="container">
+  <div class="header-card mat-elevation-z2">
+    <h1>{{ 'Edit Equipment Type' }}</h1>
+  </div>
+
+  <div class="form-card mat-elevation-z2">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div *ngIf="errorMessage" class="error-banner">
+        <mat-icon>error</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div *ngIf="isLoading" class="loading-overlay">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Saving equipment type...</p>
+      </div>
+
+      <mat-form-field appearance="outline" floatLabel="always" class="full-width">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name"  />
+        <mat-icon matSuffix>inventory_2</mat-icon>
+        <mat-error *ngIf="hasError('name')">{{ getErrorMessage('name') }}</mat-error>
+      </mat-form-field>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" floatLabel="always" class="half-width">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="category">
+             <mat-option [value]="0">Helmet</mat-option>
+            <mat-option [value]="1">Suit</mat-option>
+            <mat-option [value]="2">Gloves</mat-option>
+            <mat-option [value]="3">Balaclava</mat-option>
+            <mat-option [value]="4">Other</mat-option>
+          </mat-select>
+          <mat-icon matSuffix>category</mat-icon>
+          <mat-error *ngIf="hasError('category')">{{ getErrorMessage('category') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" floatLabel="always" class="half-width">
+          <mat-label>Size</mat-label>
+          <input matInput formControlName="size" placeholder="M" />
+          <mat-icon matSuffix>straighten</mat-icon>
+          <mat-error *ngIf="hasError('size')">{{ getErrorMessage('size') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" floatLabel="always" class="full-width">
+        <mat-label>Price</mat-label>
+        <input matInput type="number" formControlName="price" step="0.01" placeholder="0.00" />
+        <span matTextPrefix>KM&nbsp;</span>
+        <mat-icon matSuffix>payments</mat-icon>
+        <mat-error *ngIf="hasError('price')">{{ getErrorMessage('price') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" floatLabel="always" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="4" placeholder="Optional notes about this equipment type"></textarea>
+        <mat-icon matSuffix>description</mat-icon>
+        <mat-error *ngIf="hasError('description')">{{ getErrorMessage('description') }}</mat-error>
+      </mat-form-field>
+
+      <div class="form-actions">
+        <button type="button" mat-stroked-button (click)="onCancel()" [disabled]="isLoading">
+          <mat-icon>close</mat-icon>
+          Cancel
+        </button>
+
+        <button type="submit" mat-raised-button color="primary" [disabled]="form.invalid || isLoading">
+          <mat-icon>save</mat-icon>
+          Save changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

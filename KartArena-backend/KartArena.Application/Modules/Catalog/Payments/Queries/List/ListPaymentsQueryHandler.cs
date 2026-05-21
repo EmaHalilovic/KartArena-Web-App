@@ -18,11 +18,13 @@ public sealed class ListPaymentsQueryHandler(IAppDbContext context)
 
             q = q.Where(x =>
                 x.ReservationId.ToString().Contains(search) ||
+                x.Reservation.User.FirstName.Contains(search) ||
+                x.Reservation.User.LastName.Contains(search) ||
                 x.Amount.ToString().Contains(search) ||
                 (x.TransactionReference != null && x.TransactionReference.Contains(search)) ||
                 (x.Note != null && x.Note.Contains(search)) ||
                 (x.PaymentType != null && x.PaymentType.Name != null && x.PaymentType.Name.Contains(search)));
-        }
+                        }
 
         if (request.ReservationId.HasValue)
             q = q.Where(x => x.ReservationId == request.ReservationId.Value);

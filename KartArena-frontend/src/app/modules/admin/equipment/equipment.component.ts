@@ -66,6 +66,7 @@ export class EquipmentComponent
 
     this.api.list(this.buildApiRequest()).subscribe({
       next: (response) => {
+        console.log('paged response', response);
         this.handlePageResult(this.applyClientFilters(response));
         this.stopLoading();
       },

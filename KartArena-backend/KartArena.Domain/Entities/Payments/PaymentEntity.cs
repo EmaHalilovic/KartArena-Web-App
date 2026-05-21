@@ -1,5 +1,6 @@
 ﻿using KartArena.Domain.Common;
 using KartArena.Domain.Entities.Catalog;
+using KartArena.Domain.Entities.Reservations;
 using System;
 using System.Collections.Generic;
 using System.Linq;

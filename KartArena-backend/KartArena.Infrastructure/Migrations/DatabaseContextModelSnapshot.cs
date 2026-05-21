@@ -332,108 +332,6 @@ namespace KartArena.Infrastructure.Migrations
                     b.ToTable("RaceUserEntity");
                 });
 
-            modelBuilder.Entity("KartArena.Domain.Entities.Catalog.ReservationEmployeeEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EquipmentId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("EquipmentTypeEntityId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("ModifiedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ReservationId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UserEntityId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("isEnabled")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.HasIndex("EquipmentId");
-
-                    b.HasIndex("EquipmentTypeEntityId");
-
-                    b.HasIndex("ReservationId");
-
-                    b.HasIndex("UserEntityId");
-
-                    b.HasIndex("ReservationId", "EmployeeId", "EquipmentId")
-                        .IsUnique();
-
-                    b.ToTable("ReservationEmployeeEntity", (string)null);
-                });
-
-            modelBuilder.Entity("KartArena.Domain.Entities.Catalog.ReservationEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("KartId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ModifiedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TrackId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("isEnabled")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("KartId");
-
-                    b.HasIndex("TrackId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Reservations");
-                });
-
             modelBuilder.Entity("KartArena.Domain.Entities.Catalog.ReviewEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -914,6 +812,110 @@ namespace KartArena.Infrastructure.Migrations
                     b.ToTable("PaymentTypes");
                 });
 
+            modelBuilder.Entity("KartArena.Domain.Entities.Reservations.ReservationEmployeeEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("EquipmentItemId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserEntityId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("isEnabled")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("EquipmentItemId");
+
+                    b.HasIndex("ReservationId");
+
+                    b.HasIndex("UserEntityId");
+
+                    b.HasIndex("ReservationId", "EmployeeId", "EquipmentItemId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("ReservationEmployees", (string)null);
+                });
+
+            modelBuilder.Entity("KartArena.Domain.Entities.Reservations.ReservationEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("KartId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TrackId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("isEnabled")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KartId");
+
+                    b.HasIndex("TrackId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Reservations");
+                });
+
             modelBuilder.Entity("KartArena.Domain.Entities.Catalog.KartEntity", b =>
                 {
                     b.HasOne("KartArena.Domain.Entities.Catalog.PowertrainTypeEntity", "PowertrainType")
@@ -973,68 +975,6 @@ namespace KartArena.Infrastructure.Migrations
                     b.Navigation("Race");
 
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("KartArena.Domain.Entities.Catalog.ReservationEmployeeEntity", b =>
-                {
-                    b.HasOne("KartArena.Domain.Entities.Identity.UserEntity", "Employee")
-                        .WithMany()
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("KartArena.Domain.Entities.Equipment.EquipmentTypeEntity", "Equipment")
-                        .WithMany()
-                        .HasForeignKey("EquipmentId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("KartArena.Domain.Entities.Equipment.EquipmentTypeEntity", null)
-                        .WithMany("Reservations")
-                        .HasForeignKey("EquipmentTypeEntityId");
-
-                    b.HasOne("KartArena.Domain.Entities.Catalog.ReservationEntity", "Reservation")
-                        .WithMany("Employees")
-                        .HasForeignKey("ReservationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KartArena.Domain.Entities.Identity.UserEntity", null)
-                        .WithMany("ReservationEmployees")
-                        .HasForeignKey("UserEntityId");
-
-                    b.Navigation("Employee");
-
-                    b.Navigation("Equipment");
-
-                    b.Navigation("Reservation");
-                });
-
-            modelBuilder.Entity("KartArena.Domain.Entities.Catalog.ReservationEntity", b =>
-                {
-                    b.HasOne("KartArena.Domain.Entities.Catalog.KartEntity", "Kart")
-                        .WithMany()
-                        .HasForeignKey("KartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KartArena.Domain.Entities.Catalog.TrackEntity", "Track")
-                        .WithMany()
-                        .HasForeignKey("TrackId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KartArena.Domain.Entities.Identity.UserEntity", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Kart");
-
-                    b.Navigation("Track");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("KartArena.Domain.Entities.Catalog.ReviewEntity", b =>
@@ -1117,7 +1057,7 @@ namespace KartArena.Infrastructure.Migrations
                         .WithMany("Payments")
                         .HasForeignKey("PaymentTypeId");
 
-                    b.HasOne("KartArena.Domain.Entities.Catalog.ReservationEntity", "Reservation")
+                    b.HasOne("KartArena.Domain.Entities.Reservations.ReservationEntity", "Reservation")
                         .WithOne("Payment")
                         .HasForeignKey("KartArena.Domain.Entities.Payments.PaymentEntity", "ReservationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1126,6 +1066,63 @@ namespace KartArena.Infrastructure.Migrations
                     b.Navigation("PaymentType");
 
                     b.Navigation("Reservation");
+                });
+
+            modelBuilder.Entity("KartArena.Domain.Entities.Reservations.ReservationEmployeeEntity", b =>
+                {
+                    b.HasOne("KartArena.Domain.Entities.Identity.UserEntity", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("KartArena.Domain.Entities.Equipment.EquipmentItemEntity", "EquipmentItem")
+                        .WithMany("ReservationEmployees")
+                        .HasForeignKey("EquipmentItemId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("KartArena.Domain.Entities.Reservations.ReservationEntity", "Reservation")
+                        .WithMany("Employees")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KartArena.Domain.Entities.Identity.UserEntity", null)
+                        .WithMany("ReservationEmployees")
+                        .HasForeignKey("UserEntityId");
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("EquipmentItem");
+
+                    b.Navigation("Reservation");
+                });
+
+            modelBuilder.Entity("KartArena.Domain.Entities.Reservations.ReservationEntity", b =>
+                {
+                    b.HasOne("KartArena.Domain.Entities.Catalog.KartEntity", "Kart")
+                        .WithMany()
+                        .HasForeignKey("KartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KartArena.Domain.Entities.Catalog.TrackEntity", "Track")
+                        .WithMany()
+                        .HasForeignKey("TrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KartArena.Domain.Entities.Identity.UserEntity", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kart");
+
+                    b.Navigation("Track");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("KartArena.Domain.Entities.Catalog.CityEntity", b =>
@@ -1155,23 +1152,19 @@ namespace KartArena.Infrastructure.Migrations
                     b.Navigation("LapsTime");
                 });
 
-            modelBuilder.Entity("KartArena.Domain.Entities.Catalog.ReservationEntity", b =>
-                {
-                    b.Navigation("Employees");
-
-                    b.Navigation("Payment");
-                });
-
             modelBuilder.Entity("KartArena.Domain.Entities.Catalog.TrackEntity", b =>
                 {
                     b.Navigation("Races");
                 });
 
+            modelBuilder.Entity("KartArena.Domain.Entities.Equipment.EquipmentItemEntity", b =>
+                {
+                    b.Navigation("ReservationEmployees");
+                });
+
             modelBuilder.Entity("KartArena.Domain.Entities.Equipment.EquipmentTypeEntity", b =>
                 {
                     b.Navigation("Items");
-
-                    b.Navigation("Reservations");
                 });
 
             modelBuilder.Entity("KartArena.Domain.Entities.Identity.RoleEntity", b =>
@@ -1197,6 +1190,13 @@ namespace KartArena.Infrastructure.Migrations
             modelBuilder.Entity("KartArena.Domain.Entities.Payments.PaymentTypeEntity", b =>
                 {
                     b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("KartArena.Domain.Entities.Reservations.ReservationEntity", b =>
+                {
+                    b.Navigation("Employees");
+
+                    b.Navigation("Payment");
                 });
 #pragma warning restore 612, 618
         }

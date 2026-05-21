@@ -16,6 +16,12 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
             RuleFor(x => x.KartId)
                 .GreaterThan(0);
 
+            RuleFor(x => x.PaymentTypeId)
+                .GreaterThan(0);
+
+            RuleFor(x => x.Amount)
+                .GreaterThan(0);
+
             RuleFor(x => x.ReservationDate)
                 .NotEmpty();
 
@@ -26,6 +32,9 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
                 .NotEmpty()
                 .Must((cmd, end) => end > cmd.StartTime)
                 .WithMessage("End time must be after start time.");
+
+            RuleFor(x => x.PaymentNote)
+                .MaximumLength(500);
         }
     }
 }

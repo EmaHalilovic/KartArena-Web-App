@@ -1,0 +1,78 @@
+.dialog-shell {
+  background: #0a101b;
+  color: #f5f7fb;
+  padding: 24px;
+}
+
+.dialog-header {
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: #a5b0c4;
+  }
+}
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.form-row-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.full-width {
+  width: 100%;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+::ng-deep .mat-mdc-dialog-surface {
+  background: #0a101b !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px !important;
+}
+
+::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  background-color: rgba(240, 13, 13, 0.08);
+}
+
+::ng-deep .mat-mdc-form-field .mat-mdc-input-element,
+::ng-deep .mat-mdc-form-field .mat-mdc-select-min-line,
+::ng-deep .mat-mdc-form-field .mat-mdc-select-value-text {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+::ng-deep .mat-mdc-form-field .mat-mdc-floating-label {
+  color: #a5b0c4 !important;
+}
+
+@media (max-width: 700px) {
+  .form-row,
+  .form-row-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-actions {
+    flex-direction: column-reverse;
+  }
+}

@@ -1,20 +1,20 @@
 ﻿using KartArena.Domain.Common;
+using KartArena.Domain.Entities.Catalog;
 using KartArena.Domain.Entities.Identity;
 using KartArena.Domain.Entities.Payments;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace KartArena.Domain.Entities.Catalog
+namespace KartArena.Domain.Entities.Reservations
 {
-    public class ReservationEntity:BaseEntity
+    public class ReservationEntity : BaseEntity
     {
         public DateTime Date { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-      
+
+        public ReservationStatus Status { get; set; } = ReservationStatus.Pending;
+
+        // optional but very useful
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
 
         // FK
         public int TrackId { get; set; }
@@ -23,14 +23,12 @@ namespace KartArena.Domain.Entities.Catalog
         public int KartId { get; set; }
         public KartEntity? Kart { get; set; }
 
-      
-        public PaymentEntity? Payment { get; set; }
-
         public int UserId { get; set; }
         public UserEntity? User { get; set; }
 
-        public IReadOnlyCollection<ReservationEmployeeEntity> Employees { get; set; }
+        // one-to-one payment
+        public PaymentEntity? Payment { get; set; }
 
-      
+        public ICollection<ReservationEmployeeEntity> Employees { get; set; } = new List<ReservationEmployeeEntity>();
     }
 }

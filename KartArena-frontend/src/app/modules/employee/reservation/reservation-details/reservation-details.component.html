@@ -1,0 +1,209 @@
+<div class="reservation-details-page">
+  <div class="state-panel" *ngIf="isLoading">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <div class="state-copy">
+      <h2>Loading reservation</h2>
+      <p>Fetching the latest reservation details...</p>
+    </div>
+  </div>
+
+  <div class="state-panel error-panel" *ngIf="!isLoading && errorMessage">
+    <div class="state-copy">
+      <h2>Reservation unavailable</h2>
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <div class="state-actions">
+      <button mat-stroked-button type="button" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back to reservations
+      </button>
+      <button mat-flat-button type="button" (click)="loadReservation()">
+        <mat-icon>refresh</mat-icon>
+        Retry
+      </button>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!isLoading && reservation as reservation">
+    <div class="summary-card">
+      <div class="summary-topbar">
+        <button mat-stroked-button type="button" class="back-button" (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+          Back to reservations
+        </button>
+
+        <div class="summary-actions">
+          <button *ngIf="canMarkCashPaid()" mat-flat-button type="button" class="accent-button" (click)="openMarkCashPaid()">
+            <mat-icon>payments</mat-icon>
+            Mark as paid
+          </button>
+          <button *ngIf="canAssignResources()" mat-stroked-button type="button" (click)="openAssignResources()">
+            <mat-icon>assignment_ind</mat-icon>
+            Assign
+          </button>
+          <button *ngIf="canDelete()" mat-stroked-button type="button" class="danger-button" (click)="onDelete()">
+            <mat-icon>delete</mat-icon>
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <div class="summary-content">
+        <div class="summary-primary">
+          <span class="eyebrow">Reservation Details</span>
+          <h1>{{ reservationCode }}</h1>
+          <p>{{ userLabel }} - {{ trackLabel }}</p>
+          <div class="summary-meta">
+            <div>
+              <span class="meta-label">Date</span>
+              <strong>{{ dateLabel }}</strong>
+            </div>
+            <div>
+              <span class="meta-label">Time</span>
+              <strong>{{ timeLabel }}</strong>
+            </div>
+            <div>
+              <span class="meta-label">Kart</span>
+              <strong>{{ kartLabel }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-statuses">
+          <div class="status-block">
+            <span class="meta-label">Reservation status</span>
+            <span class="status-pill" [ngClass]="'status-' + reservationStatusTone">
+              {{ reservationStatusLabel }}
+            </span>
+          </div>
+          <div class="status-block">
+            <span class="meta-label">Payment status</span>
+            <span class="status-pill" [ngClass]="'status-' + paymentStatusTone">
+              {{ paymentStatusLabel }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="details-grid">
+      <section class="detail-section">
+        <div class="section-heading">
+          <h2>Reservation Information</h2>
+          <p>Core booking details shown in a single scan-friendly block.</p>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span>Reservation ID</span>
+            <strong>{{ reservationCode }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Customer</span>
+            <strong>{{ userLabel }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Track</span>
+            <strong>{{ trackLabel }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Kart</span>
+            <strong>{{ kartLabel }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Date</span>
+            <strong>{{ dateLabel }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Time</span>
+            <strong>{{ timeLabel }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Status</span>
+            <strong>{{ reservationStatusLabel }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="detail-section payment-section">
+        <div class="section-heading">
+          <h2>Payment Information</h2>
+          <p>Payment method, amount, and any recorded references.</p>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span>Payment type</span>
+            <strong>{{ paymentTypeLabel }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Payment amount</span>
+            <strong>{{ paymentAmountLabel }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Payment status</span>
+            <strong>{{ paymentStatusLabel }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Payment date</span>
+            <strong>{{ toDateTimeLabel(reservation.paymentDate) }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Transaction reference</span>
+            <strong>{{ reservation.transactionReference || '-' }}</strong>
+          </div>
+          <div class="info-item info-item-wide">
+            <span>Payment note</span>
+            <strong>{{ reservation.paymentNote || '-' }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="detail-section assignment-section">
+        <div class="section-heading">
+          <h2>Assignment</h2>
+          <p>Staff and equipment assigned to this reservation.</p>
+        </div>
+
+        <div class="assignment-grid">
+          <div class="assignment-item">
+            <span>Assigned employee</span>
+            <strong [class.placeholder]="assignedEmployeeLabel === 'Unassigned'">{{ assignedEmployeeLabel }}</strong>
+          </div>
+          <div class="assignment-item assignment-item-wide">
+            <span>Assigned equipment</span>
+            <ng-container *ngIf="!isAssignmentsLoading && hasAssignments; else assignmentFallback">
+              <div class="assignment-tags">
+                <strong *ngFor="let item of assignmentEquipmentLabels">{{ item }}</strong>
+              </div>
+            </ng-container>
+            <ng-template #assignmentFallback>
+              <strong [class.placeholder]="!isAssignmentsLoading">
+                {{ isAssignmentsLoading ? 'Loading assignments...' : 'Not assigned' }}
+              </strong>
+            </ng-template>
+          </div>
+        </div>
+      </section>
+
+      <section class="detail-section metadata-section" *ngIf="hasMetadata">
+        <div class="section-heading">
+          <h2>Metadata</h2>
+          <p>System timestamps when available from the backend.</p>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span>Created at</span>
+            <strong>{{ createdAtLabel }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Modified at</span>
+            <strong>{{ modifiedAtLabel }}</strong>
+          </div>
+        </div>
+      </section>
+    </div>
+  </ng-container>
+</div>

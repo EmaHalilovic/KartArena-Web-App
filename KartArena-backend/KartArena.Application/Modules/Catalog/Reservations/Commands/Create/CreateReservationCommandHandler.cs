@@ -1,9 +1,7 @@
-﻿using MediatR;
+﻿using KartArena.Domain.Entities.Payments;
+using KartArena.Domain.Entities.Reservations;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
 {
@@ -12,22 +10,32 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
     {
         public async Task<int> Handle(CreateReservationCommand request, CancellationToken ct)
         {
-            // 1) FK checks
             var trackExists = await ctx.Tracks.AnyAsync(x => x.Id == request.TrackId, ct);
             if (!trackExists)
-                throw new Exception("Track does not exist");
+                throw new Exception("Track does not exist.");
 
             var kartExists = await ctx.Karts.AnyAsync(x => x.Id == request.KartId, ct);
             if (!kartExists)
-                throw new Exception("Kart does not exist");
+                throw new Exception("Kart does not exist.");
 
             var userExists = await ctx.Users.AnyAsync(x => x.Id == request.UserId, ct);
             if (!userExists)
-                throw new Exception("User does not exist");
+                throw new Exception("User does not exist.");
+
+            var paymentType = await ctx.PaymentTypes
+                .FirstOrDefaultAsync(x => x.Id == request.PaymentTypeId, ct);
+
+            if (paymentType is null)
+                throw new Exception("Selected payment type does not exist.");
+
+            if (!paymentType.isEnabled)
+                throw new Exception("Selected payment type is not active.");
+
+            if (!paymentType.AllowedOnline)
+                throw new Exception("Selected payment type is not available for online payment.");
 
             var date = request.ReservationDate.Date;
 
-            // 2) Kart availability (overlapping time window)
             var kartBusy = await ctx.Reservations.AnyAsync(r =>
                 !r.IsDeleted &&
                 r.KartId == request.KartId &&
@@ -39,7 +47,6 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
             if (kartBusy)
                 throw new Exception("Selected kart is not available for the chosen time.");
 
-            // 3) Track capacity (max 6 drivers overlapping)
             var trackReservationsCount = await ctx.Reservations
                 .Where(r =>
                     !r.IsDeleted &&
@@ -52,7 +59,6 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
             if (trackReservationsCount >= 6)
                 throw new Exception("Track is not available (maximum 6 drivers for this time slot).");
 
-            // 4) Create reservation
             var reservation = new ReservationEntity
             {
                 UserId = request.UserId,
@@ -61,8 +67,22 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
                 Date = date,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
+                Status = ReservationStatus.Pending,
+                PaymentStatus = PaymentStatus.Pending,
                 IsDeleted = false
             };
+
+            var payment = new PaymentEntity
+            {
+                Amount = request.Amount,
+                PaymentTypeId = request.PaymentTypeId,
+                Status = PaymentStatus.Pending,
+                PaymentDate = null,
+                Note = request.PaymentNote,
+                Reservation = reservation
+            };
+
+            reservation.Payment = payment;
 
             await ctx.Reservations.AddAsync(reservation, ct);
             await ctx.SaveChangesAsync(ct);

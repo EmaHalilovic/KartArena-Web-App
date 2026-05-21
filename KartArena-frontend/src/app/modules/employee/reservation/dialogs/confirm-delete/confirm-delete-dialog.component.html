@@ -1,0 +1,19 @@
+<h2 mat-dialog-title>
+  {{ (data.titleKey || 'DIALOGS.TITLES.CONFIRM_DELETE') | translate }}
+</h2>
+
+<mat-dialog-content class="content">
+  <p>
+    {{ (data.messageKey || 'DIALOGS.MESSAGES.CONFIRM_DELETE') | translate:{ name: data.name } }}
+  </p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cancel()">
+    {{ (data.cancelKey || 'DIALOGS.BUTTONS.CANCEL') | translate }}
+  </button>
+  <button mat-raised-button color="warn" (click)="confirm()">
+    <mat-icon>delete</mat-icon>
+    {{ (data.confirmKey || 'DIALOGS.BUTTONS.DELETE') | translate }}
+  </button>
+</mat-dialog-actions>

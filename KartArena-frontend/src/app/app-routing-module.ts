@@ -9,6 +9,12 @@ const routes: Routes = [
   loadChildren: () =>
     import('./modules/admin/admin-module').then(m => m.AdminModule)
   },
+  {
+    path: 'employee',
+    data: myAuthData({ requireAuth: false, requireEmployee: false }),
+    loadChildren: () =>
+      import('./modules/employee/employee-module').then(m => m.EmployeeModule)
+  },
   
   {
     path: 'client',

@@ -1,0 +1,32 @@
+<div class="dialog-shell">
+  <div class="dialog-header">
+    <div class="warning-badge">
+      <mat-icon>delete_forever</mat-icon>
+    </div>
+    <div>
+      <h2>{{ (data.titleKey || 'Delete payment type') | translate }}</h2>
+      <p>Review this action before continuing.</p>
+    </div>
+  </div>
+
+  <div class="content">
+    <p class="message">
+      {{ (data.messageKey || 'This will permanently remove the selected payment type.') | translate:{ name: data.name } }}
+    </p>
+
+    <div class="item-name" *ngIf="data.name">
+      <span>Selected item</span>
+      <strong>{{ data.name }}</strong>
+    </div>
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-stroked-button type="button" (click)="cancel()">
+      {{ (data.cancelKey || 'Cancel') | translate }}
+    </button>
+    <button mat-flat-button color="warn" type="button" (click)="confirm()">
+      <mat-icon>delete</mat-icon>
+      {{ (data.confirmKey || 'Delete') | translate }}
+    </button>
+  </div>
+</div>

@@ -51,7 +51,7 @@ public partial class DatabaseContext
         ApplyGlobalFielters(modelBuilder);
 
         //StaticDataSeeder.Seed(modelBuilder); // static data
-       
+
     }
 
     private void ApplyGlobalFielters(ModelBuilder modelBuilder)

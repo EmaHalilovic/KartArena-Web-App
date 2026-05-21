@@ -19,19 +19,18 @@ public sealed class UpdatePaymentCommandHandler(IAppDbContext context)
                 "payment.update.blocked",
                 "Refunded payment cannot be updated.");
 
-        if (request.PaymentTypeId.HasValue)
-        {
+       
             var paymentType = await context.PaymentTypes
-                .FirstOrDefaultAsync(x => x.Id == request.PaymentTypeId.Value && !x.IsDeleted, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == request.PaymentTypeId && !x.IsDeleted, cancellationToken);
 
             if (paymentType is null)
-                throw new MarketNotFoundException($"Payment type with id {request.PaymentTypeId.Value} was not found.");
+                throw new MarketNotFoundException($"Payment type with id {request.PaymentTypeId} was not found.");
 
             if (!paymentType.isEnabled)
                 throw new MarketBusinessRuleException(
                     "payment.update.payment_type_disabled",
                     "Selected payment type is disabled.");
-        }
+        
 
         entity.Amount = request.Amount;
         entity.PaymentDate = request.PaymentDate ?? entity.PaymentDate ?? DateTime.UtcNow;

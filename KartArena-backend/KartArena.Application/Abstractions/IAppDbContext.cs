@@ -1,6 +1,7 @@
 ﻿using KartArena.Domain.Entities.Equipment;
 using KartArena.Domain.Entities.Identity;
 using KartArena.Domain.Entities.Payments;
+using KartArena.Domain.Entities.Reservations;
 
 namespace KartArena.Application.Abstractions;
 
@@ -8,7 +9,7 @@ namespace KartArena.Application.Abstractions;
 public interface IAppDbContext
 {
     DbSet<UserEntity> Users { get; }
-    DbSet<CityEntity>  Cities { get; }
+    DbSet<CityEntity> Cities { get; }
     DbSet<RefreshTokenEntity> RefreshTokens { get; }
     //payments
     DbSet<PaymentTypeEntity> PaymentTypes { get; }
@@ -17,7 +18,7 @@ public interface IAppDbContext
     DbSet<ReservationEntity> Reservations { get; }
     DbSet<EquipmentTypeEntity> EquipmentEntity { get; }
     DbSet<EquipmentItemEntity> EquipmentItemEntity { get; }
-
+    DbSet<ReservationEmployeeEntity> ReservationEmployees { get; }
     //karts
     DbSet<KartEntity> Karts { get; }
     DbSet<TrackEntity> Tracks { get; }

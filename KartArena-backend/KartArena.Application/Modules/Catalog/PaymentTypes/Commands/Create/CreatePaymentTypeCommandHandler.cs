@@ -20,15 +20,15 @@ public sealed class CreatePaymentTypeCommandHandler(IAppDbContext context)
         if (nameExists)
             throw new MarketConflictException("Payment type with the same name already exists.");
 
-        var generatedCode = await GenerateUniqueCodeAsync(normalizedName, cancellationToken);
 
         var entity = new PaymentTypeEntity
         {
             Name = normalizedName,
-            Code = generatedCode,
+            Code = request.Code,
             AllowedOnline = request.AllowedOnline,
             AllowedAtDesk = request.AllowedAtDesk,
-            Description = request.Description?.Trim()
+            Description = request.Description?.Trim(),
+            isEnabled = true
         };
 
         context.PaymentTypes.Add(entity);
@@ -37,30 +37,5 @@ public sealed class CreatePaymentTypeCommandHandler(IAppDbContext context)
         return entity.Id;
     }
 
-    private async Task<string> GenerateUniqueCodeAsync(string name, CancellationToken cancellationToken)
-    {
-        var baseCode = GenerateCode(name);
-        var finalCode = baseCode;
-        var counter = 1;
-
-        while (await context.PaymentTypes.AnyAsync(
-                   x => x.Code.ToLower() == finalCode.ToLower(),
-                   cancellationToken))
-        {
-            finalCode = $"{baseCode}_{counter}";
-            counter++;
-        }
-
-        return finalCode;
-    }
-
-    private static string GenerateCode(string name)
-    {
-        var trimmed = name.Trim().ToUpperInvariant();
-
-        trimmed = Regex.Replace(trimmed, @"[^A-Z0-9\s]", "");
-        trimmed = Regex.Replace(trimmed, @"\s+", "_");
-
-        return string.IsNullOrWhiteSpace(trimmed) ? "PAYMENT_TYPE" : trimmed;
-    }
+   
 }
