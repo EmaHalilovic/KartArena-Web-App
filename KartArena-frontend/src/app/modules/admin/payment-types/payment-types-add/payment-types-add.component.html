@@ -1,0 +1,60 @@
+<div class="container">
+  <div class="header-card mat-elevation-z2">
+    <h1>Create Payment Type</h1>
+  </div>
+
+  <div class="form-card mat-elevation-z2">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div *ngIf="errorMessage" class="error-banner">
+        <mat-icon>error</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div *ngIf="isLoading" class="loading-overlay">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Saving payment type...</p>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" floatLabel="always" class="half-width">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" placeholder="Card payment" />
+          <mat-icon matSuffix>badge</mat-icon>
+          <mat-error *ngIf="hasError('name')">{{ getErrorMessage('name') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" floatLabel="always" class="half-width">
+          <mat-label>Code</mat-label>
+          <input matInput formControlName="code" placeholder="CARD" />
+          <mat-icon matSuffix>qr_code_2</mat-icon>
+          <mat-error *ngIf="hasError('code')">{{ getErrorMessage('code') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="allowedOnline">Allowed online</mat-slide-toggle>
+        <mat-slide-toggle formControlName="allowedAtDesk">Allowed at desk</mat-slide-toggle>
+       
+      </div>
+
+      <mat-form-field appearance="outline" floatLabel="always" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="4" placeholder="Optional notes about this payment type"></textarea>
+        <mat-icon matSuffix>description</mat-icon>
+        <mat-error *ngIf="hasError('description')">{{ getErrorMessage('description') }}</mat-error>
+      </mat-form-field>
+
+      <div class="form-actions">
+        <button type="button" mat-stroked-button (click)="onCancel()" [disabled]="isLoading">
+          <mat-icon>close</mat-icon>
+          Cancel
+        </button>
+
+        <button type="submit" mat-raised-button color="primary" [disabled]="form.invalid || isLoading">
+          <mat-icon>save</mat-icon>
+          Save type
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

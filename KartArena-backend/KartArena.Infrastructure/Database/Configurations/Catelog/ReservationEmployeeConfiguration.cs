@@ -1,4 +1,5 @@
 ﻿using KartArena.Domain.Entities.Catalog;
+using KartArena.Domain.Entities.Reservations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,43 +10,43 @@ namespace KartArena.Infrastructure.Persistence.Configurations.Catalog
     {
         public void Configure(EntityTypeBuilder<ReservationEmployeeEntity> builder)
         {
-            builder.ToTable("ReservationEmployeeEntity");
+            builder.ToTable("ReservationEmployees");
 
             builder.HasKey(x => x.Id);
 
-            // === Employee (User) ===
+         
+
+            // === Employee ===
             builder
                 .HasOne(x => x.Employee)
-                .WithMany() // ako imaš kolekciju u UserEntity, promijeni u .WithMany(u => u.ReservationEmployees)
+                .WithMany() // change to .WithMany(e => e.ReservationEmployees) if navigation exists
                 .HasForeignKey(x => x.EmployeeId)
                 .OnDelete(DeleteBehavior.NoAction);
-            // ✅ ključno: nema cascade prema Users -> rješava multiple cascade paths
 
             // === Reservation ===
             builder
                 .HasOne(x => x.Reservation)
-                .WithMany(r => r.Employees) // PROMIJENI ako se kolekcija drugačije zove
+                .WithMany(r => r.Employees)
                 .HasForeignKey(x => x.ReservationId)
                 .OnDelete(DeleteBehavior.Cascade);
-            // ✅ logično: kad obrišeš rezervaciju, obriši i veze
 
-            // === Equipment ===
+            // === Equipment Item (optional) ===
             builder
-                .HasOne(x => x.Equipment)
-                .WithMany() // ako imaš kolekciju u EquipmentEntity, promijeni u .WithMany(e => e.ReservationEmployees)
-                .HasForeignKey(x => x.EquipmentId)
-                .OnDelete(DeleteBehavior.NoAction);
-            // ✅ preporučeno: ne briši veze kaskadno kad obrišeš opremu (ili koristi Restrict)
+                .HasOne(x => x.EquipmentItem)
+                .WithMany(e => e.ReservationEmployees)
+                .HasForeignKey(x => x.EquipmentItemId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired(false);
 
             // === Indexes ===
             builder.HasIndex(x => x.ReservationId);
             builder.HasIndex(x => x.EmployeeId);
-            builder.HasIndex(x => x.EquipmentId);
+            builder.HasIndex(x => x.EquipmentItemId);
 
-            // Optional: spriječi duplikate (isti employee + equipment na istoj rezervaciji)
+            // Prevent exact duplicate assignment
             builder
-                .HasIndex(x => new { x.ReservationId, x.EmployeeId, x.EquipmentId })
-                .IsUnique();
+                .HasIndex(x => new { x.ReservationId, x.EmployeeId, x.EquipmentItemId })
+                .IsUnique().HasFilter("[IsDeleted] = 0");
         }
     }
 }

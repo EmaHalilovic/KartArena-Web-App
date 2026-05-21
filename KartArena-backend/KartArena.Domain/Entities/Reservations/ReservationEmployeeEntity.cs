@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KartArena.Domain.Entities.Catalog
+namespace KartArena.Domain.Entities.Reservations
 {
     public class ReservationEmployeeEntity : BaseEntity
     {
@@ -18,8 +18,9 @@ namespace KartArena.Domain.Entities.Catalog
         public int ReservationId { get; set; }
         public ReservationEntity? Reservation { get; set; } = default;
 
-        public int EquipmentId { get; set; }
-        public EquipmentTypeEntity? Equipment { get; set; } = default;
+        // optional because not every employee assignment must include equipment
+        public int? EquipmentItemId { get; set; }
+        public EquipmentItemEntity? EquipmentItem { get; set; }
 
     }
 }

@@ -1,7 +1,7 @@
-﻿using KartArena.Domain.Entities.Catalog;
-using KartArena.Domain.Entities.Equipment;
+﻿using KartArena.Domain.Entities.Equipment;
 using KartArena.Domain.Entities.Identity;
 using KartArena.Domain.Entities.Payments;
+using KartArena.Domain.Entities.Reservations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -63,8 +63,23 @@ public static class DynamicDataSeeder
         context.PaymentTypes.AddRange(
             new PaymentTypeEntity
             {
-                Name = "Online kartično plaćanje",
-                Description = "Plaćanje putem online servisa za kartična plaćanja",
+                Name = "Card payment",
+                Code = "ONLINE_CARD",
+                Description = "Payment through an online card payment service",
+                AllowedOnline = true,
+                AllowedAtDesk = false,
+                IsDeleted = false,
+                isEnabled = true,
+                CreatedAtUtc = now,
+                ModifiedAtUtc = null
+            },
+            new PaymentTypeEntity
+            {
+                Name = "Cash payment",
+                Code = "DESK_CASH",
+                Description = "Payment made in cash at the front desk",
+                AllowedOnline = false,
+                AllowedAtDesk = true,
                 IsDeleted = false,
                 isEnabled = true,
                 CreatedAtUtc = now,
@@ -139,10 +154,9 @@ public static class DynamicDataSeeder
     }
 
     private static async Task SeedUsersAsync(
-        DatabaseContext context,
-        IPasswordHasher<UserEntity> passwordHasher)
+     DatabaseContext context,
+     IPasswordHasher<UserEntity> passwordHasher)
     {
-        // Only seed if there are no users and no accounts yet.
         if (await context.Users.AnyAsync())
         {
             Console.WriteLine("ℹ️ Dynamic seed: users already exist - skipping.");
@@ -160,7 +174,7 @@ public static class DynamicDataSeeder
         if (cityId == 0)
             cityId = await context.Cities.Select(c => c.Id).FirstAsync();
 
-        // Roles (adapt name matching if different)
+        // Roles
         var adminRoleId = await context.Roles
             .Where(r => r.Name.StartsWith("Admin"))
             .Select(r => r.Id)
@@ -171,73 +185,153 @@ public static class DynamicDataSeeder
             .Select(r => r.Id)
             .FirstOrDefaultAsync();
 
+        var employeeRoleId = await context.Roles
+            .Where(r => r.Name.StartsWith("Employee"))
+            .Select(r => r.Id)
+            .FirstOrDefaultAsync();
 
-        var admin = new UserEntity
+        var users = new List<UserEntity>();
+
+        // ADMIN
+        users.Add(new UserEntity
         {
             Username = "admin",
             Email = "admin@kartarena.local",
             IsEmailConfirmed = true,
-
             FirstName = "Demo",
             LastName = "Admin",
             DateOfBirth = new DateTime(1995, 1, 1),
-            PhoneNumber = null,
-            Gender = null,
-            Address = null,
-            Image = null,
-
             CityId = cityId,
             RoleId = adminRoleId,
-
-            TotalRaces = 0,
-            BestLapTime = null,
-
-            FailedLoginAttempts = 0,
-            LastLoginAtUtc = null,
-
             CreatedAtUtc = now,
-            ModifiedAtUtc = null,
             isEnabled = true,
             IsDeleted = false
-        };
-        admin.PasswordHash = passwordHasher.HashPassword(admin, "Admin123!");
+        });
 
-        var user = new UserEntity
+        // REGULAR USERS
+        users.AddRange(new[]
+        {
+        new UserEntity
         {
             Username = "user",
             Email = "user@kartarena.local",
-            IsEmailConfirmed = true,
-
             FirstName = "Demo",
             LastName = "User",
             DateOfBirth = new DateTime(1998, 1, 1),
-            PhoneNumber = null,
-            Gender = null,
-            Address = null,
-            Image = null,
-
             CityId = cityId,
             RoleId = userRoleId,
-
-            TotalRaces = 0,
-            BestLapTime = null,
-
-            FailedLoginAttempts = 0,
-            LastLoginAtUtc = null,
-
+            IsEmailConfirmed = true,
             CreatedAtUtc = now,
-            ModifiedAtUtc = null,
-            isEnabled = true,
-            IsDeleted = false
-        };
-        user.PasswordHash = passwordHasher.HashPassword(user, "User123!");
+            isEnabled = true
+        },
+        new UserEntity
+        {
+            Username = "john.doe",
+            Email = "john.doe@kartarena.local",
+            FirstName = "John",
+            LastName = "Doe",
+            DateOfBirth = new DateTime(1992, 5, 10),
+            CityId = cityId,
+            RoleId = userRoleId,
+            IsEmailConfirmed = true,
+            CreatedAtUtc = now,
+            isEnabled = true
+        },
+        new UserEntity
+        {
+            Username = "jane.smith",
+            Email = "jane.smith@kartarena.local",
+            FirstName = "Jane",
+            LastName = "Smith",
+            DateOfBirth = new DateTime(1996, 3, 22),
+            CityId = cityId,
+            RoleId = userRoleId,
+            IsEmailConfirmed = true,
+            CreatedAtUtc = now,
+            isEnabled = true
+        },
+        new UserEntity
+        {
+            Username = "alex",
+            Email = "alex@kartarena.local",
+            FirstName = "Alex",
+            LastName = "Taylor",
+            DateOfBirth = new DateTime(2000, 7, 15),
+            CityId = cityId,
+            RoleId = userRoleId,
+            IsEmailConfirmed = true,
+            CreatedAtUtc = now,
+            isEnabled = true
+        }
+    });
 
-        context.Users.AddRange(admin, user);
-        await context.SaveChangesAsync(); // get Ids
+        // EMPLOYEES
+        users.AddRange(new[]
+        {
+        new UserEntity
+        {
+            Username = "employee1",
+            Email = "employee1@kartarena.local",
+            FirstName = "Mark",
+            LastName = "Johnson",
+            DateOfBirth = new DateTime(1990, 8, 12),
+            CityId = cityId,
+            RoleId = employeeRoleId,
+            IsEmailConfirmed = true,
+            CreatedAtUtc = now,
+            isEnabled = true
+        },
+        new UserEntity
+        {
+            Username = "employee2",
+            Email = "employee2@kartarena.local",
+            FirstName = "Sara",
+            LastName = "Williams",
+            DateOfBirth = new DateTime(1993, 11, 5),
+            CityId = cityId,
+            RoleId = employeeRoleId,
+            IsEmailConfirmed = true,
+            CreatedAtUtc = now,
+            isEnabled = true
+        },
+        new UserEntity
+        {
+            Username = "employee3",
+            Email = "employee3@kartarena.local",
+            FirstName = "David",
+            LastName = "Brown",
+            DateOfBirth = new DateTime(1989, 2, 18),
+            CityId = cityId,
+            RoleId = employeeRoleId,
+            IsEmailConfirmed = true,
+            CreatedAtUtc = now,
+            isEnabled = true
+        }
+    });
 
-        Console.WriteLine("✅ Dynamic seed: demo users added.");
+        // HASH PASSWORDS
+        foreach (var u in users)
+        {
+            u.PasswordHash = passwordHasher.HashPassword(
+                u,
+                u.RoleId == adminRoleId ? "Admin123!" :
+                u.RoleId == employeeRoleId ? "Employee123!" :
+                "User123!"
+            );
+
+            u.TotalRaces = 0;
+            u.BestLapTime = null;
+            u.FailedLoginAttempts = 0;
+            u.LastLoginAtUtc = null;
+            u.ModifiedAtUtc = null;
+            u.IsDeleted = false;
+        }
+
+        context.Users.AddRange(users);
+        await context.SaveChangesAsync();
+
+        Console.WriteLine("✅ Dynamic seed: users & employees added.");
     }
-
     private static async Task EquipmentSeeder(DatabaseContext context)
     {
 
@@ -246,31 +340,31 @@ public static class DynamicDataSeeder
             Console.WriteLine("ℹ️ Dynamic seed: equipment types already exist.");
             return;
         }
-      
+
 
         var helmetTypeId = 1;
-            var suitTypeId = 2;
+        var suitTypeId = 2;
 
-          context.EquipmentEntity.AddRange(    
+        context.EquipmentEntity.AddRange(
+            new EquipmentTypeEntity
+            {
+                Name = "Helmet",
+                Category = EquipmentCategory.Helmet,
+                Size = "M",
+                Price = 5,
+                Description = "Standard kart helmet",
+                isEnabled = true
+            },
               new EquipmentTypeEntity
-                {
-                    Name = "Helmet",
-                    Category = EquipmentCategory.Helmet,
-                    Size = "M",
-                    Price = 5,
-                    Description = "Standard kart helmet",
-                    isEnabled = true
-                },
-                new EquipmentTypeEntity
-                {
-                    Name = "Racing Suit",
-                    Category = EquipmentCategory.Suit,
-                    Size = "L",
-                    Price = 10,
-                    Description = "Kart racing suit",
-                    isEnabled = true
-                }
-            );
+              {
+                  Name = "Racing Suit",
+                  Category = EquipmentCategory.Suit,
+                  Size = "L",
+                  Price = 10,
+                  Description = "Kart racing suit",
+                  isEnabled = true
+              }
+          );
 
         if (await context.EquipmentItemEntity.AnyAsync())
         {
@@ -318,185 +412,267 @@ public static class DynamicDataSeeder
         Console.WriteLine("✅ Dynamic seed: demo equipment added.");
     }
 
-
     private static async Task SeedReservationsAsync(DatabaseContext context)
-{
-    if (await context.Reservations.AnyAsync())
     {
-        Console.WriteLine("ℹ️ Dynamic seed: reservations already exist.");
-        return;
-    }
+        if (await context.Reservations.AnyAsync())
+        {
+            Console.WriteLine("ℹ️ Dynamic seed: reservations already exist.");
+            return;
+        }
 
-    var users = await context.Users
-        .Where(x => !x.IsDeleted)
-        .OrderBy(x => x.Id)
-        .Take(2)
-        .ToListAsync();
+        var userRoleId = await context.Roles
+            .Where(r => r.Name.StartsWith("User"))
+            .Select(r => r.Id)
+            .FirstAsync();
 
-    if (users.Count == 0)
-    {
-        Console.WriteLine("ℹ️ Dynamic seed: no users found - skipping reservations.");
-        return;
-    }
+        var users = await context.Users
+            .Where(x => !x.IsDeleted && x.RoleId == userRoleId)
+            .OrderBy(x => x.Id)
+            .Take(3)
+            .ToListAsync();
 
-    var tracks = await context.Tracks
-        .Where(x => !x.IsDeleted)
-        .OrderBy(x => x.Id)
-        .Take(2)
-        .ToListAsync();
+        var tracks = await context.Tracks.Where(x => !x.IsDeleted).ToListAsync();
+        var karts = await context.Karts.Where(x => !x.IsDeleted).ToListAsync();
 
-    if (tracks.Count == 0)
-    {
-        Console.WriteLine("ℹ️ Dynamic seed: no tracks found - skipping reservations.");
-        return;
-    }
+        var paymentTypes = await context.PaymentTypes.ToListAsync();
+        var card = paymentTypes.First(x => x.Code == "ONLINE_CARD");
+        var cash = paymentTypes.First(x => x.Code == "DESK_CASH");
 
-    var karts = await context.Karts
-        .Where(x => !x.IsDeleted)
-        .OrderBy(x => x.Id)
-        .Take(2)
-        .ToListAsync();
+        var now = DateTime.UtcNow;
+        var today = DateTime.UtcNow.Date;
 
-    if (karts.Count == 0)
-    {
-        Console.WriteLine("ℹ️ Dynamic seed: no karts found - skipping reservations.");
-        return;
-    }
+        var reservations = new List<ReservationEntity>();
 
-    var today = DateTime.UtcNow.Date;
+        // 1️⃣ COMPLETED + PAID (CARD)
+        reservations.Add(new ReservationEntity
+        {
+            UserId = users[0].Id,
+            TrackId = tracks[0].Id,
+            KartId = karts[0].Id,
+            Date = today.AddDays(-2),
+            StartTime = today.AddDays(-2).AddHours(18),
+            EndTime = today.AddDays(-2).AddHours(18).AddMinutes(30),
+            Status = ReservationStatus.Completed,
+            PaymentStatus = PaymentStatus.Paid,
+            CreatedAtUtc = now.AddDays(-3),
+            IsDeleted = false,
+            Payment = new PaymentEntity
+            {
+                Amount = 40,
+                Status = PaymentStatus.Paid,
+                PaymentTypeId = card.Id,
+                PaymentDate = today.AddDays(-2).AddHours(18).AddMinutes(30),
+                TransactionReference = "TX-CARD-001",
+                CreatedAtUtc = now.AddDays(-2),
+                IsDeleted = false
+            }
+        });
 
-    var reservations = new List<ReservationEntity>();
-
-    reservations.Add(new ReservationEntity
-    {
-        UserId = users[0].Id,
-        TrackId = tracks[0].Id,
-        KartId = karts[0].Id,
-        Date = today.AddDays(1),
-        StartTime = today.AddDays(1).AddHours(10),
-        EndTime = today.AddDays(1).AddHours(10).AddMinutes(30),
-        CreatedAtUtc = DateTime.UtcNow,
-        ModifiedAtUtc = null,
-        IsDeleted = false
-    });
-
-    if (users.Count > 1 && tracks.Count > 1 && karts.Count > 1)
-    {
+        // 2️⃣ COMPLETED + PAID (CASH)
         reservations.Add(new ReservationEntity
         {
             UserId = users[1].Id,
             TrackId = tracks[1].Id,
             KartId = karts[1].Id,
+            Date = today.AddDays(-1),
+            StartTime = today.AddDays(-1).AddHours(14),
+            EndTime = today.AddDays(-1).AddHours(14).AddMinutes(45),
+            Status = ReservationStatus.Completed,
+            PaymentStatus = PaymentStatus.Paid,
+            CreatedAtUtc = now.AddDays(-2),
+            IsDeleted = false,
+            Payment = new PaymentEntity
+            {
+                Amount = 55,
+                Status = PaymentStatus.Paid,
+                PaymentTypeId = cash.Id,
+                PaymentDate = today.AddDays(-1).AddHours(14).AddMinutes(45),
+                TransactionReference = "TX-CASH-002",
+                Note = "Paid at desk",
+                CreatedAtUtc = now.AddDays(-1),
+                IsDeleted = false
+            }
+        });
+
+        // 3️⃣ CANCELLED + FAILED
+        reservations.Add(new ReservationEntity
+        {
+            UserId = users[2].Id,
+            TrackId = tracks[0].Id,
+            KartId = karts[1].Id,
+            Date = today.AddDays(-1),
+            StartTime = today.AddDays(-1).AddHours(20),
+            EndTime = today.AddDays(-1).AddHours(20).AddMinutes(30),
+            Status = ReservationStatus.Cancelled,
+            PaymentStatus = PaymentStatus.Failed,
+            CreatedAtUtc = now.AddDays(-2),
+            IsDeleted = false,
+            Payment = new PaymentEntity
+            {
+                Amount = 50,
+                Status = PaymentStatus.Failed,
+                PaymentTypeId = card.Id,
+                Note = "User cancelled before payment",
+                CreatedAtUtc = now.AddDays(-1),
+                IsDeleted = false
+            }
+        });
+
+        // 4️⃣ PENDING + PENDING (future booking)
+        reservations.Add(new ReservationEntity
+        {
+            UserId = users[0].Id,
+            TrackId = tracks[1].Id,
+            KartId = karts[0].Id,
+            Date = today.AddDays(1),
+            StartTime = today.AddDays(1).AddHours(16),
+            EndTime = today.AddDays(1).AddHours(16).AddMinutes(20),
+            Status = ReservationStatus.Pending,
+            PaymentStatus = PaymentStatus.Pending,
+            CreatedAtUtc = now,
+            IsDeleted = false,
+            Payment = new PaymentEntity
+            {
+                Amount = 30,
+                Status = PaymentStatus.Pending,
+                PaymentTypeId = card.Id,
+                CreatedAtUtc = now,
+                IsDeleted = false
+            }
+        });
+
+        // 5️⃣ CONFIRMED + PENDING (reserved but not paid yet)
+        reservations.Add(new ReservationEntity
+        {
+            UserId = users[1].Id,
+            TrackId = tracks[0].Id,
+            KartId = karts[0].Id,
             Date = today.AddDays(2),
-            StartTime = today.AddDays(2).AddHours(14),
-            EndTime = today.AddDays(2).AddHours(14).AddMinutes(45),
-            CreatedAtUtc = DateTime.UtcNow,
-            ModifiedAtUtc = null,
-            IsDeleted = false
+            StartTime = today.AddDays(2).AddHours(19),
+            EndTime = today.AddDays(2).AddHours(19).AddMinutes(40),
+            Status = ReservationStatus.Confirmed,
+            PaymentStatus = PaymentStatus.Pending,
+            CreatedAtUtc = now,
+            IsDeleted = false,
+            Payment = new PaymentEntity
+            {
+                Amount = 45,
+                Status = PaymentStatus.Pending,
+                PaymentTypeId = card.Id,
+                Note = "Awaiting online payment",
+                CreatedAtUtc = now,
+                IsDeleted = false
+            }
         });
+        reservations.Add(new ReservationEntity
+        {
+            UserId = users[1].Id,
+            TrackId = tracks[0].Id,
+            KartId = karts[0].Id,
+            Date = today.AddDays(2),
+            StartTime = today.AddDays(2).AddHours(19),
+            EndTime = today.AddDays(2).AddHours(19).AddMinutes(40),
+            Status = ReservationStatus.Confirmed,
+            PaymentStatus = PaymentStatus.Pending,
+            CreatedAtUtc = now,
+            IsDeleted = false,
+            Payment = new PaymentEntity
+            {
+                Amount = 45,
+                Status = PaymentStatus.Pending,
+                PaymentTypeId = cash.Id,
+                Note = "Desk payment in cash",
+                CreatedAtUtc = now,
+                IsDeleted = false
+            }
+        });
+        context.Reservations.AddRange(reservations);
+        await context.SaveChangesAsync();
+
+        Console.WriteLine("✅ Clean demo reservations seeded.");
     }
-
-    reservations.Add(new ReservationEntity
+    private static async Task SeedPaymentsAsync(DatabaseContext context)
     {
-        UserId = users[0].Id,
-        TrackId = tracks[0].Id,
-        KartId = karts.Count > 1 ? karts[1].Id : karts[0].Id,
-        Date = today.AddDays(3),
-        StartTime = today.AddDays(3).AddHours(16),
-        EndTime = today.AddDays(3).AddHours(16).AddMinutes(20),
-        CreatedAtUtc = DateTime.UtcNow,
-        ModifiedAtUtc = null,
-        IsDeleted = false
-    });
+        if (await context.Payments.AnyAsync())
+        {
+            Console.WriteLine("ℹ️ Dynamic seed: payments already exist.");
+            return;
+        }
 
-    context.Reservations.AddRange(reservations);
-    await context.SaveChangesAsync();
+        var reservations = await context.Reservations
+            .Where(x => !x.IsDeleted)
+            .OrderBy(x => x.Id)
+            .Take(3)
+            .ToListAsync();
 
-    Console.WriteLine("✅ Dynamic seed: reservations added.");
-}
+        if (reservations.Count == 0)
+        {
+            Console.WriteLine("ℹ️ Dynamic seed: no reservations found - skipping payments.");
+            return;
+        }
 
-private static async Task SeedPaymentsAsync(DatabaseContext context)
-{
-    if (await context.Payments.AnyAsync())
-    {
-        Console.WriteLine("ℹ️ Dynamic seed: payments already exist.");
-        return;
-    }
+        var paymentType = await context.PaymentTypes
+            .Where(x => !x.IsDeleted)
+            .OrderBy(x => x.Id)
+            .FirstOrDefaultAsync();
 
-    var reservations = await context.Reservations
-        .Where(x => !x.IsDeleted)
-        .OrderBy(x => x.Id)
-        .Take(3)
-        .ToListAsync();
+        var now = DateTime.UtcNow;
 
-    if (reservations.Count == 0)
-    {
-        Console.WriteLine("ℹ️ Dynamic seed: no reservations found - skipping payments.");
-        return;
-    }
+        var payments = new List<PaymentEntity>();
 
-    var paymentType = await context.PaymentTypes
-        .Where(x => !x.IsDeleted)
-        .OrderBy(x => x.Id)
-        .FirstOrDefaultAsync();
-
-    var now = DateTime.UtcNow;
-
-    var payments = new List<PaymentEntity>();
-
-    payments.Add(new PaymentEntity
-    {
-        ReservationId = reservations[0].Id,
-        PaymentTypeId = paymentType?.Id,
-        Amount = 50.00m,
-        PaymentDate = now,
-        Status = PaymentStatus.Paid,
-        TransactionReference = "DEMO-PAY-001",
-        Note = "Demo paid reservation",
-        CreatedAtUtc = now,
-        ModifiedAtUtc = null,
-        IsDeleted = false
-    });
-
-    if (reservations.Count > 1)
-    {
         payments.Add(new PaymentEntity
         {
-            ReservationId = reservations[1].Id,
-            PaymentTypeId = paymentType?.Id,
-            Amount = 65.00m,
-            PaymentDate = now.AddMinutes(-30),
-            Status = PaymentStatus.Pending,
-            TransactionReference = "DEMO-PAY-002",
-            Note = "Demo pending reservation",
+            ReservationId = reservations[0].Id,
+            PaymentTypeId = paymentType.Id,
+            Amount = 50.00m,
+            PaymentDate = now,
+            Status = PaymentStatus.Paid,
+            TransactionReference = "DEMO-PAY-001",
+            Note = "Demo paid reservation",
             CreatedAtUtc = now,
             ModifiedAtUtc = null,
             IsDeleted = false
         });
-    }
 
-    if (reservations.Count > 2)
-    {
-        payments.Add(new PaymentEntity
+        if (reservations.Count > 1)
         {
-            ReservationId = reservations[2].Id,
-            PaymentTypeId = paymentType?.Id,
-            Amount = 40.00m,
-            PaymentDate = now.AddHours(-1),
-            Status = PaymentStatus.Failed,
-            TransactionReference = "DEMO-PAY-003",
-            Note = "Demo failed payment",
-            CreatedAtUtc = now,
-            ModifiedAtUtc = null,
-            IsDeleted = false
-        });
+            payments.Add(new PaymentEntity
+            {
+                ReservationId = reservations[1].Id,
+                PaymentTypeId = paymentType.Id,
+                Amount = 65.00m,
+                PaymentDate = now.AddMinutes(-30),
+                Status = PaymentStatus.Pending,
+                TransactionReference = "DEMO-PAY-002",
+                Note = "Demo pending reservation",
+                CreatedAtUtc = now,
+                ModifiedAtUtc = null,
+                IsDeleted = false
+            });
+        }
+
+        if (reservations.Count > 2)
+        {
+            payments.Add(new PaymentEntity
+            {
+                ReservationId = reservations[2].Id,
+                PaymentTypeId = paymentType.Id,
+                Amount = 40.00m,
+                PaymentDate = now.AddHours(-1),
+                Status = PaymentStatus.Failed,
+                TransactionReference = "DEMO-PAY-003",
+                Note = "Demo failed payment",
+                CreatedAtUtc = now,
+                ModifiedAtUtc = null,
+                IsDeleted = false
+            });
+        }
+
+        context.Payments.AddRange(payments);
+        await context.SaveChangesAsync();
+
+        Console.WriteLine("✅ Dynamic seed: payments added.");
     }
-
-    context.Payments.AddRange(payments);
-    await context.SaveChangesAsync();
-
-    Console.WriteLine("✅ Dynamic seed: payments added.");
-}
 
     private static async Task SeedTracksAsync(DatabaseContext context)
     {

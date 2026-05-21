@@ -16,7 +16,7 @@ public sealed class UpdatePaymentCommandValidator : AbstractValidator<UpdatePaym
 
         RuleFor(x => x.PaymentTypeId)
             .GreaterThan(0)
-            .When(x => x.PaymentTypeId.HasValue)
+           
             .WithMessage("PaymentTypeId must be greater than 0.");
 
         RuleFor(x => x.TransactionReference)

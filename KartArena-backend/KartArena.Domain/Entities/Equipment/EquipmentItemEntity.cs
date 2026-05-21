@@ -1,4 +1,5 @@
 ﻿using KartArena.Domain.Common;
+using KartArena.Domain.Entities.Reservations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -23,5 +24,6 @@ namespace KartArena.Domain.Entities.Equipment
 
         [MaxLength(500)]
         public string? Notes { get; set; }
+        public ICollection<ReservationEmployeeEntity> ReservationEmployees { get; set; } = new List<ReservationEmployeeEntity>();
     }
 }

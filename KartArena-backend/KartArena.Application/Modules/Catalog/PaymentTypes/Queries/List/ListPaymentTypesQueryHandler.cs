@@ -28,6 +28,7 @@ public sealed class ListPaymentTypesQueryHandler(IAppDbContext context)
                 AllowedOnline = x.AllowedOnline,
                 AllowedAtDesk = x.AllowedAtDesk,
                 Description = x.Description,
+                IsEnabled=x.isEnabled
             });
 
         return await PageResult<ListPaymentTypesQueryDto>.FromQueryableAsync(projected, request.Paging, ct);

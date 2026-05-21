@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using KartArena.Domain.Entities.Reservations;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Delete
 {
@@ -17,11 +15,8 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Delete
             if (reservation is null)
                 throw new Exception("Reservation not found.");
 
-            if (reservation.StartTime - DateTime.UtcNow < TimeSpan.FromHours(2))
-            {
-                throw new Exception(
-                   "Reservation can only be deleted at least 2 hours before the start time.");
-            }
+            if (reservation.Status is not ReservationStatus.Completed and not ReservationStatus.Cancelled)
+                throw new Exception("Only completed or cancelled reservations can be deleted.");
 
             reservation.IsDeleted = true;
             await ctx.SaveChangesAsync(ct);

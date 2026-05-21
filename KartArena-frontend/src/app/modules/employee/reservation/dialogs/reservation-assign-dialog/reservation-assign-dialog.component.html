@@ -1,0 +1,114 @@
+<h2 mat-dialog-title>Assign Reservation Resources</h2>
+
+<mat-dialog-content class="dialog-content" [formGroup]="form">
+  <div class="summary">
+    <div>
+      <span class="label">Reservation</span>
+      <strong>{{ data.reservationCode }}</strong>
+    </div>
+    <div>
+      <span class="label">Customer</span>
+      <strong>{{ data.customerName }}</strong>
+    </div>
+  </div>
+
+  <div class="state-banner error" *ngIf="loadError">
+    {{ loadError }}
+  </div>
+
+  <div class="state-banner" *ngIf="isLoadingInitial">
+    Loading assignment context...
+  </div>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Assigned employee</mat-label>
+    <input matInput formControlName="employeeName" placeholder="Enter employee name, username, or email" />
+    <mat-hint>Employee assignment is still manual, so enter an existing employee value directly for now.</mat-hint>
+    <mat-error *ngIf="form.controls.employeeName.invalid">Employee is required.</mat-error>
+  </mat-form-field>
+
+  <div class="picker-grid">
+    <mat-form-field appearance="fill">
+      <mat-label>Equipment category/type</mat-label>
+      <mat-select
+        [value]="form.value.equipmentTypeId"
+        (selectionChange)="onEquipmentTypeChange($event.value)"
+        [disabled]="isLoadingEquipmentTypes"
+      >
+        <mat-option [value]="null">Select category/type</mat-option>
+        <mat-option *ngFor="let option of equipmentTypeOptions; trackBy: trackByEquipmentType" [value]="option.id">
+          {{ option.name }}{{ option.category ? ' · ' + option.category : '' }}
+        </mat-option>
+      </mat-select>
+      <mat-hint *ngIf="isLoadingEquipmentTypes">Loading equipment categories...</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Available equipment items</mat-label>
+      <mat-select
+        formControlName="pendingEquipmentItemIds"
+        multiple
+        [disabled]="!form.value.equipmentTypeId || isLoadingAvailableEquipment"
+      >
+        <mat-option
+          *ngFor="let option of availableEquipmentOptions"
+          [value]="option.id"
+          [disabled]="isAlreadySelected(option.id)"
+        >
+          {{ option.itemCode }}
+        </mat-option>
+      </mat-select>
+      <mat-hint *ngIf="!form.value.equipmentTypeId">Select a category/type first.</mat-hint>
+      <mat-hint *ngIf="form.value.equipmentTypeId && isLoadingAvailableEquipment">Loading reservation availability...</mat-hint>
+    </mat-form-field>
+  </div>
+
+  <div class="picker-actions">
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="addSelectedItems()"
+      [disabled]="!canAddPendingItems"
+    >
+      <mat-icon>add</mat-icon>
+      Add selected items
+    </button>
+  </div>
+
+  <div class="selected-section">
+    <div class="section-heading">
+      <h3>Assigned equipment items</h3>
+      <span>{{ selectedAssignments.length }} selected</span>
+    </div>
+
+    <div class="empty-state" *ngIf="!hasSelectedAssignments">
+      No equipment items assigned yet.
+    </div>
+
+    <div class="selected-list" *ngIf="hasSelectedAssignments">
+      <div class="selected-item" *ngFor="let item of selectedAssignments; trackBy: trackByAssignment">
+        <div>
+          <strong>{{ item.itemCode }}</strong>
+          <span>{{ item.equipmentTypeName || 'Uncategorized' }}</span>
+        </div>
+
+        <button mat-icon-button type="button" (click)="removeSelectedItem(item.equipmentItemId)" aria-label="Remove assigned item">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="cancel()">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    type="button"
+    (click)="save()"
+    [disabled]="isLoadingInitial || isLoadingAvailableEquipment"
+  >
+    Save assignments
+  </button>
+</mat-dialog-actions>

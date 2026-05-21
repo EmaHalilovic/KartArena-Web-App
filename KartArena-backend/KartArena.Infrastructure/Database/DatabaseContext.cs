@@ -2,6 +2,7 @@
 using KartArena.Domain.Entities.Equipment;
 using KartArena.Domain.Entities.Identity;
 using KartArena.Domain.Entities.Payments;
+using KartArena.Domain.Entities.Reservations;
 
 namespace KartArena.Infrastructure.Database;
 
@@ -10,8 +11,8 @@ public partial class DatabaseContext : DbContext, IAppDbContext
     public DbSet<UserEntity> Users => Set<UserEntity>();
     public DbSet<CityEntity> Cities => Set<CityEntity>();
     public DbSet<RefreshTokenEntity> RefreshTokens => Set<RefreshTokenEntity>();
-    public DbSet<PowertrainTypeEntity>PowertrainTypes=> Set<PowertrainTypeEntity>();
-    public DbSet<RoleEntity> Roles=> Set<RoleEntity>();
+    public DbSet<PowertrainTypeEntity> PowertrainTypes => Set<PowertrainTypeEntity>();
+    public DbSet<RoleEntity> Roles => Set<RoleEntity>();
 
     //payment
     public DbSet<PaymentTypeEntity> PaymentTypes => Set<PaymentTypeEntity>();
@@ -22,7 +23,7 @@ public partial class DatabaseContext : DbContext, IAppDbContext
     public DbSet<EquipmentTypeEntity> EquipmentEntity => Set<EquipmentTypeEntity>();
 
     public DbSet<EquipmentItemEntity> EquipmentItemEntity => Set<EquipmentItemEntity>();
-
+    public DbSet<ReservationEmployeeEntity> ReservationEmployees => Set<ReservationEmployeeEntity>();
     //kart
     public DbSet<KartEntity> Karts => Set<KartEntity>();
     public DbSet<TrackEntity> Tracks => Set<TrackEntity>();

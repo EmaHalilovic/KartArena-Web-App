@@ -19,7 +19,10 @@ import { EquipmentEditItemDialogComponent } from './equipment/dialogs/equipment-
 import { ReservationComponent } from './reservation/reservation.component';
 import { ReservationAddComponent } from './reservation/reservation-add/reservation-add.component';
 import { ReservationEditComponent } from './reservation/reservation-edit/reservation-edit.component';
+import { ReservationDetailsComponent } from './reservation/reservation-details/reservation-details.component';
 import { ConfirmDeleteDialogReservationComponent } from './reservation/dialogs/confirm-delete/confirm-delete-dialog.component';
+import { ReservationCashPaymentDialogComponent } from './reservation/dialogs/reservation-cash-payment-dialog/reservation-cash-payment-dialog.component';
+import { ReservationAssignDialogComponent } from './reservation/dialogs/reservation-assign-dialog/reservation-assign-dialog.component';
 
 
 import { KartsComponent } from './karts/karts.component';
@@ -27,6 +30,10 @@ import { KartsAddComponent } from './karts/karts-add/karts-add.component';
 import { KartsEditComponent } from './karts/karts-edit/karts-edit.component';
 import { ConfirmDeleteDialogComponent as ConfirmDeleteKartDialogComponent } from './karts/dialogs/confirm-delete/confirm-delete-dialog.component';
 import { PaymentsComponent } from './payments/payments.component';
+import { PaymentTypesComponent } from './payment-types/payment-types.component';
+import { PaymentTypesAddComponent } from './payment-types/payment-types-add/payment-types-add.component';
+import { PaymentTypesEditComponent } from './payment-types/payment-types-edit/payment-types-edit.component';
+import { ConfirmDeletePaymentTypeDialogComponent } from './payment-types/dialogs/confirm-delete/confirm-delete-dialog.component';
 
 
 @NgModule({
@@ -44,12 +51,19 @@ import { PaymentsComponent } from './payments/payments.component';
     ReservationComponent,
     ReservationAddComponent,
     ReservationEditComponent,
+    ReservationDetailsComponent,
     ConfirmDeleteDialogReservationComponent,
+    ReservationCashPaymentDialogComponent,
+    ReservationAssignDialogComponent,
      KartsComponent,
     KartsAddComponent,
     KartsEditComponent,
     ConfirmDeleteKartDialogComponent,
     PaymentsComponent,
+    PaymentTypesComponent,
+    PaymentTypesAddComponent,
+    PaymentTypesEditComponent,
+    ConfirmDeletePaymentTypeDialogComponent,
   ],
   imports: [
     AdminRoutingModule,

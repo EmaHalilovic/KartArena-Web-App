@@ -13,4 +13,5 @@ public sealed class ListPaymentTypesQueryDto
     public bool AllowedAtDesk { get; init; }
 
     public string? Description { get; init; }
+    public bool IsEnabled { get; set; } 
 }

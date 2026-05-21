@@ -62,7 +62,7 @@ public partial class Program
                             .AllowCredentials();
                     });
             });
-
+            builder.Services.AddHostedService<ExpiredReservationCancellationService>();
             var app = builder.Build();
 
             // ---------------------------------------------------------

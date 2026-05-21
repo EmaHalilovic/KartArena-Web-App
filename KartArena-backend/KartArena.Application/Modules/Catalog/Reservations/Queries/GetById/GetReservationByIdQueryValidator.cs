@@ -1,8 +1,14 @@
-﻿using KartArena.Application.Modules.Catalog.Reservations.Queries.GetById;
-public sealed class GetReservationByIdQueryValidator : AbstractValidator<GetReservationByIdQuery>
+﻿using FluentValidation;
+
+namespace KartArena.Application.Modules.Catalog.Reservations.Queries.GetById
 {
-    public GetReservationByIdQueryValidator()
+    public sealed class GetReservationByIdQueryValidator : AbstractValidator<GetReservationByIdQuery>
     {
-        RuleFor(x => x.Id).GreaterThan(0).WithMessage("Id must be a positive value.");
+        public GetReservationByIdQueryValidator()
+        {
+            RuleFor(x => x.Id)
+                .GreaterThan(0)
+                .WithMessage("Id must be a positive value.");
+        }
     }
 }

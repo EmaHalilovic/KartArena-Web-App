@@ -1,48 +1,89 @@
-﻿namespace KartArena.Application.Modules.Catalog.Reservations.Queries.List;
+﻿using Microsoft.EntityFrameworkCore;
 
-public sealed class ListReservationsQueryHandler(IAppDbContext ctx)
-    : IRequestHandler<ListReservationsQuery, PageResult<ListReservationsQueryDto>>
+namespace KartArena.Application.Modules.Catalog.Reservations.Queries.List
 {
-    public async Task<PageResult<ListReservationsQueryDto>> Handle(
-        ListReservationsQuery request, CancellationToken ct)
+    public sealed class ListReservationsQueryHandler(IAppDbContext ctx)
+        : IRequestHandler<ListReservationsQuery, PageResult<ListReservationsQueryDto>>
     {
-        var q = ctx.Reservations.AsNoTracking()
-            .Where(x => !x.IsDeleted);
-
-        // Search (prilagodi po čemu želiš tražiti)
-        if (!string.IsNullOrWhiteSpace(request.Search))
+        public async Task<PageResult<ListReservationsQueryDto>> Handle(
+            ListReservationsQuery request,
+            CancellationToken ct)
         {
-            var s = request.Search.Trim();
+            var q = ctx.Reservations
+                .AsNoTracking()
+                .Where(x => !x.IsDeleted);
 
-            q = q.Where(x =>
-                x.UserId.ToString().Contains(s) ||
-                x.TrackId.ToString().Contains(s) ||
-                x.KartId.ToString().Contains(s)
-                || x.User.FirstName.Contains(s)
-                || x.User.LastName.Contains(s)
-                || x.Track.Name.Contains(s)
-                || x.Kart.Name.Contains(s)
-            );
-        }
+            if (request.UserId.HasValue)
+                q = q.Where(x => x.UserId == request.UserId.Value);
 
-        var projectedQuery = q
-            .OrderByDescending(x => x.StartTime)
-            .Select(x => new ListReservationsQueryDto
+            if (request.TrackId.HasValue)
+                q = q.Where(x => x.TrackId == request.TrackId.Value);
+
+            if (request.KartId.HasValue)
+                q = q.Where(x => x.KartId == request.KartId.Value);
+
+            if (request.Status.HasValue)
+                q = q.Where(x => x.Status == request.Status.Value);
+
+            if (request.PaymentStatus.HasValue)
+                q = q.Where(x => x.PaymentStatus == request.PaymentStatus.Value);
+
+            if (request.DateFrom.HasValue)
             {
-                Id = x.Id,
-                UserId = x.UserId,
-                TrackId = x.TrackId,
-                KartId = x.KartId,
-                Date=x.Date,
-                StartTime = x.StartTime,
-                EndTime = x.EndTime,
-                UserFirstName = x.User.FirstName,
-                UserLastName=x.User.LastName,
-                TrackName = x.Track.Name,
-                KartName = x.Kart.Name
-            });
+                var from = request.DateFrom.Value.Date;
+                q = q.Where(x => x.Date >= from);
+            }
 
-        return await PageResult<ListReservationsQueryDto>
-            .FromQueryableAsync(projectedQuery, request.Paging, ct);
+            if (request.DateTo.HasValue)
+            {
+                var to = request.DateTo.Value.Date;
+                q = q.Where(x => x.Date <= to);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Search))
+            {
+                var s = request.Search.Trim();
+
+                q = q.Where(x =>
+                    x.Id.ToString().Contains(s) ||
+                    x.UserId.ToString().Contains(s) ||
+                    x.TrackId.ToString().Contains(s) ||
+                    x.KartId.ToString().Contains(s) ||
+                    (x.User != null && (
+                        x.User.FirstName.Contains(s) ||
+                        x.User.LastName.Contains(s))) ||
+                    (x.Track != null && x.Track.Name.Contains(s)) ||
+                    (x.Kart != null && x.Kart.Name.Contains(s)) ||
+                    (x.Payment != null && x.Payment.PaymentType != null && x.Payment.PaymentType.Name.Contains(s))
+                );
+            }
+
+            var projectedQuery = q
+                .OrderByDescending(x => x.Date)
+                .ThenByDescending(x => x.StartTime)
+                .Select(x => new ListReservationsQueryDto
+                {
+                    Id = x.Id,
+                    UserId = x.UserId,
+                    TrackId = x.TrackId,
+                    KartId = x.KartId,
+                    Date = x.Date,
+                    StartTime = x.StartTime,
+                    EndTime = x.EndTime,
+                    Status = x.Status,
+                    PaymentStatus = x.PaymentStatus,
+                    PaymentAmount = x.Payment != null ? x.Payment.Amount : null,
+                    PaymentTypeName = x.Payment != null && x.Payment.PaymentType != null
+                        ? x.Payment.PaymentType.Name
+                        : null,
+                    UserFirstName = x.User != null ? x.User.FirstName : null,
+                    UserLastName = x.User != null ? x.User.LastName : null,
+                    TrackName = x.Track != null ? x.Track.Name : null,
+                    KartName = x.Kart != null ? x.Kart.Name : null
+                });
+
+            return await PageResult<ListReservationsQueryDto>
+                .FromQueryableAsync(projectedQuery, request.Paging, ct);
+        }
     }
 }

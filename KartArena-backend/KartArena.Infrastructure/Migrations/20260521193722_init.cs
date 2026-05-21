@@ -329,6 +329,8 @@ namespace KartArena.Infrastructure.Migrations
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    PaymentStatus = table.Column<int>(type: "int", nullable: false),
                     TrackId = table.Column<int>(type: "int", nullable: false),
                     KartId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
@@ -491,15 +493,14 @@ namespace KartArena.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ReservationEmployeeEntity",
+                name: "ReservationEmployees",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EmployeeId = table.Column<int>(type: "int", nullable: false),
                     ReservationId = table.Column<int>(type: "int", nullable: false),
-                    EquipmentId = table.Column<int>(type: "int", nullable: false),
-                    EquipmentTypeEntityId = table.Column<int>(type: "int", nullable: true),
+                    EquipmentItemId = table.Column<int>(type: "int", nullable: true),
                     UserEntityId = table.Column<int>(type: "int", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     isEnabled = table.Column<bool>(type: "bit", nullable: false),
@@ -508,30 +509,25 @@ namespace KartArena.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ReservationEmployeeEntity", x => x.Id);
+                    table.PrimaryKey("PK_ReservationEmployees", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ReservationEmployeeEntity_EquipmentEntity_EquipmentId",
-                        column: x => x.EquipmentId,
-                        principalTable: "EquipmentEntity",
+                        name: "FK_ReservationEmployees_EquipmentItemEntity_EquipmentItemId",
+                        column: x => x.EquipmentItemId,
+                        principalTable: "EquipmentItemEntity",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_ReservationEmployeeEntity_EquipmentEntity_EquipmentTypeEntityId",
-                        column: x => x.EquipmentTypeEntityId,
-                        principalTable: "EquipmentEntity",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_ReservationEmployeeEntity_Reservations_ReservationId",
+                        name: "FK_ReservationEmployees_Reservations_ReservationId",
                         column: x => x.ReservationId,
                         principalTable: "Reservations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ReservationEmployeeEntity_Users_EmployeeId",
+                        name: "FK_ReservationEmployees_Users_EmployeeId",
                         column: x => x.EmployeeId,
                         principalTable: "Users",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_ReservationEmployeeEntity_Users_UserEntityId",
+                        name: "FK_ReservationEmployees_Users_UserEntityId",
                         column: x => x.UserEntityId,
                         principalTable: "Users",
                         principalColumn: "Id");
@@ -620,34 +616,30 @@ namespace KartArena.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ReservationEmployeeEntity_EmployeeId",
-                table: "ReservationEmployeeEntity",
+                name: "IX_ReservationEmployees_EmployeeId",
+                table: "ReservationEmployees",
                 column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ReservationEmployeeEntity_EquipmentId",
-                table: "ReservationEmployeeEntity",
-                column: "EquipmentId");
+                name: "IX_ReservationEmployees_EquipmentItemId",
+                table: "ReservationEmployees",
+                column: "EquipmentItemId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ReservationEmployeeEntity_EquipmentTypeEntityId",
-                table: "ReservationEmployeeEntity",
-                column: "EquipmentTypeEntityId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ReservationEmployeeEntity_ReservationId",
-                table: "ReservationEmployeeEntity",
+                name: "IX_ReservationEmployees_ReservationId",
+                table: "ReservationEmployees",
                 column: "ReservationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ReservationEmployeeEntity_ReservationId_EmployeeId_EquipmentId",
-                table: "ReservationEmployeeEntity",
-                columns: new[] { "ReservationId", "EmployeeId", "EquipmentId" },
-                unique: true);
+                name: "IX_ReservationEmployees_ReservationId_EmployeeId_EquipmentItemId",
+                table: "ReservationEmployees",
+                columns: new[] { "ReservationId", "EmployeeId", "EquipmentItemId" },
+                unique: true,
+                filter: "[IsDeleted] = 0");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ReservationEmployeeEntity_UserEntityId",
-                table: "ReservationEmployeeEntity",
+                name: "IX_ReservationEmployees_UserEntityId",
+                table: "ReservationEmployees",
                 column: "UserEntityId");
 
             migrationBuilder.CreateIndex(
@@ -706,9 +698,6 @@ namespace KartArena.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "EquipmentItemEntity");
-
-            migrationBuilder.DropTable(
                 name: "LapTimeEntity");
 
             migrationBuilder.DropTable(
@@ -721,7 +710,7 @@ namespace KartArena.Infrastructure.Migrations
                 name: "RefreshTokens");
 
             migrationBuilder.DropTable(
-                name: "ReservationEmployeeEntity");
+                name: "ReservationEmployees");
 
             migrationBuilder.DropTable(
                 name: "ReviewEntity");
@@ -736,13 +725,16 @@ namespace KartArena.Infrastructure.Migrations
                 name: "PaymentTypes");
 
             migrationBuilder.DropTable(
-                name: "EquipmentEntity");
+                name: "EquipmentItemEntity");
 
             migrationBuilder.DropTable(
                 name: "Reservations");
 
             migrationBuilder.DropTable(
                 name: "RaceEntity");
+
+            migrationBuilder.DropTable(
+                name: "EquipmentEntity");
 
             migrationBuilder.DropTable(
                 name: "Karts");

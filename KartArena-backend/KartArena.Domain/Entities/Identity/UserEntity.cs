@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations.Schema;
 using KartArena.Domain.Common;
 using KartArena.Domain.Entities.Catalog;
+using KartArena.Domain.Entities.Reservations;
 
 namespace KartArena.Domain.Entities.Identity
 {

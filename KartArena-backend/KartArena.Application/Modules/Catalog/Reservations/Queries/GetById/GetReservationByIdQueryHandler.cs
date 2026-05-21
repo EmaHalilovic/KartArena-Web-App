@@ -1,34 +1,46 @@
-﻿using KartArena.Application.Modules.Catalog.Equipment.Queries.GetById;
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 
-namespace KartArena.Application.Modules.Catalog.Reservations.Queries.GetById;
-
-public class GetReservationByIdQueryHandler(IAppDbContext ctx) : IRequestHandler<GetReservationByIdQuery, GetReservationByIdQueryDto>
+namespace KartArena.Application.Modules.Catalog.Reservations.Queries.GetById
 {
-    public async Task<GetReservationByIdQueryDto> Handle(GetReservationByIdQuery request, CancellationToken cancellationToken)
+    public sealed class GetReservationByIdQueryHandler(IAppDbContext ctx)
+        : IRequestHandler<GetReservationByIdQuery, GetReservationByIdQueryDto>
     {
-        var dto = await ctx.Reservations
-                 .AsNoTracking()
-                 .Where(r => !r.IsDeleted && r.Id == request.Id)
-                 .Select(r => new GetReservationByIdQueryDto
-                 {
-                     Id = r.Id,
-                     UserId = r.UserId,
-                     TrackId = r.TrackId,
-                     KartId = r.KartId,
-                     Date = r.Date,
-                     StartTime = r.StartTime,
-                     EndTime = r.EndTime,
+        public async Task<GetReservationByIdQueryDto> Handle(GetReservationByIdQuery request, CancellationToken cancellationToken)
+        {
+            var dto = await ctx.Reservations
+                .AsNoTracking()
+                .Where(r => !r.IsDeleted && r.Id == request.Id)
+                .Select(r => new GetReservationByIdQueryDto
+                {
+                    Id = r.Id,
+                    UserId = r.UserId,
+                    TrackId = r.TrackId,
+                    KartId = r.KartId,
+                    Date = r.Date,
+                    StartTime = r.StartTime,
+                    EndTime = r.EndTime,
+                    Status = r.Status,
+                    PaymentStatus = r.PaymentStatus,
 
-                     UserFirstName = r.User != null ? r.User.FirstName : null,
-                     UserLastName = r.User != null ? r.User.LastName : null,
-                     TrackName = r.Track != null ? r.Track.Name : null,
-                     KartName = r.Kart != null ? r.Kart.Name : null,
-                 })
-                 .FirstOrDefaultAsync(cancellationToken);
+                    PaymentAmount = r.Payment != null ? r.Payment.Amount : null,
+                    PaymentTypeId = r.Payment != null ? r.Payment.PaymentTypeId : null,
+                    PaymentTypeName = r.Payment != null && r.Payment.PaymentType != null ? r.Payment.PaymentType.Name : null,
+                    PaymentDate = r.Payment != null ? r.Payment.PaymentDate : null,
+                    TransactionReference = r.Payment != null ? r.Payment.TransactionReference : null,
+                    PaymentNote = r.Payment != null ? r.Payment.Note : null,
 
-        if (dto is null)
-            throw new Exception("Reservation not found.");
+                    UserFirstName = r.User != null ? r.User.FirstName : null,
+                    UserLastName = r.User != null ? r.User.LastName : null,
+                    TrackName = r.Track != null ? r.Track.Name : null,
+                    KartName = r.Kart != null ? r.Kart.Name : null,
+                })
+                .FirstOrDefaultAsync(cancellationToken);
 
-        return dto;
+            if (dto is null)
+                throw new Exception("Reservation not found.");
+
+            return dto;
+        }
     }
 }

@@ -14,19 +14,18 @@ public sealed class CreatePaymentCommandHandler(IAppDbContext context)
         if (!reservationExists)
             throw new MarketNotFoundException($"Reservation with id {request.ReservationId} was not found.");
 
-        if (request.PaymentTypeId.HasValue)
-        {
+       
             var paymentType = await context.PaymentTypes
-                .FirstOrDefaultAsync(x => x.Id == request.PaymentTypeId.Value && !x.IsDeleted, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == request.PaymentTypeId && !x.IsDeleted, cancellationToken);
 
             if (paymentType is null)
-                throw new MarketNotFoundException($"Payment type with id {request.PaymentTypeId.Value} was not found.");
+                throw new MarketNotFoundException($"Payment type with id {request.PaymentTypeId} was not found.");
 
             if (!paymentType.isEnabled)
                 throw new MarketBusinessRuleException(
                     "payment.create.payment_type_disabled",
                     "Selected payment type is disabled.");
-        }
+        
 
         var entity = new PaymentEntity
         {

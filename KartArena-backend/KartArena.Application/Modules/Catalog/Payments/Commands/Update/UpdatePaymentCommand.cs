@@ -12,7 +12,7 @@ public sealed class UpdatePaymentCommand : IRequest<Unit>
 
     public DateTime? PaymentDate { get; set; }
 
-    public int? PaymentTypeId { get; set; }
+    public int PaymentTypeId { get; set; }
 
 
     public string? TransactionReference { get; set; }

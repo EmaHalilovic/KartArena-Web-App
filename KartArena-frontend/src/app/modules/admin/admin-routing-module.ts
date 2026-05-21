@@ -12,12 +12,17 @@ import { EquipmentEditComponent } from './equipment/equipment-edit/equipment-edi
 import { EquipmentDetailComponent } from './equipment/equipment-detail/equipment-detail.component';
 
 import { ReservationComponent } from './reservation/reservation.component';
+import { ReservationAddComponent } from './reservation/reservation-add/reservation-add.component';
 import { ReservationEditComponent } from './reservation/reservation-edit/reservation-edit.component';
+import { ReservationDetailsComponent } from './reservation/reservation-details/reservation-details.component';
 
 
 import { KartsComponent } from './karts/karts.component';
 import { KartsAddComponent } from './karts/karts-add/karts-add.component';
 import { KartsEditComponent } from './karts/karts-edit/karts-edit.component';
+import { PaymentTypesComponent } from './payment-types/payment-types.component';
+import { PaymentTypesAddComponent } from './payment-types/payment-types-add/payment-types-add.component';
+import { PaymentTypesEditComponent } from './payment-types/payment-types-edit/payment-types-edit.component';
 
 const routes: Routes = [
   {
@@ -42,9 +47,17 @@ const routes: Routes = [
         component: EquipmentComponent,
       },
       //RESERVATIONS
-       {
+      {
         path: 'reservations',
         component: ReservationComponent,
+      },
+      {
+        path: 'reservation/add',
+        component: ReservationAddComponent,
+      },
+      {
+        path: 'reservations/:id',
+        component: ReservationDetailsComponent,
       },
       
        {
@@ -53,9 +66,21 @@ const routes: Routes = [
       },
 
  //PAYMENTS
-       {
+      {
         path: 'payments',
         component: PaymentsComponent,
+      },
+      {
+        path: 'payment-types',
+        component: PaymentTypesComponent,
+      },
+      {
+        path: 'payment-types/add',
+        component: PaymentTypesAddComponent,
+      },
+      {
+        path: 'payment-types/:id/edit',
+        component: PaymentTypesEditComponent,
       },
       // KARTS
       {

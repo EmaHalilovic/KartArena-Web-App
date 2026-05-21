@@ -13,8 +13,8 @@ public sealed class CreatePaymentCommandValidator : AbstractValidator<CreatePaym
             .GreaterThan(0);
 
         RuleFor(x => x.PaymentTypeId)
-            .GreaterThan(0)
-            .When(x => x.PaymentTypeId.HasValue);
+            .GreaterThan(0);
+           
 
         RuleFor(x => x.TransactionReference)
             .MaximumLength(100);
