@@ -23,8 +23,15 @@ namespace KartArena.Domain.Entities.Reservations
         public int KartId { get; set; }
         public KartEntity? Kart { get; set; }
 
-        public int UserId { get; set; }
+        // Logged-in user, optional
+        public int? UserId { get; set; }
         public UserEntity? User { get; set; }
+
+        // Public reservation / guest info
+        public string CustomerFirstName { get; set; } = string.Empty;
+        public string CustomerLastName { get; set; } = string.Empty;
+        public string CustomerEmail { get; set; } = string.Empty;
+        public string CustomerPhone { get; set; } = string.Empty;
 
         // one-to-one payment
         public PaymentEntity? Payment { get; set; }

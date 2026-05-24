@@ -8,7 +8,8 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
         public CreateReservationCommandValidator()
         {
             RuleFor(x => x.UserId)
-                .GreaterThan(0);
+                .GreaterThan(0)
+                .When(x => x.UserId.HasValue);
 
             RuleFor(x => x.TrackId)
                 .GreaterThan(0);
@@ -17,10 +18,12 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
                 .GreaterThan(0);
 
             RuleFor(x => x.PaymentTypeId)
-                .GreaterThan(0);
+                .GreaterThan(0)
+                .When(x => x.PaymentTypeId.HasValue);
 
             RuleFor(x => x.Amount)
-                .GreaterThan(0);
+                .GreaterThan(0)
+                .When(x => x.Amount.HasValue);
 
             RuleFor(x => x.ReservationDate)
                 .NotEmpty();

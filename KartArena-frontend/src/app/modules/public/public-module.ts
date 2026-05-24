@@ -10,6 +10,7 @@ import { KartComponent } from './karts/kart.component';
 import { HomeComponent } from './home/home.component';
 import { StatsComponent } from './stats/stats.component';
 import { KartDetailsComponent } from './kart-details/kart-details.component';
+import { ReservationsComponent } from './reservations/reservations.component';
 
 
 @NgModule({
@@ -17,7 +18,8 @@ import { KartDetailsComponent } from './kart-details/kart-details.component';
     HomeComponent,
     StatsComponent,
     KartComponent,
-    KartDetailsComponent
+    KartDetailsComponent,
+    ReservationsComponent
   ],
   imports: [
     NgApexchartsModule,

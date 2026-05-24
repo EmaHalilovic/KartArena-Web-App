@@ -52,6 +52,8 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Queries.List
                     (x.User != null && (
                         x.User.FirstName.Contains(s) ||
                         x.User.LastName.Contains(s))) ||
+                    x.CustomerFirstName.Contains(s) ||
+                    x.CustomerLastName.Contains(s) ||
                     (x.Track != null && x.Track.Name.Contains(s)) ||
                     (x.Kart != null && x.Kart.Name.Contains(s)) ||
                     (x.Payment != null && x.Payment.PaymentType != null && x.Payment.PaymentType.Name.Contains(s))
@@ -78,6 +80,8 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Queries.List
                         : null,
                     UserFirstName = x.User != null ? x.User.FirstName : null,
                     UserLastName = x.User != null ? x.User.LastName : null,
+                    CustomerFirstName = x.CustomerFirstName,
+                    CustomerLastName = x.CustomerLastName,
                     TrackName = x.Track != null ? x.Track.Name : null,
                     KartName = x.Kart != null ? x.Kart.Name : null
                 });

@@ -293,10 +293,26 @@ export class ReservationComponent
   }
 
   getUserFullName(r: ListReservationQueryDto): string {
-    const first = (r.userFirstName ?? '').trim();
-    const last = (r.userLastName ?? '').trim();
-    const full = `${first} ${last}`.trim();
-    return full || `#${r.userId}`;
+    const userName = this.joinName(
+      this.readString(r, 'userFirstName', 'UserFirstName'),
+      this.readString(r, 'userLastName', 'UserLastName')
+    );
+    const customerName = this.joinName(
+      this.readString(r, 'customerFirstName', 'CustomerFirstName'),
+      this.readString(r, 'customerLastName', 'CustomerLastName')
+    );
+
+    return userName || customerName || (r.userId ? `#${r.userId}` : '-');
+  }
+
+  private joinName(firstName: string, lastName: string): string {
+    return `${firstName.trim()} ${lastName.trim()}`.trim();
+  }
+
+  private readString(source: unknown, ...keys: string[]): string {
+    const record = source as Record<string, unknown>;
+    const value = keys.map((key) => record[key]).find((item) => typeof item === 'string');
+    return typeof value === 'string' ? value : '';
   }
 
   getTrackLabel(r: ListReservationQueryDto): string {

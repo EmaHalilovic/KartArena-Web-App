@@ -1,4 +1,5 @@
 ﻿using KartArena.Domain.Entities.Payments;
+using KartArena.Domain.Entities.Catalog;
 using KartArena.Domain.Entities.Reservations;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -18,21 +19,29 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
             if (!kartExists)
                 throw new Exception("Kart does not exist.");
 
-            var userExists = await ctx.Users.AnyAsync(x => x.Id == request.UserId, ct);
-            if (!userExists)
-                throw new Exception("User does not exist.");
+            if (request.UserId.HasValue)
+            {
+                var userExists = await ctx.Users.AnyAsync(x => x.Id == request.UserId.Value, ct);
+                if (!userExists)
+                    throw new Exception("User does not exist.");
+            }
 
-            var paymentType = await ctx.PaymentTypes
-                .FirstOrDefaultAsync(x => x.Id == request.PaymentTypeId, ct);
+            PaymentTypeEntity? paymentType = null;
 
-            if (paymentType is null)
-                throw new Exception("Selected payment type does not exist.");
+            if (request.PaymentTypeId.HasValue)
+            {
+                paymentType = await ctx.PaymentTypes
+                    .FirstOrDefaultAsync(x => x.Id == request.PaymentTypeId.Value, ct);
 
-            if (!paymentType.isEnabled)
-                throw new Exception("Selected payment type is not active.");
+                if (paymentType is null)
+                    throw new Exception("Selected payment type does not exist.");
 
-            if (!paymentType.AllowedOnline)
-                throw new Exception("Selected payment type is not available for online payment.");
+                if (!paymentType.isEnabled)
+                    throw new Exception("Selected payment type is not active.");
+
+                if (!paymentType.AllowedOnline)
+                    throw new Exception("Selected payment type is not available for online payment.");
+            }
 
             var date = request.ReservationDate.Date;
 
@@ -72,17 +81,20 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
                 IsDeleted = false
             };
 
-            var payment = new PaymentEntity
+            if (paymentType is not null)
             {
-                Amount = request.Amount,
-                PaymentTypeId = request.PaymentTypeId,
-                Status = PaymentStatus.Pending,
-                PaymentDate = null,
-                Note = request.PaymentNote,
-                Reservation = reservation
-            };
+                var payment = new PaymentEntity
+                {
+                    Amount = request.Amount ?? 0,
+                    PaymentTypeId = request.PaymentTypeId,
+                    Status = PaymentStatus.Pending,
+                    PaymentDate = null,
+                    Note = request.PaymentNote,
+                    Reservation = reservation
+                };
 
-            reservation.Payment = payment;
+                reservation.Payment = payment;
+            }
 
             await ctx.Reservations.AddAsync(reservation, ct);
             await ctx.SaveChangesAsync(ct);

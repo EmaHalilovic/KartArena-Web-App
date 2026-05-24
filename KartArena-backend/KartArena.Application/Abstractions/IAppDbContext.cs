@@ -2,6 +2,7 @@
 using KartArena.Domain.Entities.Identity;
 using KartArena.Domain.Entities.Payments;
 using KartArena.Domain.Entities.Reservations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace KartArena.Application.Abstractions;
 
@@ -23,5 +24,6 @@ public interface IAppDbContext
     DbSet<KartEntity> Karts { get; }
     DbSet<TrackEntity> Tracks { get; }
 
+    DatabaseFacade Database { get; }
     Task<int> SaveChangesAsync(CancellationToken ct);
 }

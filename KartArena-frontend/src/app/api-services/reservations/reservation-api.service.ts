@@ -7,6 +7,7 @@ import {
   ListReservationResponse,
   GetReservationByIdQueryDto,
   CreateReservationCommand,
+  CheckoutReservationsRequest,
   UpdateReservationCommand,
   MarkReservationCashPaidPayload,
   MarkReservationCashPaidCommand,
@@ -14,11 +15,13 @@ import {
   AvailableReservationEquipmentItemDto,
   AssignReservationResourcesPayload,
   AssignReservationResourcesCommand,
+  GetReservationAvailabilityDto,
 } from './reservation-api.models';
 import { buildHttpParams } from '../../core/models/build-http-params';
 
 @Injectable({ providedIn: 'root' })
 export class ReservationApiService {
+  private readonly apiUrl = `${environment.apiUrl}/api`;
   private readonly baseUrl = `${environment.apiUrl}/reservations`;
   private http = inject(HttpClient);
 
@@ -35,6 +38,21 @@ export class ReservationApiService {
     return this.http.post<any>(this.baseUrl, payload);
   }
 
+  checkout(payload: CheckoutReservationsRequest): Observable<number[]> {
+    return this.http.post<number[]>(`${this.apiUrl}/reservations/checkout`, payload);
+  }
+
+  getAvailability(date: string, duration: number): Observable<GetReservationAvailabilityDto> {
+  return this.http.get<GetReservationAvailabilityDto>(
+    `${this.apiUrl}/reservations/availability`,
+    {
+      params: {
+        date,
+        duration,
+      },
+    }
+  );
+}
   update(id: number, payload: UpdateReservationCommand): Observable<number> {
     return this.http.put<number>(`${this.baseUrl}/${id}`, payload);
   }
