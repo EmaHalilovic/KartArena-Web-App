@@ -1,8 +1,10 @@
 ﻿using KartArena.API;
 using KartArena.API.Middleware;
-using KartArena.Infrastructure;
 using KartArena.Application;
+using KartArena.Application.Modules.Catalog.Payments.Stripe;
+using KartArena.Infrastructure;
 using Serilog;
+using Stripe;
 
 public partial class Program
 {
@@ -63,6 +65,23 @@ public partial class Program
                     });
             });
             builder.Services.AddHostedService<ExpiredReservationCancellationService>();
+
+            builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection(
+        StripeSettings.SectionName));
+
+            var stripeSecretKey =
+                builder.Configuration["Stripe:SecretKey"];
+
+            if (string.IsNullOrWhiteSpace(stripeSecretKey))
+            {
+                throw new InvalidOperationException(
+                    "Stripe secret key is not configured.");
+            }
+
+            StripeConfiguration.ApiKey = stripeSecretKey;
+
+
+
             var app = builder.Build();
 
             // ---------------------------------------------------------

@@ -63,11 +63,11 @@ public static class DynamicDataSeeder
         context.PaymentTypes.AddRange(
             new PaymentTypeEntity
             {
-                Name = "Card payment",
-                Code = "ONLINE_CARD",
-                Description = "Payment through an online card payment service",
+                Name = "Stripe Card Payment",
+                Code = "STRIPE",
                 AllowedOnline = true,
                 AllowedAtDesk = false,
+                Description = "Online card payment through Stripe.",
                 IsDeleted = false,
                 isEnabled = true,
                 CreatedAtUtc = now,
