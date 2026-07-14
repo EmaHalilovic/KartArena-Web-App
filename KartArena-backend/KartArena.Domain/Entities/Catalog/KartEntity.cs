@@ -16,8 +16,7 @@ namespace KartArena.Domain.Entities.Catalog
         public string? Manufacturer { get; set; }
         public string? ImageUrl { get; set; }
 
-        //removed '?' from PricePerSession because it should be required for reservation calculations
-        public decimal PricePerSession { get; set; }
+        public decimal? PricePerSession { get; set; }
         public string? Description { get; set; }
 
 

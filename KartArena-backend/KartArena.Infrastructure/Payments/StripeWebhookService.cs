@@ -135,7 +135,6 @@ namespace KartArena.Infrastructure.Payments
                     $"{session.Id} was not found.");
             }
 
-            // Stripe može ponovo poslati isti događaj.
             if (payment.Status == PaymentStatus.Paid)
             {
                 return;

@@ -192,11 +192,3 @@ export interface AvailableKartDto {
   kartName: string;
   pricePerSession?: number | null;
 }
-
-export interface CheckoutReservationsResponse {
-  reservationIds: number[];
-  paymentId: number | null;
-  paymentStatus: string;
-  checkoutUrl: string | null;
-  stripeCheckoutSessionId: string | null;
-}

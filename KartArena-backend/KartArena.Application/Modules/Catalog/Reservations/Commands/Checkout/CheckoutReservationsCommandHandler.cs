@@ -144,6 +144,7 @@ public sealed class CheckoutReservationsCommandHandler(IAppDbContext ctx)
                 Date = date,
                 StartTime = item.StartTime,
                 EndTime = item.EndTime,
+                TotalPrice = itemAmount,
 
                 Status = ReservationStatus.Pending,
                 PaymentStatus = PaymentStatus.Pending,

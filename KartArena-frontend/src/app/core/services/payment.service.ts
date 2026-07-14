@@ -14,8 +14,7 @@ import {
 export class PaymentService {
   private readonly http = inject(HttpClient);
 
-  private readonly baseUrl =
-    `${environment.apiUrl}/payments`;
+  private readonly baseUrl = `${environment.apiUrl}/payments/controller`;
 
   createCheckoutSession(
     reservationId: number

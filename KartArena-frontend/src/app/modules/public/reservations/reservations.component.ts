@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
-import { Subscription, forkJoin, of } from 'rxjs';
-import { catchError, finalize, map, tap } from 'rxjs/operators';
+import { Subscription, forkJoin, of, throwError } from 'rxjs';
+import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
 
 import {
   ListKartsQueryDto,
@@ -20,6 +20,7 @@ import {
   AvailableTrackDto,
 } from '../../../api-services/reservations/reservation-api.models';
 import { ReservationApiService } from '../../../api-services/reservations/reservation-api.service';
+import { PaymentService } from '../../../core/services/payment.service';
 import { ToasterService } from '../../../core/services/toaster.service';
 
 interface ReservationOption {
@@ -57,6 +58,7 @@ export class ReservationsComponent implements OnInit, OnDestroy {
   private readonly kartsApi = inject(KartsApiService);
   private readonly paymentTypesApi = inject(PaymentTypesApiService);
   private readonly reservationApi = inject(ReservationApiService);
+  private readonly paymentService = inject(PaymentService);
   private readonly toaster = inject(ToasterService);
   private readonly subscriptions = new Subscription();
 
@@ -347,16 +349,48 @@ this.subscriptions.add(
       return;
     }
 
+    const isStripePayment = this.isStripePaymentSelected();
+
+    if (isStripePayment && this.cartItems.length !== 1) {
+      this.toaster.error('Stripe plaćanje trenutno podržava jednu rezervaciju po transakciji.');
+      return;
+    }
+
     const payload = this.buildCheckoutPayload();
 
     this.isSubmitting = true;
 
     this.reservationApi
       .checkout(payload)
-      .pipe(finalize(() => (this.isSubmitting = false)))
+      .pipe(
+        switchMap((reservationIds) => {
+          if (!isStripePayment) {
+            return of(null);
+          }
+
+          const reservationId = reservationIds[0];
+
+          if (!reservationId) {
+            return throwError(() => new Error('Backend nije vratio ID kreirane rezervacije.'));
+          }
+
+          return this.paymentService.createCheckoutSession(reservationId).pipe(
+            catchError((checkoutError) =>
+              this.reservationApi.delete(reservationId).pipe(
+                catchError((cleanupError) => {
+                  console.error('Failed to remove reservation after Stripe session error:', cleanupError);
+                  return of(undefined);
+                }),
+                switchMap(() => throwError(() => checkoutError))
+              )
+            )
+          );
+        }),
+        finalize(() => (this.isSubmitting = false))
+      )
       .subscribe({
         next: (response) => {
-          if (response.checkoutUrl) {
+          if (response?.checkoutUrl) {
             this.isRedirectingToStripe = true;
             window.location.assign(response.checkoutUrl);
             return;
@@ -368,7 +402,9 @@ this.subscriptions.add(
         error: (err) => {
           console.error('Public reservation checkout error:', err);
           this.toaster.error(
-            err?.error?.message ?? 'Reservations could not be submitted. Please try again.'
+            err?.error?.message ??
+              err?.message ??
+              'Reservations could not be submitted. Please try again.'
           );
         },
       });
@@ -413,6 +449,14 @@ this.subscriptions.add(
     this.paymentForm.patchValue({
       amount: this.cartTotal,
     });
+  }
+
+  private isStripePaymentSelected(): boolean {
+    const paymentTypeId = this.paymentForm.controls.paymentTypeId.value;
+
+    return this.paymentTypes.some(
+      (paymentType) => paymentType.id === paymentTypeId && paymentType.code === 'STRIPE'
+    );
   }
 
   private resetCheckoutState(): void {
