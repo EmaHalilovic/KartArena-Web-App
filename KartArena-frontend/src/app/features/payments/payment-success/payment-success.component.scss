@@ -1,0 +1,10 @@
+.payment-result {
+  max-width: 640px;
+  margin: 4rem auto;
+  padding: 2rem;
+  text-align: center;
+
+  .result-icon { width: 4rem; height: 4rem; color: #2e7d32; font-size: 4rem; }
+  h1, p { margin-bottom: 1rem; }
+  strong { overflow-wrap: anywhere; }
+}

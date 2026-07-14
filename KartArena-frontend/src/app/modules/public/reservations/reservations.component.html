@@ -288,12 +288,17 @@
             [disabled]="
               cartCount === 0 ||
               isSubmitting ||
+              isRedirectingToStripe ||
               customerForm.invalid ||
               paymentForm.invalid
             "
           >
-            <mat-icon>flag</mat-icon>
-            Potvrdi rezervacije
+            <mat-icon>{{ isRedirectingToStripe ? 'open_in_new' : 'flag' }}</mat-icon>
+            <ng-container *ngIf="isRedirectingToStripe">Preusmjeravanje na Stripe...</ng-container>
+            <ng-container *ngIf="!isRedirectingToStripe && isSubmitting">Kreiranje rezervacije...</ng-container>
+            <ng-container *ngIf="!isRedirectingToStripe && !isSubmitting">
+              Potvrdi rezervaciju i nastavi na plaćanje
+            </ng-container>
           </button>
         </div>
       </section>

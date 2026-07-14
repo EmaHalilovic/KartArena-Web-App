@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace KartArena.Application.Abstractions
 {
-    internal class IStripeWebhookService
+    public interface IStripeWebhookService
     {
+        Task ProcessWebhookAsync(
+            string json,
+            string stripeSignature,
+            CancellationToken cancellationToken);
     }
 }

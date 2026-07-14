@@ -84,6 +84,7 @@ export class ReservationsComponent implements OnInit, OnDestroy {
   isLoadingOptions = false;
   isLoadingPaymentTypes = false;
   isSubmitting = false;
+  isRedirectingToStripe = false;
   currentStep = 0;
   cartItems: ReservationCartItem[] = [];
   savedItems: ReservationCartItem[] = [];
@@ -329,7 +330,7 @@ this.subscriptions.add(
   }
 
   checkout(): void {
-    if (this.cartItems.length === 0 || this.isSubmitting) {
+    if (this.cartItems.length === 0 || this.isSubmitting || this.isRedirectingToStripe) {
       return;
     }
 
@@ -354,21 +355,21 @@ this.subscriptions.add(
       .checkout(payload)
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
-        next: () => {
+        next: (response) => {
+          if (response.checkoutUrl) {
+            this.isRedirectingToStripe = true;
+            window.location.assign(response.checkoutUrl);
+            return;
+          }
+
           this.toaster.success('Reservations have been submitted and are waiting for confirmation.');
-          this.clearCart();
-          this.customerForm.reset();
-          this.paymentForm.reset({
-            paymentTypeId: null,
-            amount: 0,
-            paymentNote: '',
-          });
-          this.paymentForm.controls.amount.disable();
-          this.currentStep = 0;
+          this.resetCheckoutState();
         },
         error: (err) => {
           console.error('Public reservation checkout error:', err);
-          this.toaster.error('Reservations could not be submitted. Please try again.');
+          this.toaster.error(
+            err?.error?.message ?? 'Reservations could not be submitted. Please try again.'
+          );
         },
       });
   }
@@ -412,6 +413,20 @@ this.subscriptions.add(
     this.paymentForm.patchValue({
       amount: this.cartTotal,
     });
+  }
+
+  private resetCheckoutState(): void {
+    this.clearCart();
+    this.customerForm.reset({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      note: '',
+    });
+    this.paymentForm.reset({ paymentTypeId: null, amount: 0, paymentNote: '' });
+    this.paymentForm.controls.amount.disable();
+    this.currentStep = 0;
   }
 
   private handleActiveCartChanged(): void {
@@ -492,6 +507,14 @@ this.subscriptions.add(
 
           if (this.paymentTypes.length === 0) {
             console.warn('Public payment type list is empty.', res);
+          }
+
+          const stripePaymentType = this.paymentTypes.find((item) => item.code === 'STRIPE');
+          const selectedPaymentType =
+            stripePaymentType ?? (this.paymentTypes.length === 1 ? this.paymentTypes[0] : null);
+
+          if (selectedPaymentType) {
+            this.paymentForm.patchValue({ paymentTypeId: selectedPaymentType.id });
           }
         },
         error: (err) => {

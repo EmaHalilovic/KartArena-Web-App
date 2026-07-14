@@ -17,8 +17,6 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
         public string CustomerPhone { get; set; } = string.Empty;
         public required int KartId { get; set; }
         public required int TrackId { get; set; }
-
-        public decimal? Amount { get; set; }
         public int? PaymentTypeId { get; set; }
         public string? PaymentNote { get; set; }
     }

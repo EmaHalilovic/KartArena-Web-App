@@ -11,12 +11,16 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
     {
         public async Task<int> Handle(CreateReservationCommand request, CancellationToken ct)
         {
-            var trackExists = await ctx.Tracks.AnyAsync(x => x.Id == request.TrackId, ct);
-            if (!trackExists)
+            var track = await ctx.Tracks
+    .FirstOrDefaultAsync(x => x.Id == request.TrackId, ct);
+
+            if (track is null)
                 throw new Exception("Track does not exist.");
 
-            var kartExists = await ctx.Karts.AnyAsync(x => x.Id == request.KartId, ct);
-            if (!kartExists)
+            var kart = await ctx.Karts
+     .FirstOrDefaultAsync(x => x.Id == request.KartId, ct);
+
+            if (kart is null)
                 throw new Exception("Kart does not exist.");
 
             if (request.UserId.HasValue)
@@ -68,6 +72,26 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
             if (trackReservationsCount >= 6)
                 throw new Exception("Track is not available (maximum 6 drivers for this time slot).");
 
+            if (request.EndTime <= request.StartTime)
+                throw new Exception(
+                    "Reservation end time must be after the start time.");
+
+            var durationMinutes =
+                (request.EndTime - request.StartTime).TotalMinutes;
+
+            decimal totalPrice = (track.Outdoors, durationMinutes) switch
+            {
+                (false, 10) => 15m,
+                (false, 15) => 20m,
+
+                (true, 10) => 20m,
+                (true, 15) => 25m,
+
+                _ => throw new Exception(
+                    "Only 10-minute and 15-minute sessions are allowed.")
+            };
+
+
             var reservation = new ReservationEntity
             {
                 UserId = request.UserId,
@@ -78,14 +102,14 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
                 EndTime = request.EndTime,
                 Status = ReservationStatus.Pending,
                 PaymentStatus = PaymentStatus.Pending,
-                IsDeleted = false
+                IsDeleted = false,
+                TotalPrice = totalPrice,
             };
 
             if (paymentType is not null)
             {
                 var payment = new PaymentEntity
                 {
-                    Amount = request.Amount ?? 0,
                     PaymentTypeId = request.PaymentTypeId,
                     Status = PaymentStatus.Pending,
                     PaymentDate = null,

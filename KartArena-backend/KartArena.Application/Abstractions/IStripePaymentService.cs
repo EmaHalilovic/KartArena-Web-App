@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using KartArena.Application.Modules.Catalog.Payments.Stripe.Models;
 
-namespace KartArena.Application.Modules.Catalog.Payments.Stripe
+namespace KartArena.Application.Abstractions
 {
-    internal class IStripePaymentService
+    public interface IStripePaymentService
     {
+        Task<CreateCheckoutSessionResponse>
+            CreateCheckoutSessionAsync(
+                int reservationId,
+                CancellationToken cancellationToken);
     }
 }
