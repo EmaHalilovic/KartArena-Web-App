@@ -2,7 +2,7 @@ using KartArena.Application.Modules.Reports.Payments;
 using KartArena.Application.Modules.Reports.Reservations;
 
 namespace KartArena.API.Controllers;
-
+[AllowAnonymous]
 [ApiController]
 [Route("api/reports")]
 public sealed class ReportsController(ISender sender) : ControllerBase
