@@ -137,6 +137,7 @@ public sealed class CheckoutReservationsCommandHandler(IAppDbContext ctx)
                 CustomerLastName = request.CustomerLastName.Trim(),
                 CustomerEmail = request.CustomerEmail.Trim(),
                 CustomerPhone = request.CustomerPhone.Trim(),
+                CustomerNote = string.IsNullOrWhiteSpace(request.CustomerNote) ? null : request.CustomerNote.Trim(),
 
                 TrackId = item.TrackId,
                 KartId = item.KartId,

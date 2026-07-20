@@ -34,6 +34,9 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Queries.GetById
                     UserLastName = r.User != null ? r.User.LastName : null,
                     CustomerFirstName = r.CustomerFirstName,
                     CustomerLastName = r.CustomerLastName,
+                    CustomerEmail = r.CustomerEmail,
+                    CustomerPhone = r.CustomerPhone,
+                    CustomerNote = r.CustomerNote,
                     TrackName = r.Track != null ? r.Track.Name : null,
                     KartName = r.Kart != null ? r.Kart.Name : null,
                 })

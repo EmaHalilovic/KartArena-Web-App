@@ -39,6 +39,7 @@ export class PaymentsComponent
     { value: PaymentStatus.Pending, label: 'Pending' },
     { value: PaymentStatus.Paid, label: 'Paid' },
     { value: PaymentStatus.Failed, label: 'Failed' },
+    { value: PaymentStatus.Cancelled, label: 'Cancelled' },
     { value: PaymentStatus.Refunded, label: 'Refunded' },
   ];
   paymentTypeOptions: ListPaymentTypesQueryDto[] = [];
@@ -102,6 +103,7 @@ export class PaymentsComponent
       case PaymentStatus.Pending:
         return 'fair';
       case PaymentStatus.Failed:
+      case PaymentStatus.Cancelled:
         return 'low';
       case PaymentStatus.Refunded:
         return 'neutral';

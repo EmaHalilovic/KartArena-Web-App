@@ -61,8 +61,11 @@ export class ReservationComponent
     { value: PaymentStatus.Pending, label: 'Pending' },
     { value: PaymentStatus.Paid, label: 'Paid' },
     { value: PaymentStatus.Failed, label: 'Failed' },
+    { value: PaymentStatus.Cancelled, label: 'Cancelled' },
     { value: PaymentStatus.Refunded, label: 'Refunded' },
   ];
+
+  readonly ReservationStatus = ReservationStatus;
 
   onlyToday = false;
   onlyUpcoming = false;
@@ -257,6 +260,36 @@ export class ReservationComponent
     });
   }
 
+  changeReservationStatus(item: ListReservationQueryDto, status: ReservationStatus.Completed | ReservationStatus.Cancelled): void {
+    if (!this.canCloseReservation(item)) {
+      this.toaster.error('Confirmed reservations can only be closed on their reservation date');
+      return;
+    }
+
+    const completed = status === ReservationStatus.Completed;
+    const ref = this.dialog.open(ConfirmDeleteDialogReservationComponent, {
+      width: '420px',
+      maxWidth: '95vw',
+      data: {
+        titleKey: completed ? 'Complete reservation' : 'Cancel reservation',
+        messageKey: completed
+          ? 'Confirm that the customer completed this reservation.'
+          : 'Confirm that the customer did not show up.',
+        confirmKey: completed ? 'Complete' : 'Mark as no-show',
+        cancelKey: 'Back',
+      },
+    });
+
+    ref.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+      this.runRowAction(
+        this.api.changeStatus(item.id, status),
+        completed ? 'Reservation marked as completed' : 'Reservation cancelled as no-show',
+        'Failed to update reservation status'
+      );
+    });
+  }
+
   toShortTime(value?: string | null): string {
     if (!value) {
       return '';
@@ -290,6 +323,10 @@ export class ReservationComponent
 
   canAssignResources(r: ListReservationQueryDto): boolean {
     return this.isConfirmedReservation(r);
+  }
+
+  canCloseReservation(r: ListReservationQueryDto): boolean {
+    return this.isConfirmedReservation(r) && this.toShortDate(r.date) === this.getTodayIsoDate();
   }
 
   getUserFullName(r: ListReservationQueryDto): string {
@@ -533,13 +570,15 @@ export class ReservationComponent
 
     if (typeof status === 'number') {
       switch (status) {
-        case 0:
+        case PaymentStatus.Pending:
           return { label: 'Pending', className: 'fair' };
-        case 1:
+        case PaymentStatus.Paid:
           return { label: 'Paid', className: 'good' };
-        case 2:
+        case PaymentStatus.Failed:
           return { label: 'Failed', className: 'low' };
-        case 3:
+        case PaymentStatus.Cancelled:
+          return { label: 'Cancelled', className: 'low' };
+        case PaymentStatus.Refunded:
           return { label: 'Refunded', className: 'fair' };
         default:
           return { label: String(status), className: 'fair' };

@@ -740,14 +740,33 @@ this.subscriptions.add(
     .pipe(finalize(() => (this.isLoadingOptions = false)))
     .subscribe({
       next: (availability) => {
-        this.availability = availability;
-        this.timeOptions = availability.availableTimes.map((slot) => slot.startTime);
+        const availableTimes = availability.availableTimes.filter((slot) =>
+          this.isFutureStartTime(date, slot.startTime)
+        );
+
+        this.availability = { ...availability, availableTimes };
+        this.timeOptions = availableTimes.map((slot) => slot.startTime);
       },
       error: (err) => {
         console.error('Load availability error:', err);
         this.toaster.error('Dostupni termini se nisu mogli učitati.');
       },
     });
+}
+
+private isFutureStartTime(date: string, startTime: string): boolean {
+  const today = this.formatDate(new Date());
+
+  if (date !== today) {
+    return true;
+  }
+
+  const normalizedTime = startTime.includes('T')
+    ? startTime.split('T')[1]?.split('.')[0]
+    : startTime.split('.')[0];
+  const slotStart = new Date(`${date}T${normalizedTime}`);
+
+  return !Number.isNaN(slotStart.getTime()) && slotStart.getTime() > Date.now();
 }
 
 private applyTracksForSelectedTime(): void {

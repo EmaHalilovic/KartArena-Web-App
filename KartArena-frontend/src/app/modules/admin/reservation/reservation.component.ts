@@ -61,6 +61,7 @@ export class ReservationComponent
     { value: PaymentStatus.Pending, label: 'Pending' },
     { value: PaymentStatus.Paid, label: 'Paid' },
     { value: PaymentStatus.Failed, label: 'Failed' },
+    { value: PaymentStatus.Cancelled, label: 'Cancelled' },
     { value: PaymentStatus.Refunded, label: 'Refunded' },
   ];
 
@@ -533,13 +534,15 @@ export class ReservationComponent
 
     if (typeof status === 'number') {
       switch (status) {
-        case 0:
+        case PaymentStatus.Pending:
           return { label: 'Pending', className: 'fair' };
-        case 1:
+        case PaymentStatus.Paid:
           return { label: 'Paid', className: 'good' };
-        case 2:
+        case PaymentStatus.Failed:
           return { label: 'Failed', className: 'low' };
-        case 3:
+        case PaymentStatus.Cancelled:
+          return { label: 'Cancelled', className: 'low' };
+        case PaymentStatus.Refunded:
           return { label: 'Refunded', className: 'fair' };
         default:
           return { label: String(status), className: 'fair' };

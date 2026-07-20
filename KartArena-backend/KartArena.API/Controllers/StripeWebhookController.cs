@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KartArena.API.Controllers
 {
+    [AllowAnonymous]
     [ApiController]
     [Route("api/stripe")]
     public class StripeWebhookController : ControllerBase

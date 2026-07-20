@@ -4,6 +4,7 @@ using KartArena.Application.Features.ReservationEmployeeAssignments.DTOs;
 using KartArena.Application.Features.ReservationEmployeeAssignments.Queries.GetAvailableEquipmentForReservation;
 using KartArena.Application.Features.ReservationEmployeeAssignments.Queries.GetReservationAssignmentsByReservationId;
 using KartArena.Application.Modules.Catalog.Reservations.Commands.Checkout;
+using KartArena.Application.Modules.Catalog.Reservations.Commands.ChangeStatus;
 using KartArena.Application.Modules.Catalog.Reservations.Commands.Create;
 using KartArena.Application.Modules.Catalog.Reservations.Commands.Delete;
 using KartArena.Application.Modules.Catalog.Reservations.Commands.MarkCashPaymentAsPaid;
@@ -93,6 +94,17 @@ namespace KartArena.Api.Controllers.Catalog
         public async Task<ActionResult<int>> MarkCashPaymentAsPaid(
             int reservationId,
             [FromBody] MarkCashReservationPaymentAsPaidCommand command,
+            CancellationToken cancellationToken)
+        {
+            command.ReservationId = reservationId;
+            var result = await sender.Send(command, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpPut("{reservationId:int}/status")]
+        public async Task<ActionResult<int>> ChangeStatus(
+            int reservationId,
+            [FromBody] ChangeReservationStatusCommand command,
             CancellationToken cancellationToken)
         {
             command.ReservationId = reservationId;

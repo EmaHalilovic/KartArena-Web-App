@@ -138,7 +138,7 @@ namespace KartArena.Infrastructure.Payments
                         PriceData =
                             new SessionLineItemPriceDataOptions
                             {
-                                Currency = "eur",
+                                Currency = "bam",
 
                                 UnitAmount =
                                     amountInMinorUnits,
@@ -227,7 +227,7 @@ namespace KartArena.Infrastructure.Payments
                     reservation.TotalPrice;
 
                 reservation.Payment.Currency =
-                    "BAM";
+                    "bam";
 
                 reservation.Payment.Status =
                     PaymentStatus.Pending;

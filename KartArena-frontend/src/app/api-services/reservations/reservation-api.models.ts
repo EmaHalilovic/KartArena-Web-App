@@ -75,6 +75,9 @@ export interface GetReservationByIdQueryDto {
   userLastName?: string | null;
   customerFirstName?: string | null;
   customerLastName?: string | null;
+  customerEmail?: string | null;
+  customerPhone?: string | null;
+  customerNote?: string | null;
   trackName?: string | null;
   kartName?: string | null;
   createdAt?: string | null;
@@ -191,4 +194,9 @@ export interface AvailableKartDto {
   kartId: number;
   kartName: string;
   pricePerSession?: number | null;
+}
+
+export interface ChangeReservationStatusCommand {
+  reservationId: number;
+  status: ReservationStatus.Completed | ReservationStatus.Cancelled;
 }

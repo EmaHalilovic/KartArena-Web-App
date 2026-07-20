@@ -11,6 +11,8 @@ import {
   UpdateReservationCommand,
   MarkReservationCashPaidPayload,
   MarkReservationCashPaidCommand,
+  ChangeReservationStatusCommand,
+  ReservationStatus,
   ReservationEmployeeAssignmentDto,
   AvailableReservationEquipmentItemDto,
   AssignReservationResourcesPayload,
@@ -75,6 +77,14 @@ export class ReservationApiService {
     };
 
     return this.http.put<number>(`${this.baseUrl}/${id}/pay-cash`, command);
+  }
+
+  changeStatus(
+    id: number,
+    status: ReservationStatus.Completed | ReservationStatus.Cancelled
+  ): Observable<number> {
+    const command: ChangeReservationStatusCommand = { reservationId: id, status };
+    return this.http.put<number>(`${this.baseUrl}/${id}/status`, command);
   }
 
   getReservationAssignments(reservationId: number): Observable<ReservationEmployeeAssignmentDto[]> {

@@ -64,7 +64,7 @@ public partial class Program
                             .AllowCredentials();
                     });
             });
-            builder.Services.AddHostedService<ExpiredReservationCancellationService>();
+           
 
             builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection(
         StripeSettings.SectionName));

@@ -67,6 +67,8 @@ public static class DependencyInjection
         //// TimeProvider (if used in handlers/services)
         services.AddSingleton<TimeProvider>(TimeProvider.System);
 
+        services.AddHostedService<ExpiredReservationCancellationService>();
+
         return services;
     }
 }

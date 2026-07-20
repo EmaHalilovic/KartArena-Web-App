@@ -7,7 +7,7 @@ namespace KartArena.Domain.Entities.Payments
     {
         public decimal Amount { get; set; }
 
-        public string Currency { get; set; } = "EUR";
+        public string Currency { get; set; } = "bam";
 
         public DateTime? PaymentDate { get; set; }
 

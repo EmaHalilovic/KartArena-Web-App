@@ -33,6 +33,7 @@ namespace KartArena.Domain.Entities.Reservations
         public string CustomerLastName { get; set; } = string.Empty;
         public string CustomerEmail { get; set; } = string.Empty;
         public string CustomerPhone { get; set; } = string.Empty;
+        public string? CustomerNote { get; set; }
 
         // one-to-one payment
         public PaymentEntity? Payment { get; set; }

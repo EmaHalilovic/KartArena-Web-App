@@ -441,6 +441,8 @@ export class ReservationDetailsComponent implements OnInit {
           return { label: 'Paid', className: 'good' };
         case PaymentStatus.Failed:
           return { label: 'Failed', className: 'low' };
+        case PaymentStatus.Cancelled:
+          return { label: 'Cancelled', className: 'low' };
         case PaymentStatus.Refunded:
           return { label: 'Refunded', className: 'neutral' };
         default:

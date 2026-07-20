@@ -104,6 +104,18 @@
             <strong>{{ userLabel }}</strong>
           </div>
           <div class="info-item">
+            <span>Email</span>
+            <strong>{{ reservation.customerEmail || '-' }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Phone number</span>
+            <strong>{{ reservation.customerPhone || '-' }}</strong>
+          </div>
+          <div class="info-item info-item-wide">
+            <span>Reservation note</span>
+            <strong>{{ reservation.customerNote || '-' }}</strong>
+          </div>
+          <div class="info-item">
             <span>Track</span>
             <strong>{{ trackLabel }}</strong>
           </div>
@@ -151,7 +163,7 @@
           </div>
           <div class="info-item">
             <span>Transaction reference</span>
-            <strong>{{ reservation.transactionReference || '-' }}</strong>
+            <strong class="transaction-reference">{{ reservation.transactionReference || '-' }}</strong>
           </div>
           <div class="info-item info-item-wide">
             <span>Payment note</span>
