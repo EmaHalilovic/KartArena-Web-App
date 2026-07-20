@@ -5,6 +5,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { AdminLayoutComponent } from './admin-layout/admin-layout.component';
 import { AdminSettingsComponent } from './admin-settings/admin-settings.component';
+import { ReportsComponent } from './reports/reports.component';
 
 import { EquipmentComponent } from './equipment/equipment.component';
 import { EquipmentAddComponent } from './equipment/equipment-add/equipment-add.component';
@@ -100,6 +101,10 @@ const routes: Routes = [
       {
         path: 'settings',
         component: AdminSettingsComponent,
+      },
+      {
+        path: 'reports',
+        component: ReportsComponent,
       },
 
       // default admin route → /admin/equipment
