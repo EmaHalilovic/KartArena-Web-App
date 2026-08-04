@@ -3,6 +3,10 @@ import { BasePagedQuery } from '../../core/models/paging/base-paged-query';
 
 export class ListPaymentTypesRequest extends BasePagedQuery {
   search?: string | null;
+  name?: string | null;
+  code?: string | null;
+  paymentMethod?: 'online' | 'desk' | null;
+  allowedOnline?: boolean | null;
   onlyEnabled?: boolean | null;
 }
 

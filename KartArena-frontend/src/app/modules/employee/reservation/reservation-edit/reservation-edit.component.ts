@@ -1,29 +1,29 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { ToasterService } from '../../../../core/services/toaster.service';
-import { ReservationApiService } from '../../../../api-services/reservations/reservation-api.service';
 import {
   GetReservationByIdQueryDto,
   ReservationStatus,
   UpdateReservationCommand,
 } from '../../../../api-services/reservations/reservation-api.models';
+import { ReservationApiService } from '../../../../api-services/reservations/reservation-api.service';
+import { ToasterService } from '../../../../core/services/toaster.service';
 import { ReservationFormService } from '../services/reservation-form.service';
 
 @Component({
-  selector: 'app-reservation-edit',
+  selector: 'app-employee-reservation-edit',
   standalone: false,
-  templateUrl: './reservation-edit.component.html',
-  styleUrl: './reservation-edit.component.scss',
+  templateUrl: '../../../admin/reservation/reservation-edit/reservation-edit.component.html',
+  styleUrl: '../../../admin/reservation/reservation-edit/reservation-edit.component.scss',
   providers: [ReservationFormService],
 })
 export class ReservationEditComponent implements OnInit {
-  private api = inject(ReservationApiService);
-  private formService = inject(ReservationFormService);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private toaster = inject(ToasterService);
+  private readonly api = inject(ReservationApiService);
+  private readonly formService = inject(ReservationFormService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly toaster = inject(ToasterService);
 
   form!: FormGroup;
   isLoading = false;
@@ -47,7 +47,7 @@ export class ReservationEditComponent implements OnInit {
         if (dto.status !== ReservationStatus.Confirmed) {
           this.isLoading = false;
           this.toaster.error('Only confirmed reservations can be edited');
-          this.router.navigate(['/admin/reservations', this.id]);
+          this.router.navigate(['/employee/reservations', this.id]);
           return;
         }
 
@@ -67,18 +67,17 @@ export class ReservationEditComponent implements OnInit {
         this.errorMessage = 'Reservation could not be loaded.';
         console.error('Get reservation error:', err);
         this.toaster.error('Reservation not found');
-        this.router.navigate(['/admin/reservations']);
+        this.router.navigate(['/employee/reservations']);
       },
     });
   }
 
   onCancel(): void {
-    this.router.navigate(['/admin/reservations']);
+    this.router.navigate(['/employee/reservations']);
   }
 
   onSubmit(): void {
     this.errorMessage = '';
-
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -108,7 +107,7 @@ export class ReservationEditComponent implements OnInit {
       next: () => {
         this.isSaving = false;
         this.toaster.success('Reservation updated');
-        this.router.navigate(['/admin/reservations', this.id]);
+        this.router.navigate(['/employee/reservations', this.id]);
       },
       error: (err) => {
         this.isSaving = false;
@@ -144,16 +143,13 @@ export class ReservationEditComponent implements OnInit {
   private toLocalDate(value: string): Date | null {
     const datePart = value?.split('T')[0];
     if (!datePart) return null;
-
     const [year, month, day] = datePart.split('-').map(Number);
-    if (!year || !month || !day) return null;
-    return new Date(year, month - 1, day);
+    return year && month && day ? new Date(year, month - 1, day) : null;
   }
 
   private toIsoDate(value: Date | string | null): string {
     if (!value) return '';
     if (typeof value === 'string') return value.split('T')[0];
-
     const year = value.getFullYear();
     const month = String(value.getMonth() + 1).padStart(2, '0');
     const day = String(value.getDate()).padStart(2, '0');

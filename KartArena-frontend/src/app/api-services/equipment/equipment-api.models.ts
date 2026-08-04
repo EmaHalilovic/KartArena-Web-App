@@ -43,6 +43,7 @@ export class ListEquipmentRequest extends BasePagedQuery {
   onlyActive?: boolean | null;
   category?: EquipmentCategory | null;
   stockStatus?: EquipmentStockStatus | null;
+  size?: string | null;
 
   constructor() {
     super();

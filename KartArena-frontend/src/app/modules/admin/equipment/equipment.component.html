@@ -38,6 +38,16 @@
         </mat-select>
       </mat-form-field>
 
+      <mat-form-field appearance="fill">
+        <mat-label>Size</mat-label>
+        <input
+          matInput
+          placeholder="Filter by size"
+          [ngModel]="request.size"
+          (ngModelChange)="onSizeChange($event)"
+        />
+      </mat-form-field>
+
       <mat-slide-toggle
         class="active-toggle"
         [ngModel]="onlyActive"

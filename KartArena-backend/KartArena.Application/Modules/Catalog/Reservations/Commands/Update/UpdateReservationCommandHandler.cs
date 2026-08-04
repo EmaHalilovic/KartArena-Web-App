@@ -15,11 +15,10 @@ public sealed class UpdateReservationCommandHandler(IAppDbContext ctx)
         if (reservation is null)
             throw new Exception("Reservation not found.");
 
-        // Allow updates only for editable reservation statuses
-        if (reservation.Status == ReservationStatus.Cancelled ||
-            reservation.Status == ReservationStatus.Completed)
+        // Only confirmed reservations may be edited.
+        if (reservation.Status != ReservationStatus.Confirmed)
         {
-            throw new Exception("This reservation can no longer be updated.");
+            throw new Exception("Only confirmed reservations can be updated.");
         }
 
         // Do not allow update after payment is completed
@@ -38,7 +37,8 @@ public sealed class UpdateReservationCommandHandler(IAppDbContext ctx)
         }
 
         // Foreign key checks
-        if (!await ctx.Users.AnyAsync(x => x.Id == request.UserId, ct))
+        if (request.UserId.HasValue &&
+            !await ctx.Users.AnyAsync(x => x.Id == request.UserId.Value, ct))
             throw new Exception("User does not exist.");
 
         if (!await ctx.Tracks.AnyAsync(x => x.Id == request.TrackId, ct))

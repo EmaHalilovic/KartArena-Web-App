@@ -1,66 +1,87 @@
 <div class="container">
-  <div class="header">
-    <h1>{{ 'RESERVATION.EDIT_TITLE' | translate }}</h1>
+  <div class="header-card">
+    <h1>Edit reservation</h1>
+    <p *ngIf="reservation">Update the schedule for {{ reservationCode }}.</p>
   </div>
 
-  <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="row">
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>User ID</mat-label>
-        <input matInput type="number" formControlName="userId" />
-        <mat-error *ngIf="form.get('userId')?.invalid">{{ err('userId') }}</mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>Track ID</mat-label>
-        <input matInput type="number" formControlName="trackId" />
-        <mat-error *ngIf="form.get('trackId')?.invalid">{{ err('trackId') }}</mat-error>
-      </mat-form-field>
+  <div class="form-card">
+    <div class="loading-overlay" *ngIf="isLoading">
+      <mat-spinner diameter="44"></mat-spinner>
+      <p>Loading reservation...</p>
     </div>
 
-    <div class="row">
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>Kart ID</mat-label>
-        <input matInput type="number" formControlName="kartId" />
-        <mat-error *ngIf="form.get('kartId')?.invalid">{{ err('kartId') }}</mat-error>
+    <form *ngIf="!isLoading" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="reservation-context" *ngIf="reservation">
+        <div>
+          <span>Customer</span>
+          <strong>{{ customerLabel }}</strong>
+        </div>
+        <div>
+          <span>Track</span>
+          <strong>{{ trackLabel }}</strong>
+        </div>
+        <div>
+          <span>Kart</span>
+          <strong>{{ kartLabel }}</strong>
+        </div>
+      </div>
+
+      <input type="hidden" formControlName="userId" />
+      <input type="hidden" formControlName="trackId" />
+      <input type="hidden" formControlName="kartId" />
+
+      <div class="error-banner" *ngIf="errorMessage">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div class="section-heading">
+        <h2>Schedule</h2>
+        <p>Choose a new date and time. Paid, completed or imminent reservations may be locked by the backend.</p>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Reservation date</mat-label>
+        <input matInput [matDatepicker]="picker" [min]="minDate" formControlName="reservationDate" />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="form.get('reservationDate')?.touched && form.get('reservationDate')?.invalid">
+          {{ err('reservationDate') }}
+        </mat-error>
       </mat-form-field>
 
-    <mat-form-field appearance="outline" class="half">
-  <mat-label>{{ 'RESERVATION.FIELDS.DATE' | translate }}</mat-label>
-  <input
-    matInput
-    [matDatepicker]="picker"
-    formControlName="reservationDate"
-  />
-  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-  <mat-datepicker #picker></mat-datepicker>
-</mat-form-field>
-    </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Start time</mat-label>
+          <input matInput type="time" formControlName="startTime" />
+          <mat-icon matSuffix>schedule</mat-icon>
+          <mat-error *ngIf="form.get('startTime')?.touched && form.get('startTime')?.invalid">
+            {{ err('startTime') }}
+          </mat-error>
+        </mat-form-field>
 
-    <div class="row">
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>Start time</mat-label>
-        <input matInput type="time" formControlName="startTime" />
-        <mat-error *ngIf="form.get('startTime')?.invalid">{{ err('startTime') }}</mat-error>
-      </mat-form-field>
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>End time</mat-label>
+          <input matInput type="time" formControlName="endTime" />
+          <mat-icon matSuffix>schedule</mat-icon>
+          <mat-error *ngIf="form.get('endTime')?.touched && form.get('endTime')?.invalid">
+            {{ err('endTime') }}
+          </mat-error>
+        </mat-form-field>
+      </div>
 
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>End time</mat-label>
-        <input matInput type="time" formControlName="endTime" />
-        <mat-error *ngIf="form.get('endTime')?.invalid">{{ err('endTime') }}</mat-error>
-      </mat-form-field>
-    </div>
+      <div class="form-actions">
+        <button type="button" mat-stroked-button (click)="onCancel()" [disabled]="isSaving">
+          <mat-icon>close</mat-icon>
+          Cancel
+        </button>
 
-    <div class="actions">
-      <button type="button" mat-stroked-button (click)="onCancel()">
-        <mat-icon>close</mat-icon>
-        {{ 'COMMON.CANCEL' | translate }}
-      </button>
-
-      <button type="submit" mat-raised-button color="primary" [disabled]="isSaving">
-        <mat-icon>save</mat-icon>
-        {{ 'COMMON.SAVE' | translate }}
-      </button>
-    </div>
-  </form>
+        <button type="submit" mat-raised-button [disabled]="form.invalid || isSaving">
+          <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+          <mat-icon *ngIf="!isSaving">save</mat-icon>
+          {{ isSaving ? 'Saving...' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

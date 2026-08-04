@@ -8,5 +8,6 @@ public sealed class ListEquipmentQuery : BasePagedQuery<ListEquipmentQueryDto>
     public bool? OnlyActive { get; init; }
     public EquipmentCategory? Category { get; init; }
     public EquipmentStockStatus? StockStatus { get; init; }
+    public string? Size { get; init; }
 
 }

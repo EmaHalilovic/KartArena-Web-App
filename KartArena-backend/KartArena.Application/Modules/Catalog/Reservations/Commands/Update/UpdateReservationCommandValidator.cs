@@ -9,7 +9,8 @@ public sealed class UpdateReservationCommandValidator
             .GreaterThan(0);
 
         RuleFor(x => x.UserId)
-            .GreaterThan(0);
+            .GreaterThan(0)
+            .When(x => x.UserId.HasValue);
 
         RuleFor(x => x.TrackId)
             .GreaterThan(0);
