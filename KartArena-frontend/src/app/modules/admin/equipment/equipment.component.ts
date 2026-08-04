@@ -151,19 +151,6 @@ export class EquipmentComponent
     this.loadPagedData();
   }
 
-  onExportPdf(): void {
-    // this.api.exportListPdf(this.request).subscribe({
-    //   next: (blob) => {
-    //     this.downloadBlob(blob, 'equipment-types.pdf');
-    //     this.toaster.success('Equipment PDF export started');
-    //   },
-    //   error: (err) => {
-    //     console.error('Export equipment PDF error:', err);
-    //     this.toaster.error('Failed to export equipment PDF');
-    //   },
-    // });
-   }
-
   getStockTone(item: ListEquipmentQueryDto): string {
     return getEquipmentStockTone(item.stockStatus);
   }
@@ -254,12 +241,4 @@ export class EquipmentComponent
     });
   }
 
-  private downloadBlob(blob: Blob, fileName: string): void {
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    window.URL.revokeObjectURL(url);
-  }
 }

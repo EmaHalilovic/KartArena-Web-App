@@ -177,23 +177,6 @@ export class EquipmentDetailComponent extends BaseComponent implements OnInit {
     });
   }
 
-  onExportPdf(): void {
-    // if (!this.equipment) {
-    //   return;
-    // }
-
-    // this.api.exportDetailsPdf(this.equipment.id).subscribe({
-    //   next: (blob) => {
-    //     this.downloadBlob(blob, `${this.equipment?.name ?? 'equipment-type'}.pdf`);
-    //     this.toaster.success('Equipment detail PDF export started');
-    //   },
-    //   error: (err) => {
-    //     console.error('Export equipment detail PDF error:', err);
-    //     this.toaster.error('Failed to export equipment type PDF');
-    //   },
-    // });
-  }
-
   getStockTone(): string {
     return this.equipment ? getEquipmentStockTone(this.equipment.stockStatus) : 'neutral';
   }
@@ -333,13 +316,5 @@ export class EquipmentDetailComponent extends BaseComponent implements OnInit {
     });
   }
 
-  private downloadBlob(blob: Blob, fileName: string): void {
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    window.URL.revokeObjectURL(url);
-  }
 }
 
