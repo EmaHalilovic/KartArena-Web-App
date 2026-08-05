@@ -1,0 +1,413 @@
+<section class="reservations-page">
+  <app-header></app-header>
+
+  <main class="reservation-shell">
+    <header class="page-hero">
+      <p class="eyebrow">Kart Arena</p>
+      <h1>REZERVACIJA</h1>
+      <p>Odaberite stazu, kart, datum i vrijeme</p>
+    </header>
+
+    <div class="reservation-grid">
+      <aside class="steps-panel" aria-label="Koraci rezervacije">
+        <button
+          class="step"
+          type="button"
+          *ngFor="let step of steps; let i = index"
+          [class.active]="i === currentStep"
+          [class.done]="i < currentStep"
+          [disabled]="!canOpenStep(i)"
+          (click)="goToStep(i)"
+        >
+          <span class="step-index">{{ i + 1 }}</span>
+          <span>{{ step }}</span>
+        </button>
+      </aside>
+
+      <form class="reservation-form" [formGroup]="form" (ngSubmit)="addToCart()" *ngIf="currentStep === 0">
+        <div class="form-head">
+          <div>
+            <span class="section-kicker">Detalji voznje</span>
+            <h2>Izaberite termin</h2>
+          </div>
+         
+        </div>
+
+        <div class="loading-row" *ngIf="isLoadingOptions">
+          <mat-spinner diameter="22"></mat-spinner>
+          <span>Ucitavanje opcija...</span>
+        </div>
+
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Datum</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              [min]="minReservationDate"
+              [matDatepickerFilter]="reservationDateFilter"
+              formControlName="date"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="form.controls.date.hasError('required')">Datum je obavezan.</mat-error>
+            <mat-error
+              *ngIf="
+                form.controls.date.hasError('minDate') ||
+                form.controls.date.hasError('matDatepickerMin') ||
+                form.controls.date.hasError('matDatepickerFilter')
+              "
+            >
+              Datum ne moze biti prije danas.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Pocetak</mat-label>
+            <mat-select formControlName="startTime">
+              <mat-option *ngFor="let time of timeOptions" [value]="time">{{ time }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="form.controls.startTime.hasError('required')">
+              Vrijeme pocetka je obavezno.
+            </mat-error>
+          </mat-form-field>
+
+          <div class="duration-field">
+            <span class="field-label">Trajanje</span>
+            <mat-button-toggle-group formControlName="duration" aria-label="Trajanje voznje">
+              <mat-button-toggle *ngFor="let duration of durationOptions" [value]="duration">
+                {{ duration }} minuta
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+            <span class="field-error" *ngIf="form.controls.duration.invalid && form.controls.duration.touched">
+              Trajanje mora biti 10 ili 15 minuta.
+            </span>
+          </div>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Kraj</mat-label>
+            <input matInput formControlName="endTime" readonly />
+            <mat-hint>Automatski izracunato</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Staza</mat-label>
+            <mat-select formControlName="trackId">
+              <mat-option *ngFor="let track of tracks" [value]="track.id">
+                {{ track.name }} <span *ngIf="track.detail">- {{ track.detail }}</span>
+              </mat-option>
+            </mat-select>
+            
+            <mat-error *ngIf="form.controls.trackId.hasError('required')">Staza je obavezna.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Kart</mat-label>
+            <mat-select formControlName="kartId">
+              <mat-option *ngFor="let kart of karts" [value]="kart.id">
+                {{ kart.name }} <span *ngIf="kart.detail">- {{ kart.detail }}</span>
+              </mat-option>
+            </mat-select>
+           
+            <mat-error *ngIf="form.controls.kartId.hasError('required')">Kart je obavezan.</mat-error>
+          </mat-form-field>
+        </div>
+
+        <p class="reservation-rule">
+          Jedna rezervacija vrijedi za jednu osobu / jedan kart. Za više osoba dodajte više vožnji u korpu.
+        </p>
+
+        <button mat-raised-button type="submit" class="add-cart-button">
+          <mat-icon>add_shopping_cart</mat-icon>
+          Dodaj u korpu
+        </button>
+
+        <button
+          mat-raised-button
+          type="button"
+          class="next-button"
+          (click)="continueToCustomer()"
+          [disabled]="cartCount === 0"
+        >
+          Nastavi na podatke
+        </button>
+      </form>
+
+      <form
+        class="reservation-form customer-step"
+        [formGroup]="customerForm"
+        (ngSubmit)="continueToReview()"
+        *ngIf="currentStep === 1"
+      >
+        <div class="form-head">
+          <div>
+            <span class="section-kicker">Kupac</span>
+            <h2>Podaci za potvrdu</h2>
+          </div>
+        </div>
+
+        <div class="customer-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Ime</mat-label>
+            <input matInput formControlName="firstName" />
+            <mat-error *ngIf="customerForm.controls.firstName.hasError('required')">
+              Ime je obavezno.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Prezime</mat-label>
+            <input matInput formControlName="lastName" />
+            <mat-error *ngIf="customerForm.controls.lastName.hasError('required')">
+              Prezime je obavezno.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" />
+            <mat-error *ngIf="customerForm.controls.email.hasError('required')">
+              Email je obavezan.
+            </mat-error>
+            <mat-error *ngIf="customerForm.controls.email.hasError('email')">
+              Unesite ispravan email.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Telefon</mat-label>
+            <input matInput formControlName="phone" />
+            <mat-error *ngIf="customerForm.controls.phone.hasError('required')">
+              Telefon je obavezan.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-field">
+            <mat-label>Napomena</mat-label>
+            <textarea matInput rows="4" formControlName="note"></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="wizard-actions">
+          <button mat-button type="button" class="back-button" (click)="backToRideDetails()">
+            Nazad
+          </button>
+          <button mat-raised-button type="submit" class="next-button">
+            Pregled rezervacije
+          </button>
+        </div>
+      </form>
+
+      <section class="reservation-form review-step" *ngIf="currentStep === 2">
+        <div class="form-head">
+          <div>
+            <span class="section-kicker">Pregled</span>
+            <h2>Potvrdite rezervacije</h2>
+          </div>
+        </div>
+
+        <div class="review-list">
+          <article class="review-item" *ngFor="let item of cartItems">
+            <strong>{{ item.date }} - {{ getCartItemTimeRange(item) }}</strong>
+            <span>{{ item.trackName }}</span>
+            <span>{{ item.kartName }} - 1 osoba</span>
+          </article>
+        </div>
+
+        <div class="review-customer">
+          <span class="section-kicker">Kupac</span>
+          <strong>
+            {{ customerForm.controls.firstName.value }} {{ customerForm.controls.lastName.value }}
+          </strong>
+          <span>{{ customerForm.controls.email.value }}</span>
+          <span>{{ customerForm.controls.phone.value }}</span>
+        </div>
+
+        <form class="payment-section" [formGroup]="paymentForm">
+          <div class="payment-head">
+            <span class="section-kicker">Placanje</span>
+            <strong>Odaberite nacin placanja</strong>
+          </div>
+
+          <div class="loading-row compact" *ngIf="isLoadingPaymentTypes">
+            <mat-spinner diameter="20"></mat-spinner>
+            <span>Ucitavanje nacina placanja...</span>
+          </div>
+
+          <div class="payment-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Nacin placanja</mat-label>
+              <mat-select formControlName="paymentTypeId" panelClass="payment-type-panel">
+                <mat-option [value]="null">Odaberite nacin placanja</mat-option>
+                <mat-option *ngFor="let type of paymentTypes" [value]="type.id">
+                  {{ type.name }}
+                </mat-option>
+              </mat-select>
+              <mat-error
+                *ngIf="
+                  paymentForm.controls.paymentTypeId.touched &&
+                  paymentForm.controls.paymentTypeId.invalid
+                "
+              >
+                Nacin placanja je obavezan.
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Ukupan iznos</mat-label>
+              <input matInput formControlName="amount" readonly />
+              <span matTextSuffix>KM</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-field">
+              <mat-label>Napomena za placanje</mat-label>
+              <textarea
+                matInput
+                rows="3"
+                formControlName="paymentNote"
+                placeholder="Napomena za placanje, opcionalno"
+              ></textarea>
+            </mat-form-field>
+          </div>
+
+          <div class="payment-total">
+            <span>Ukupno za placanje</span>
+            <strong>{{ cartTotal | number: '1.2-2' }} KM</strong>
+          </div>
+        </form>
+
+        <div class="wizard-actions">
+          <button mat-button type="button" class="back-button" (click)="backToCustomerDetails()">
+            Nazad
+          </button>
+          <button
+            mat-raised-button
+            type="button"
+            class="confirm-button"
+            (click)="checkout()"
+            [disabled]="
+              cartCount === 0 ||
+              isSubmitting ||
+              isRedirectingToStripe ||
+              customerForm.invalid ||
+              paymentForm.invalid
+            "
+          >
+            <mat-icon>{{ isRedirectingToStripe ? 'open_in_new' : 'flag' }}</mat-icon>
+            <ng-container *ngIf="isRedirectingToStripe">Preusmjeravanje na Stripe...</ng-container>
+            <ng-container *ngIf="!isRedirectingToStripe && isSubmitting">Kreiranje rezervacije...</ng-container>
+            <ng-container *ngIf="!isRedirectingToStripe && !isSubmitting">
+              Potvrdi rezervaciju i nastavi na plaćanje
+            </ng-container>
+          </button>
+        </div>
+      </section>
+
+      <aside class="summary-card">
+        <div class="cart-head">
+          <div>
+            <h2>Korpa</h2>
+            <span>{{ cartCount }} rezervacija</span>
+          </div>
+
+          <button mat-button type="button" class="clear-cart-button" (click)="clearCart()" [disabled]="cartCount === 0">
+            Ocisti
+          </button>
+        </div>
+
+        <div class="empty-cart" *ngIf="cartCount === 0">
+          <mat-icon>shopping_cart</mat-icon>
+          <strong>Korpa je prazna</strong>
+          <span>Dodajte jedan ili vise termina prije checkouta.</span>
+        </div>
+
+        <div class="cart-list" *ngIf="cartCount > 0">
+          <article class="cart-item" *ngFor="let item of cartItems">
+            <button
+              mat-icon-button
+              type="button"
+              class="remove-cart-item"
+              (click)="removeCartItem(item.id)"
+              aria-label="Ukloni rezervaciju iz korpe"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+
+            <strong>{{ item.date }}</strong>
+            <span>{{ getCartItemTimeRange(item) }}</span>
+            <span>{{ item.trackName }}</span>
+            <span>{{ item.kartName }}</span>
+
+            <div class="cart-item-meta">
+              <span>{{ item.duration }} min</span>
+              <span>1 osoba</span>
+            </div>
+
+            <div class="cart-price" *ngIf="item.price != null">
+              {{ getCartItemSubtotal(item) | number: '1.2-2' }} KM
+            </div>
+
+            <button
+              mat-button
+              type="button"
+              class="save-later-button"
+              (click)="saveForLater(item.id)"
+            >
+              Sacuvaj za kasnije
+            </button>
+          </article>
+        </div>
+
+        <div class="cart-total" *ngIf="cartCount > 0">
+          <span>Ukupno</span>
+          <strong *ngIf="cartTotal != null; else noCartPrice">
+            {{ cartTotal | number: '1.2-2' }} KM
+          </strong>
+          <ng-template #noCartPrice>
+            <strong>{{ cartCount }} termina</strong>
+          </ng-template>
+        </div>
+
+        <section class="saved-cart-section" *ngIf="savedItems.length > 0">
+          <div class="saved-cart-head">
+            <h3>Sacuvano za kasnije</h3>
+            <span>{{ savedItems.length }} rezervacija</span>
+          </div>
+
+          <div class="saved-cart-list">
+            <article class="cart-item saved-cart-item" *ngFor="let item of savedItems">
+              <strong>{{ item.kartName }}</strong>
+              <span>{{ item.trackName }}</span>
+              <span>{{ item.date }}</span>
+              <span>{{ getCartItemTimeRange(item) }}</span>
+
+              <div class="cart-price" *ngIf="item.price != null">
+                {{ getCartItemSubtotal(item) | number: '1.2-2' }} KM
+              </div>
+
+              <div class="saved-cart-actions">
+                <button
+                  mat-button
+                  type="button"
+                  class="restore-cart-button"
+                  (click)="moveSavedItemToCart(item.id)"
+                >
+                  Vrati u korpu
+                </button>
+                <button
+                  mat-button
+                  type="button"
+                  class="remove-saved-button"
+                  (click)="removeSavedItem(item.id)"
+                >
+                  Ukloni
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+      </aside>
+    </div>
+  </main>
+</section>

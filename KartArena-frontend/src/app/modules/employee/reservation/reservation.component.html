@@ -219,6 +219,30 @@
             </button>
 
             <button
+              *ngIf="canCloseReservation(r)"
+              mat-icon-button
+              type="button"
+              class="row-action-btn"
+              (click)="changeReservationStatus(r, ReservationStatus.Completed)"
+              matTooltip="Mark completed"
+              aria-label="Mark reservation as completed"
+            >
+              <mat-icon>task_alt</mat-icon>
+            </button>
+
+            <button
+              *ngIf="canCloseReservation(r)"
+              mat-icon-button
+              type="button"
+              class="row-action-btn row-delete-btn"
+              (click)="changeReservationStatus(r, ReservationStatus.Cancelled)"
+              matTooltip="Customer did not show up"
+              aria-label="Cancel reservation as no-show"
+            >
+              <mat-icon>person_off</mat-icon>
+            </button>
+
+            <button
               *ngIf="canDelete(r)"
               mat-icon-button
               type="button"

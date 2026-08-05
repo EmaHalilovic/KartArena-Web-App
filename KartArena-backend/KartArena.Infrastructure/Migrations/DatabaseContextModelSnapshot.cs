@@ -734,6 +734,11 @@ namespace KartArena.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -741,7 +746,8 @@ namespace KartArena.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTime?>("PaymentDate")
                         .HasColumnType("datetime2");
@@ -755,8 +761,21 @@ namespace KartArena.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<string>("StripeCheckoutSessionId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("StripeEventId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("StripePaymentIntentId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<string>("TransactionReference")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<bool>("isEnabled")
                         .HasColumnType("bit");
@@ -768,7 +787,13 @@ namespace KartArena.Infrastructure.Migrations
                     b.HasIndex("ReservationId")
                         .IsUnique();
 
-                    b.ToTable("Payments");
+                    b.HasIndex("StripeCheckoutSessionId")
+                        .IsUnique()
+                        .HasFilter("[StripeCheckoutSessionId] IS NOT NULL");
+
+                    b.HasIndex("StripePaymentIntentId");
+
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("KartArena.Domain.Entities.Payments.PaymentTypeEntity", b =>
@@ -787,13 +812,15 @@ namespace KartArena.Infrastructure.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -802,14 +829,19 @@ namespace KartArena.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("isEnabled")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
 
-                    b.ToTable("PaymentTypes");
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("PaymentTypes", (string)null);
                 });
 
             modelBuilder.Entity("KartArena.Domain.Entities.Reservations.ReservationEmployeeEntity", b =>
@@ -872,6 +904,25 @@ namespace KartArena.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("CustomerEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerFirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerLastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerNote")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerPhone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
@@ -896,10 +947,14 @@ namespace KartArena.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("TotalPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("TrackId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.Property<bool>("isEnabled")
@@ -1055,12 +1110,13 @@ namespace KartArena.Infrastructure.Migrations
                 {
                     b.HasOne("KartArena.Domain.Entities.Payments.PaymentTypeEntity", "PaymentType")
                         .WithMany("Payments")
-                        .HasForeignKey("PaymentTypeId");
+                        .HasForeignKey("PaymentTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("KartArena.Domain.Entities.Reservations.ReservationEntity", "Reservation")
                         .WithOne("Payment")
                         .HasForeignKey("KartArena.Domain.Entities.Payments.PaymentEntity", "ReservationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("PaymentType");
@@ -1114,9 +1170,7 @@ namespace KartArena.Infrastructure.Migrations
 
                     b.HasOne("KartArena.Domain.Entities.Identity.UserEntity", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Kart");
 

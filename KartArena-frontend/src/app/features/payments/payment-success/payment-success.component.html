@@ -1,0 +1,9 @@
+<section class="payment-result payment-result--success">
+  <mat-icon class="result-icon">check_circle</mat-icon>
+  <h1>Plaćanje je uspješno</h1>
+  <p>
+    Vaša kartična transakcija je zaprimljena. Rezervacija je potvrđena kroz sistem naplate.
+  </p>
+  <p *ngIf="sessionId">Referenca Stripe sesije: <strong>{{ sessionId }}</strong></p>
+  <a mat-raised-button color="primary" routerLink="/">Povratak na početnu stranicu</a>
+</section>

@@ -14,6 +14,7 @@ import { ReservationApiService } from '../../../api-services/reservations/reserv
 import { PaymentStatus } from '../../../api-services/payments/payments-api.models';
 
 import { BaseListPagedComponent } from '../../../core/components/base-classes/base-list-paged-component';
+import { PageRequest } from '../../../core/models/paging/page-request';
 import { ToasterService } from '../../../core/services/toaster.service';
 import { ConfirmDeleteDialogReservationComponent } from './dialogs/confirm-delete/confirm-delete-dialog.component';
 import { ReservationCashPaymentDialogComponent } from './dialogs/reservation-cash-payment-dialog/reservation-cash-payment-dialog.component';
@@ -61,6 +62,7 @@ export class ReservationComponent
     { value: PaymentStatus.Pending, label: 'Pending' },
     { value: PaymentStatus.Paid, label: 'Paid' },
     { value: PaymentStatus.Failed, label: 'Failed' },
+    { value: PaymentStatus.Cancelled, label: 'Cancelled' },
     { value: PaymentStatus.Refunded, label: 'Refunded' },
   ];
 
@@ -72,7 +74,7 @@ export class ReservationComponent
   constructor() {
     super();
     this.request = new ListReservationRequest();
-    this.request.paging = this.request.paging ?? { page: 1, pageSize: 10 };
+    this.request.paging = new PageRequest(1, 10);
   }
 
   ngOnInit(): void {
@@ -85,6 +87,15 @@ export class ReservationComponent
     this.api.list(this.buildRequest()).subscribe({
       next: (response) => {
         this.handlePageResult(response);
+
+        // A delete can leave the current page outside the new backend range.
+        // Move to the last valid page and request it instead of showing an empty table.
+        if (this.totalPages > 0 && this.paging.page > this.totalPages) {
+          this.paging.page = this.totalPages;
+          this.loadPagedData();
+          return;
+        }
+
         this.applyClientSideUpcomingFilter();
         this.stopLoading();
       },
@@ -293,10 +304,26 @@ export class ReservationComponent
   }
 
   getUserFullName(r: ListReservationQueryDto): string {
-    const first = (r.userFirstName ?? '').trim();
-    const last = (r.userLastName ?? '').trim();
-    const full = `${first} ${last}`.trim();
-    return full || `#${r.userId}`;
+    const userName = this.joinName(
+      this.readString(r, 'userFirstName', 'UserFirstName'),
+      this.readString(r, 'userLastName', 'UserLastName')
+    );
+    const customerName = this.joinName(
+      this.readString(r, 'customerFirstName', 'CustomerFirstName'),
+      this.readString(r, 'customerLastName', 'CustomerLastName')
+    );
+
+    return userName || customerName || (r.userId ? `#${r.userId}` : '-');
+  }
+
+  private joinName(firstName: string, lastName: string): string {
+    return `${firstName.trim()} ${lastName.trim()}`.trim();
+  }
+
+  private readString(source: unknown, ...keys: string[]): string {
+    const record = source as Record<string, unknown>;
+    const value = keys.map((key) => record[key]).find((item) => typeof item === 'string');
+    return typeof value === 'string' ? value : '';
   }
 
   getTrackLabel(r: ListReservationQueryDto): string {
@@ -394,7 +421,7 @@ export class ReservationComponent
 
   private buildRequest(): ListReservationRequest {
     const request = new ListReservationRequest();
-    request.paging = this.request.paging;
+    request.paging = new PageRequest(this.paging.page, this.paging.pageSize);
     request.search = this.request.search?.trim() || null;
     request.userId = this.request.userId ?? null;
     request.trackId = this.request.trackId ?? null;
@@ -517,13 +544,15 @@ export class ReservationComponent
 
     if (typeof status === 'number') {
       switch (status) {
-        case 0:
+        case PaymentStatus.Pending:
           return { label: 'Pending', className: 'fair' };
-        case 1:
+        case PaymentStatus.Paid:
           return { label: 'Paid', className: 'good' };
-        case 2:
+        case PaymentStatus.Failed:
           return { label: 'Failed', className: 'low' };
-        case 3:
+        case PaymentStatus.Cancelled:
+          return { label: 'Cancelled', className: 'low' };
+        case PaymentStatus.Refunded:
           return { label: 'Refunded', className: 'fair' };
         default:
           return { label: String(status), className: 'fair' };

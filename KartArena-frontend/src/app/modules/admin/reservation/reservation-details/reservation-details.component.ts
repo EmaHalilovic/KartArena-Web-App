@@ -200,9 +200,26 @@ export class ReservationDetailsComponent implements OnInit {
       return '-';
     }
 
-    const first = (reservation.userFirstName ?? '').trim();
-    const last = (reservation.userLastName ?? '').trim();
-    return `${first} ${last}`.trim() || `#${reservation.userId}`;
+    const userName = this.joinName(
+      this.readString(reservation, 'userFirstName', 'UserFirstName'),
+      this.readString(reservation, 'userLastName', 'UserLastName')
+    );
+    const customerName = this.joinName(
+      this.readString(reservation, 'customerFirstName', 'CustomerFirstName'),
+      this.readString(reservation, 'customerLastName', 'CustomerLastName')
+    );
+
+    return userName || customerName || (reservation.userId ? `#${reservation.userId}` : '-');
+  }
+
+  private joinName(firstName: string, lastName: string): string {
+    return `${firstName.trim()} ${lastName.trim()}`.trim();
+  }
+
+  private readString(source: unknown, ...keys: string[]): string {
+    const record = source as Record<string, unknown>;
+    const value = keys.map((key) => record[key]).find((item) => typeof item === 'string');
+    return typeof value === 'string' ? value : '';
   }
 
   get trackLabel(): string {
@@ -424,6 +441,8 @@ export class ReservationDetailsComponent implements OnInit {
           return { label: 'Paid', className: 'good' };
         case PaymentStatus.Failed:
           return { label: 'Failed', className: 'low' };
+        case PaymentStatus.Cancelled:
+          return { label: 'Cancelled', className: 'low' };
         case PaymentStatus.Refunded:
           return { label: 'Refunded', className: 'neutral' };
         default:

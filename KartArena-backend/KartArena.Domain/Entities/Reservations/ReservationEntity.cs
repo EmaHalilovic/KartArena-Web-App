@@ -10,6 +10,7 @@ namespace KartArena.Domain.Entities.Reservations
         public DateTime Date { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
+        public decimal TotalPrice { get; set; }
 
         public ReservationStatus Status { get; set; } = ReservationStatus.Pending;
 
@@ -23,8 +24,16 @@ namespace KartArena.Domain.Entities.Reservations
         public int KartId { get; set; }
         public KartEntity? Kart { get; set; }
 
-        public int UserId { get; set; }
+        // Logged-in user, optional
+        public int? UserId { get; set; }
         public UserEntity? User { get; set; }
+
+        // Public reservation / guest info
+        public string CustomerFirstName { get; set; } = string.Empty;
+        public string CustomerLastName { get; set; } = string.Empty;
+        public string CustomerEmail { get; set; } = string.Empty;
+        public string CustomerPhone { get; set; } = string.Empty;
+        public string? CustomerNote { get; set; }
 
         // one-to-one payment
         public PaymentEntity? Payment { get; set; }

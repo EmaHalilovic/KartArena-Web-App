@@ -24,9 +24,13 @@ export abstract class BaseListPagedComponent<TItem, TRequest extends BasePagedQu
   }
 
   protected handlePageResult(result: PageResult<TItem>) {
-    this.items = result.items;
-    this.totalItems = result.totalItems;
-    this.totalPages = result.totalPages;
+    this.items = result.items ?? [];
+
+    // The API PageResult contract is { total, items }. Keep support for older
+    // frontend adapters which expose totalItems/totalPages explicitly.
+    this.totalItems = result.total ?? result.totalItems ?? this.items.length;
+    this.totalPages = result.totalPages
+      ?? (this.totalItems > 0 ? Math.ceil(this.totalItems / this.paging.pageSize) : 0);
   }
 
   goToPage(page: number): void {

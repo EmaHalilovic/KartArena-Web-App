@@ -10,12 +10,14 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
         public required DateTime StartTime { get; set; }
         public required DateTime EndTime { get; set; }
 
-        public required int UserId { get; set; }
+        public int? UserId { get; set; }
+        public string CustomerFirstName { get; set; } = string.Empty;
+        public string CustomerLastName { get; set; } = string.Empty;
+        public string CustomerEmail { get; set; } = string.Empty;
+        public string CustomerPhone { get; set; } = string.Empty;
         public required int KartId { get; set; }
         public required int TrackId { get; set; }
-
-        public required decimal Amount { get; set; }
-        public required int PaymentTypeId { get; set; }
+        public int? PaymentTypeId { get; set; }
         public string? PaymentNote { get; set; }
     }
 }

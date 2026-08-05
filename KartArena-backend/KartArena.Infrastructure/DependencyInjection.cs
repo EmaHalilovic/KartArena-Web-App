@@ -7,6 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using KartArena.Application.Abstractions;
+using KartArena.Infrastructure.Payments;
+
 
 namespace KartArena.Infrastructure;
 
@@ -42,7 +45,13 @@ public static class DependencyInjection
 
         //// Identity hasher
         services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
-        
+
+        //// stripe
+        services.AddScoped<IStripePaymentService, StripePaymentService>();
+
+        ////webhook service 
+        services.AddScoped<IStripeWebhookService, StripeWebhookService>();
+
         services.AddOptions<JwtOptions>()
         .Bind(configuration.GetSection(JwtOptions.SectionName))
         .ValidateDataAnnotations()
@@ -57,6 +66,8 @@ public static class DependencyInjection
 
         //// TimeProvider (if used in handlers/services)
         services.AddSingleton<TimeProvider>(TimeProvider.System);
+
+        services.AddHostedService<ExpiredReservationCancellationService>();
 
         return services;
     }

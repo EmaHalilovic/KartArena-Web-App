@@ -198,6 +198,12 @@ $accent: #ff1a1a;
   grid-column: 1 / -1;
 }
 
+.transaction-reference {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .assignment-item-wide {
   grid-column: 1 / -1;
 }

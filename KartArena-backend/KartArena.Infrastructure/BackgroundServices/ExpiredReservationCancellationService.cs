@@ -1,4 +1,5 @@
-﻿using KartArena.Domain.Entities.Payments;
+﻿using KartArena.Application.Abstractions;
+using KartArena.Domain.Entities.Payments;
 using KartArena.Domain.Entities.Reservations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,17 +23,20 @@ public class ExpiredReservationCancellationService : BackgroundService
 
             var now = DateTime.UtcNow;
 
+            var expirationThreshold = now.AddMinutes(-10);
+
             var expiredReservations = await context.Reservations
                 .Where(x =>
                     !x.IsDeleted &&
                     x.Status == ReservationStatus.Pending &&
-                    x.StartTime < now)
+                    x.PaymentStatus != PaymentStatus.Paid &&
+                    x.CreatedAtUtc <= expirationThreshold)
                 .ToListAsync(stoppingToken);
 
             foreach (var reservation in expiredReservations)
             {
                 reservation.Status = ReservationStatus.Cancelled;
-                reservation.PaymentStatus = PaymentStatus.Failed;
+                reservation.PaymentStatus = PaymentStatus.Cancelled;
                 reservation.ModifiedAtUtc = now;
             }
 

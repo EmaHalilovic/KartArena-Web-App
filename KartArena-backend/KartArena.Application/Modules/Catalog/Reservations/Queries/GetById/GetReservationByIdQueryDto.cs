@@ -7,7 +7,7 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Queries.GetById
     {
         public int Id { get; set; }
 
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
         public int TrackId { get; set; }
         public int KartId { get; set; }
 
@@ -27,6 +27,11 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Queries.GetById
 
         public string? UserFirstName { get; set; }
         public string? UserLastName { get; set; }
+        public string? CustomerFirstName { get; set; }
+        public string? CustomerLastName { get; set; }
+        public string? CustomerEmail { get; set; }
+        public string? CustomerPhone { get; set; }
+        public string? CustomerNote { get; set; }
 
         public string? TrackName { get; set; }
         public string? KartName { get; set; }

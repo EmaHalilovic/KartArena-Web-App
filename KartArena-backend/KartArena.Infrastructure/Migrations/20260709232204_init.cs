@@ -57,11 +57,11 @@ namespace KartArena.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     AllowedOnline = table.Column<bool>(type: "bit", nullable: false),
                     AllowedAtDesk = table.Column<bool>(type: "bit", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     isEnabled = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -333,7 +333,11 @@ namespace KartArena.Infrastructure.Migrations
                     PaymentStatus = table.Column<int>(type: "int", nullable: false),
                     TrackId = table.Column<int>(type: "int", nullable: false),
                     KartId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: true),
+                    CustomerFirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerLastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     isEnabled = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -358,8 +362,7 @@ namespace KartArena.Infrastructure.Migrations
                         name: "FK_Reservations_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -465,10 +468,14 @@ namespace KartArena.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
                     PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    TransactionReference = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TransactionReference = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    StripeCheckoutSessionId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    StripePaymentIntentId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    StripeEventId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     PaymentTypeId = table.Column<int>(type: "int", nullable: true),
                     ReservationId = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
@@ -483,13 +490,14 @@ namespace KartArena.Infrastructure.Migrations
                         name: "FK_Payments_PaymentTypes_PaymentTypeId",
                         column: x => x.PaymentTypeId,
                         principalTable: "PaymentTypes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Payments_Reservations_ReservationId",
                         column: x => x.ReservationId,
                         principalTable: "Reservations",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -587,6 +595,24 @@ namespace KartArena.Infrastructure.Migrations
                 name: "IX_Payments_ReservationId",
                 table: "Payments",
                 column: "ReservationId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payments_StripeCheckoutSessionId",
+                table: "Payments",
+                column: "StripeCheckoutSessionId",
+                unique: true,
+                filter: "[StripeCheckoutSessionId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payments_StripePaymentIntentId",
+                table: "Payments",
+                column: "StripePaymentIntentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PaymentTypes_Code",
+                table: "PaymentTypes",
+                column: "Code",
                 unique: true);
 
             migrationBuilder.CreateIndex(

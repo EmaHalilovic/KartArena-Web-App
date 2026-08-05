@@ -15,6 +15,7 @@ namespace KartArena.Domain.Entities.Catalog
         public string? ChassisNumber { get; set; }
         public string? Manufacturer { get; set; }
         public string? ImageUrl { get; set; }
+
         public decimal? PricePerSession { get; set; }
         public string? Description { get; set; }
 

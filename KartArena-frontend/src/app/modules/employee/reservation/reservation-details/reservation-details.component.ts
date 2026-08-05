@@ -26,6 +26,7 @@ type ReservationTone = 'good' | 'fair' | 'low' | 'neutral';
   styleUrl: './reservation-details.component.scss',
 })
 export class ReservationDetailsComponent implements OnInit {
+  readonly ReservationStatus = ReservationStatus;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
@@ -200,9 +201,56 @@ export class ReservationDetailsComponent implements OnInit {
       return '-';
     }
 
-    const first = (reservation.userFirstName ?? '').trim();
-    const last = (reservation.userLastName ?? '').trim();
-    return `${first} ${last}`.trim() || `#${reservation.userId}`;
+    const userName = this.joinName(
+      this.readString(reservation, 'userFirstName', 'UserFirstName'),
+      this.readString(reservation, 'userLastName', 'UserLastName')
+    );
+    const customerName = this.joinName(
+      this.readString(reservation, 'customerFirstName', 'CustomerFirstName'),
+      this.readString(reservation, 'customerLastName', 'CustomerLastName')
+    );
+
+    return userName || customerName || (reservation.userId ? `#${reservation.userId}` : '-');
+  }
+
+  changeReservationStatus(status: ReservationStatus.Completed | ReservationStatus.Cancelled): void {
+    if (!this.reservation || !this.canCloseReservation()) {
+      this.toaster.error('Confirmed reservations can only be closed on their reservation date');
+      return;
+    }
+
+    const completed = status === ReservationStatus.Completed;
+    const ref = this.dialog.open(ConfirmDeleteDialogReservationComponent, {
+      width: '420px',
+      maxWidth: '95vw',
+      data: {
+        titleKey: completed ? 'Complete reservation' : 'Cancel reservation',
+        messageKey: completed
+          ? 'Confirm that the customer completed this reservation.'
+          : 'Confirm that the customer did not show up.',
+        confirmKey: completed ? 'Complete' : 'Mark as no-show',
+        cancelKey: 'Back',
+      },
+    });
+
+    ref.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed || !this.reservation) return;
+      this.runRowAction(
+        this.api.changeStatus(this.reservation.id, status),
+        completed ? 'Reservation marked as completed' : 'Reservation cancelled as no-show',
+        'Failed to update reservation status'
+      );
+    });
+  }
+
+  private joinName(firstName: string, lastName: string): string {
+    return `${firstName.trim()} ${lastName.trim()}`.trim();
+  }
+
+  private readString(source: unknown, ...keys: string[]): string {
+    const record = source as Record<string, unknown>;
+    const value = keys.map((key) => record[key]).find((item) => typeof item === 'string');
+    return typeof value === 'string' ? value : '';
   }
 
   get trackLabel(): string {
@@ -298,6 +346,20 @@ export class ReservationDetailsComponent implements OnInit {
   canAssignResources(): boolean {
     const reservation = this.reservation;
     return !!reservation && this.isConfirmedReservation(reservation);
+  }
+
+  canCloseReservation(): boolean {
+    const reservation = this.reservation;
+    return !!reservation
+      && this.isConfirmedReservation(reservation)
+      && this.toShortDate(reservation.date) === this.toLocalIsoDate(new Date());
+  }
+
+  private toLocalIsoDate(value: Date): string {
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   canDelete(): boolean {
@@ -424,6 +486,8 @@ export class ReservationDetailsComponent implements OnInit {
           return { label: 'Paid', className: 'good' };
         case PaymentStatus.Failed:
           return { label: 'Failed', className: 'low' };
+        case PaymentStatus.Cancelled:
+          return { label: 'Cancelled', className: 'low' };
         case PaymentStatus.Refunded:
           return { label: 'Refunded', className: 'neutral' };
         default:

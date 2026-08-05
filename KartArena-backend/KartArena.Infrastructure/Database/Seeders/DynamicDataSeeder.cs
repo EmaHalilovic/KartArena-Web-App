@@ -23,8 +23,8 @@ public static class DynamicDataSeeder
         await SeedTracksAsync(context);
         await SeedKartsAsync(context);
         await EquipmentSeeder(context);
-        await SeedReservationsAsync(context);
         await SeedPaymentsAsync(context);
+        await SeedReservationsAsync(context);
     }
 
     private static async Task SeedCitiesAsync(DatabaseContext context)
@@ -63,11 +63,11 @@ public static class DynamicDataSeeder
         context.PaymentTypes.AddRange(
             new PaymentTypeEntity
             {
-                Name = "Card payment",
-                Code = "ONLINE_CARD",
-                Description = "Payment through an online card payment service",
+                Name = "Stripe Card Payment",
+                Code = "STRIPE",
                 AllowedOnline = true,
                 AllowedAtDesk = false,
+                Description = "Online card payment through Stripe.",
                 IsDeleted = false,
                 isEnabled = true,
                 CreatedAtUtc = now,
@@ -435,7 +435,7 @@ public static class DynamicDataSeeder
         var karts = await context.Karts.Where(x => !x.IsDeleted).ToListAsync();
 
         var paymentTypes = await context.PaymentTypes.ToListAsync();
-        var card = paymentTypes.First(x => x.Code == "ONLINE_CARD");
+        var card = paymentTypes.First(x => x.Code == "STRIPE");
         var cash = paymentTypes.First(x => x.Code == "DESK_CASH");
 
         var now = DateTime.UtcNow;
