@@ -11,10 +11,6 @@
     </div>
 
     <div class="header-actions">
-      <button mat-stroked-button type="button" (click)="onExportPdf()">
-        <mat-icon>picture_as_pdf</mat-icon>
-        Export PDF
-      </button>
       <button mat-stroked-button type="button" (click)="onToggleActive()">
         <mat-icon>{{ type.isActive ? 'toggle_off' : 'toggle_on' }}</mat-icon>
         {{ type.isActive ? 'Deactivate' : 'Activate' }}

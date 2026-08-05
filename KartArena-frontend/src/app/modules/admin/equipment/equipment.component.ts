@@ -10,7 +10,6 @@ import {
 } from '../../../api-services/equipment/equipment-api.models';
 import { EquipmentApiService } from '../../../api-services/equipment/equipment-api.service';
 import { BaseListPagedComponent } from '../../../core/components/base-classes/base-list-paged-component';
-import { PageResult } from '../../../core/models/paging/page-result';
 import { ToasterService } from '../../../core/services/toaster.service';
 import { ConfirmDeleteDialogComponent } from './dialogs/confirm-delete/confirm-delete-dialog.component';
 import {
@@ -54,6 +53,7 @@ export class EquipmentComponent
   constructor() {
     super();
     this.request = new ListEquipmentRequest();
+    this.request.paging.pageSize = 10;
     this.request.onlyActive = this.onlyActive;
   }
 
@@ -66,8 +66,7 @@ export class EquipmentComponent
 
     this.api.list(this.buildApiRequest()).subscribe({
       next: (response) => {
-        console.log('paged response', response);
-        this.handlePageResult(this.applyClientFilters(response));
+        this.handlePageResult(response);
         this.stopLoading();
       },
       error: (err) => {
@@ -151,18 +150,11 @@ export class EquipmentComponent
     this.loadPagedData();
   }
 
-  onExportPdf(): void {
-    // this.api.exportListPdf(this.request).subscribe({
-    //   next: (blob) => {
-    //     this.downloadBlob(blob, 'equipment-types.pdf');
-    //     this.toaster.success('Equipment PDF export started');
-    //   },
-    //   error: (err) => {
-    //     console.error('Export equipment PDF error:', err);
-    //     this.toaster.error('Failed to export equipment PDF');
-    //   },
-    // });
-   }
+  onSizeChange(size: string): void {
+    this.request.size = size?.trim() || null;
+    this.request.paging.page = 1;
+    this.loadPagedData();
+  }
 
   getStockTone(item: ListEquipmentQueryDto): string {
     return getEquipmentStockTone(item.stockStatus);
@@ -180,63 +172,12 @@ export class EquipmentComponent
     const request = new ListEquipmentRequest();
     request.search = this.request.search?.trim() || null;
     request.onlyActive = this.request.onlyActive ?? this.onlyActive;
-    request.category = null;
-    request.stockStatus = null;
-    request.paging.page = 1;
-    request.paging.pageSize = 1000;
+    request.category = this.request.category ?? null;
+    request.stockStatus = this.request.stockStatus ?? null;
+    request.size = this.request.size?.trim() || null;
+    request.paging.page = this.request.paging.page;
+    request.paging.pageSize = this.request.paging.pageSize;
     return request;
-  }
-
-  private applyClientFilters(response: PageResult<ListEquipmentQueryDto>): PageResult<ListEquipmentQueryDto> {
-    const filteredItems = response.items.filter((item) => this.matchesFilters(item));
-    const pageSize = this.request.paging.pageSize;
-    const currentPage = this.request.paging.page;
-    const totalItems = filteredItems.length;
-    const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / pageSize);
-    const safePage = totalPages === 0 ? 1 : Math.min(currentPage, totalPages);
-    const startIndex = (safePage - 1) * pageSize;
-
-    this.request.paging.page = safePage;
-
-    return {
-      ...response,
-      items: filteredItems.slice(startIndex, startIndex + pageSize),
-      currentPage: safePage,
-      totalItems,
-      totalPages,
-    };
-  }
-
-  private matchesFilters(item: ListEquipmentQueryDto): boolean {
-    const search = (this.request.search ?? '').trim().toLowerCase();
-    const categoryLabel = getEquipmentCategoryLabel(item.category).toLowerCase();
-
-    if (search) {
-      const matchesSearch =
-        item.name.toLowerCase().includes(search) ||
-        item.size.toLowerCase().includes(search) ||
-        categoryLabel.includes(search);
-
-      if (!matchesSearch) {
-        return false;
-      }
-    }
-
-    const onlyActive = this.request.onlyActive ?? this.onlyActive;
-
-    if (item.isActive !== onlyActive) {
-      return false;
-    }
-
-    if (this.request.category && item.category !== this.request.category) {
-      return false;
-    }
-
-    if (this.request.stockStatus && item.stockStatus !== this.request.stockStatus) {
-      return false;
-    }
-
-    return true;
   }
 
   private performDelete(item: ListEquipmentQueryDto): void {
@@ -254,12 +195,4 @@ export class EquipmentComponent
     });
   }
 
-  private downloadBlob(blob: Blob, fileName: string): void {
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    window.URL.revokeObjectURL(url);
-  }
 }

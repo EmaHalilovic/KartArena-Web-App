@@ -34,6 +34,10 @@
         </button>
 
         <div class="summary-actions">
+          <button *ngIf="canEdit()" mat-stroked-button type="button" (click)="openEdit()">
+            <mat-icon>edit</mat-icon>
+            Edit
+          </button>
           <button *ngIf="canMarkCashPaid()" mat-flat-button type="button" class="accent-button" (click)="openMarkCashPaid()">
             <mat-icon>payments</mat-icon>
             Mark as paid

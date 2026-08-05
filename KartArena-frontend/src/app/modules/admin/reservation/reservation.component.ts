@@ -208,6 +208,15 @@ export class ReservationComponent
     this.router.navigate(['/admin/reservations', item.id]);
   }
 
+  openEdit(item: ListReservationQueryDto): void {
+    if (!this.canEdit(item)) {
+      this.toaster.error('Only confirmed reservations can be edited');
+      return;
+    }
+
+    this.router.navigate(['/admin/reservation/edit', item.id]);
+  }
+
   openMarkCashPaid(item: ListReservationQueryDto): void {
     if (!this.canMarkCashPaid(item)) {
       this.toaster.error('Only confirmed reservations can be marked as paid in cash');
@@ -297,6 +306,10 @@ export class ReservationComponent
     return this.isConfirmedReservation(r)
       && this.isCashPayment(r)
       && this.hasPaymentStatus(r, ['pending', 'awaitingpayment', 'processing']);
+  }
+
+  canEdit(r: ListReservationQueryDto): boolean {
+    return this.isConfirmedReservation(r);
   }
 
   canAssignResources(r: ListReservationQueryDto): boolean {

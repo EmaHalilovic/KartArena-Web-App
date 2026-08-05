@@ -15,6 +15,26 @@ public sealed class ListPaymentTypesQueryHandler(IAppDbContext context)
                 (x.Description != null && x.Description.Contains(search)));
         }
 
+        if (!string.IsNullOrWhiteSpace(request.Name))
+        {
+            var name = request.Name.Trim();
+            q = q.Where(x => x.Name != null && x.Name.Contains(name));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Code))
+        {
+            var code = request.Code.Trim();
+            q = q.Where(x => x.Code.Contains(code));
+        }
+
+        if (request.PaymentMethod?.Equals("online", StringComparison.OrdinalIgnoreCase) == true)
+            q = q.Where(x => x.AllowedOnline);
+        else if (request.PaymentMethod?.Equals("desk", StringComparison.OrdinalIgnoreCase) == true)
+            q = q.Where(x => x.AllowedAtDesk);
+
+        if (request.AllowedOnline.HasValue)
+            q = q.Where(x => x.AllowedOnline == request.AllowedOnline.Value);
+
         if (request.OnlyEnabled.HasValue)
             q = q.Where(x => x.isEnabled == request.OnlyEnabled.Value);
 

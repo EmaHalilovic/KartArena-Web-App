@@ -8,7 +8,6 @@ import {
 } from '../../../api-services/payment-types/payment-types-api.models';
 import { PaymentTypesApiService } from '../../../api-services/payment-types/payment-types-api.service';
 import { BaseListPagedComponent } from '../../../core/components/base-classes/base-list-paged-component';
-import { PageResult } from '../../../core/models/paging/page-result';
 import { ToasterService } from '../../../core/services/toaster.service';
 import { ConfirmDeletePaymentTypeDialogComponent } from './dialogs/confirm-delete/confirm-delete-dialog.component';
 
@@ -44,7 +43,7 @@ export class PaymentTypesComponent
   constructor() {
     super();
     this.request = new ListPaymentTypesRequest();
-    this.request.paging = this.request.paging ?? { page: 1, pageSize: 10 };
+    this.request.paging.pageSize = 10;
     this.request.onlyEnabled = true;
   }
 
@@ -54,11 +53,9 @@ export class PaymentTypesComponent
 
   protected loadPagedData(): void {
     this.startLoading();
-    this.request.search = this.request.search?.trim() || null;
-
     this.api.list(this.buildApiRequest()).subscribe({
       next: (response) => {
-        this.handlePageResult(this.applyClientFilters(response));
+        this.handlePageResult(response);
         this.stopLoading();
       },
       error: (err) => {
@@ -109,9 +106,15 @@ export class PaymentTypesComponent
     });
   }
 
-  onSearch(value: string): void {
+  onNameFilterChange(value: string): void {
     this.request.paging.page = 1;
-    this.request.search = value?.trim() || null;
+    this.request.name = value?.trim() || null;
+    this.loadPagedData();
+  }
+
+  onCodeFilterChange(value: string): void {
+    this.request.paging.page = 1;
+    this.request.code = value?.trim() || null;
     this.loadPagedData();
   }
 
@@ -123,6 +126,13 @@ export class PaymentTypesComponent
 
   onPaymentMethodFilterChange(value: PaymentMethodFilter): void {
     this.paymentMethodFilter = value;
+    this.request.paymentMethod = value === 'all' ? null : value;
+    this.request.paging.page = 1;
+    this.loadPagedData();
+  }
+
+  onAllowedOnlineFilterChange(value: boolean | null): void {
+    this.request.allowedOnline = value;
     this.request.paging.page = 1;
     this.loadPagedData();
   }
@@ -133,44 +143,14 @@ export class PaymentTypesComponent
 
   private buildApiRequest(): ListPaymentTypesRequest {
     const request = new ListPaymentTypesRequest();
-    request.search = this.request.search?.trim() || null;
+    request.name = this.request.name?.trim() || null;
+    request.code = this.request.code?.trim() || null;
+    request.paymentMethod = this.request.paymentMethod ?? null;
+    request.allowedOnline = this.request.allowedOnline ?? null;
     request.onlyEnabled = this.request.onlyEnabled ?? null;
-    request.paging.page = 1;
-    request.paging.pageSize = 1000;
+    request.paging.page = this.request.paging.page;
+    request.paging.pageSize = this.request.paging.pageSize;
     return request;
-  }
-
-  private applyClientFilters(response: PageResult<ListPaymentTypesQueryDto>): PageResult<ListPaymentTypesQueryDto> {
-    const filteredItems = response.items.filter((item) => this.matchesPaymentMethodFilter(item));
-    const pageSize = this.request.paging.pageSize;
-    const currentPage = this.request.paging.page;
-    const totalItems = filteredItems.length;
-    const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / pageSize);
-    const safePage = totalPages === 0 ? 1 : Math.min(currentPage, totalPages);
-    const startIndex = (safePage - 1) * pageSize;
-
-    this.request.paging.page = safePage;
-
-    return {
-      ...response,
-      items: filteredItems.slice(startIndex, startIndex + pageSize),
-      currentPage: safePage,
-      pageSize,
-      totalItems,
-      totalPages,
-    };
-  }
-
-  private matchesPaymentMethodFilter(item: ListPaymentTypesQueryDto): boolean {
-    if (this.paymentMethodFilter === 'online') {
-      return item.allowedOnline;
-    }
-
-    if (this.paymentMethodFilter === 'desk') {
-      return item.allowedAtDesk;
-    }
-
-    return true;
   }
 
   private performDelete(item: ListPaymentTypesQueryDto): void {

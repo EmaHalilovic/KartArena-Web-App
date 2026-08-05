@@ -3,6 +3,24 @@
     "TITLE": "Dobrodošli u našu aplikaciju",
     "DESCRIPTION": "Ovo je primjer lokalizacije."
   },
+  "REPORTS": {
+    "NAV": "Izvještaji",
+    "EYEBROW": "Administracija",
+    "TITLE": "PDF izvještaji",
+    "SUBTITLE": "Generišite filtrirane izvještaje o rezervacijama i plaćanjima.",
+    "RESERVATIONS": { "TITLE": "Izvještaj o rezervacijama", "DESCRIPTION": "Podaci o rezervacijama, korisnicima, stazama, kartinzima i statusima." },
+    "PAYMENTS": { "TITLE": "Izvještaj o plaćanjima", "DESCRIPTION": "Iznosi, načini plaćanja, statusi i detalji transakcija." },
+    "FIELDS": { "ID": "Opcionalni ID", "DATE_FROM": "Početni datum", "DATE_TO": "Krajnji datum" },
+    "GENERATE": "Generiši PDF",
+    "GENERATING": "Generisanje...",
+    "MESSAGES": {
+      "SUCCESS": "PDF izvještaj je uspješno preuzet.",
+      "INVALID_RANGE": "Početni datum ne može biti poslije krajnjeg datuma.",
+      "INVALID_FILTERS": "Filteri izvještaja nisu ispravni.",
+      "EMPTY": "Nema zapisa koji odgovaraju odabranim filterima.",
+      "ERROR": "PDF izvještaj nije moguće generisati."
+    }
+  },
   "AUTH": {
     "LOGIN": {
       "TITLE": "Prijava",

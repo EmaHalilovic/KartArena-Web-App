@@ -10,13 +10,24 @@
 
     <div class="toolbar">
       <mat-form-field class="search-field" appearance="fill">
+        <mat-label>Name</mat-label>
         <input
           matInput
-          placeholder="Search by name or code"
-          (ngModelChange)="onSearch($event)"
-          [(ngModel)]="request.search"
+          placeholder="Filter by name"
+          (ngModelChange)="onNameFilterChange($event)"
+          [(ngModel)]="request.name"
         />
         <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Code</mat-label>
+        <input
+          matInput
+          placeholder="Filter by code"
+          (ngModelChange)="onCodeFilterChange($event)"
+          [(ngModel)]="request.code"
+        />
       </mat-form-field>
 
       <mat-form-field appearance="fill">
@@ -25,6 +36,15 @@
           <mat-option value="all">All methods</mat-option>
           <mat-option value="online">Only online</mat-option>
           <mat-option value="desk">Only at desk</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Allowed online</mat-label>
+        <mat-select [ngModel]="request.allowedOnline" (ngModelChange)="onAllowedOnlineFilterChange($event)">
+          <mat-option [value]="null">All</mat-option>
+          <mat-option [value]="true">Yes</mat-option>
+          <mat-option [value]="false">No</mat-option>
         </mat-select>
       </mat-form-field>
 
@@ -117,7 +137,9 @@
 
       <tr class="mat-row" *matNoDataRow>
         <td class="mat-cell" colspan="7">
-          {{ request.search ? 'No payment types match the current filters.' : 'No payment types found.' }}
+          {{ request.name || request.code || request.paymentMethod || request.allowedOnline != null
+            ? 'No payment types match the current filters.'
+            : 'No payment types found.' }}
         </td>
       </tr>
     </table>

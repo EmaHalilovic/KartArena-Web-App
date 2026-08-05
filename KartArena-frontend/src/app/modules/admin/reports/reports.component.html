@@ -1,0 +1,45 @@
+<section class="reports-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">{{ 'REPORTS.EYEBROW' | translate }}</p>
+      <h1>{{ 'REPORTS.TITLE' | translate }}</h1>
+      <p>{{ 'REPORTS.SUBTITLE' | translate }}</p>
+    </div>
+    <mat-icon>picture_as_pdf</mat-icon>
+  </header>
+
+  <div class="report-grid">
+    <ng-container *ngFor="let type of reportTypes">
+      <article class="report-card">
+        <div class="card-heading">
+          <mat-icon>{{ type === 'reservations' ? 'event_note' : 'payments' }}</mat-icon>
+          <div>
+            <h2>{{ ('REPORTS.' + (type === 'reservations' ? 'RESERVATIONS' : 'PAYMENTS') + '.TITLE') | translate }}</h2>
+            <p>{{ ('REPORTS.' + (type === 'reservations' ? 'RESERVATIONS' : 'PAYMENTS') + '.DESCRIPTION') | translate }}</p>
+          </div>
+        </div>
+
+        <div class="fields">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'REPORTS.FIELDS.ID' | translate }}</mat-label>
+            <input matInput type="number" min="1" [(ngModel)]="filters[type].id" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'REPORTS.FIELDS.DATE_FROM' | translate }}</mat-label>
+            <input matInput type="date" [(ngModel)]="filters[type].dateFrom" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'REPORTS.FIELDS.DATE_TO' | translate }}</mat-label>
+            <input matInput type="date" [(ngModel)]="filters[type].dateTo" />
+          </mat-form-field>
+        </div>
+
+        <button mat-flat-button type="button" (click)="generate(type)" [disabled]="loading[type]">
+          <mat-spinner *ngIf="loading[type]" diameter="20"></mat-spinner>
+          <mat-icon *ngIf="!loading[type]">download</mat-icon>
+          {{ (loading[type] ? 'REPORTS.GENERATING' : 'REPORTS.GENERATE') | translate }}
+        </button>
+      </article>
+    </ng-container>
+  </div>
+</section>

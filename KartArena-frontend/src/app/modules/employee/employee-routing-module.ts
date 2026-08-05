@@ -7,6 +7,7 @@ import { EquipmentAddComponent } from './equipment/equipment-add/equipment-add.c
 import { EquipmentEditComponent } from './equipment/equipment-edit/equipment-edit.component';
 import { EquipmentDetailComponent } from './equipment/equipment-detail/equipment-detail.component';
 import { ReservationComponent } from './reservation/reservation.component';
+import { ReservationEditComponent } from './reservation/reservation-edit/reservation-edit.component';
 import { ReservationDetailsComponent } from './reservation/reservation-details/reservation-details.component';
 import { PaymentsComponent } from './payments/payments.component';
 import { PaymentTypesComponent } from './payment-types/payment-types.component';
@@ -41,6 +42,10 @@ const routes: Routes = [
       {
         path: 'reservations/:id',
         component: ReservationDetailsComponent,
+      },
+      {
+        path: 'reservation/edit/:id',
+        component: ReservationEditComponent,
       },
    
      

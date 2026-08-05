@@ -195,6 +195,18 @@
             </button>
 
             <button
+              *ngIf="canEdit(r)"
+              mat-icon-button
+              type="button"
+              class="row-action-btn"
+              (click)="openEdit(r)"
+              matTooltip="Edit reservation"
+              aria-label="Edit reservation"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button
               *ngIf="canMarkCashPaid(r)"
               mat-icon-button
               type="button"
