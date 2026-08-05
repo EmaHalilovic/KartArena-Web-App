@@ -30,7 +30,7 @@ namespace KartArena.Api.Controllers.Catalog
 
         [HttpPost("checkout")]
         [AllowAnonymous]
-        public async Task<ActionResult<List<int>>> Checkout(CheckoutReservationsCommand command,CancellationToken ct)
+        public async Task<ActionResult<CheckoutReservationsResponse>> Checkout(CheckoutReservationsCommand command,CancellationToken ct)
         {
             var reservationIds = await sender.Send(command, ct);
 

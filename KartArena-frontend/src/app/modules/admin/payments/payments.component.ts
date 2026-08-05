@@ -29,7 +29,7 @@ export class PaymentsComponent
   displayedColumns: string[] = [
     'id',
     'customerName',
-    'reservationDate',
+    'reservations',
     'amount',
     'paymentDate',
     'paymentTypeName',
@@ -88,8 +88,14 @@ export class PaymentsComponent
     return (r.customerName ?? '').trim() || '-';
   }
 
-  formatReservationDate(r: ListPaymentsQueryDto): string {
-    return (r.reservationDate ?? '').trim() || '-';
+  formatReservations(r: ListPaymentsQueryDto): string {
+    if (!r.reservations?.length) {
+      return '-';
+    }
+
+    return r.reservations
+      .map((reservation) => `#${reservation.id} · ${reservation.date} · ${reservation.trackName}`)
+      .join(', ');
   }
 
   formatPaymentType(r: ListPaymentsQueryDto): string {

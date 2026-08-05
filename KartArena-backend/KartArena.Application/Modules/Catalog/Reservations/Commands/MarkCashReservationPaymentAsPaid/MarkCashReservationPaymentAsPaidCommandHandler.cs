@@ -3,54 +3,110 @@ using KartArena.Domain.Entities.Reservations;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace KartArena.Application.Modules.Catalog.Reservations.Commands.MarkCashPaymentAsPaid
+namespace KartArena.Application.Modules.Catalog.Reservations.Commands.MarkCashPaymentAsPaid;
+
+public sealed class MarkCashReservationPaymentAsPaidCommandHandler(
+    IAppDbContext ctx)
+    : IRequestHandler<MarkCashReservationPaymentAsPaidCommand, int>
 {
-    public sealed class MarkCashReservationPaymentAsPaidCommandHandler(IAppDbContext ctx)
-        : IRequestHandler<MarkCashReservationPaymentAsPaidCommand, int>
+    public async Task<int> Handle(
+        MarkCashReservationPaymentAsPaidCommand request,
+        CancellationToken ct)
     {
-        public async Task<int> Handle(MarkCashReservationPaymentAsPaidCommand request, CancellationToken ct)
+        var reservationExists = await ctx.Reservations.AnyAsync(
+            reservation =>
+                reservation.Id == request.ReservationId &&
+                !reservation.IsDeleted,
+            ct);
+
+        if (!reservationExists)
         {
-            var reservation = await ctx.Reservations
-                .Include(r => r.Payment)
-                    .ThenInclude(p => p.PaymentType)
-                .FirstOrDefaultAsync(r => r.Id == request.ReservationId && !r.IsDeleted, ct);
+            throw new InvalidOperationException(
+                "Reservation not found.");
+        }
 
-            if (reservation is null)
-                throw new Exception("Reservation not found.");
+        var payment = await ctx.Payments
+            .Include(p => p.PaymentType)
+            .Include(p => p.PaymentReservations)
+                .ThenInclude(link => link.Reservation)
+            .FirstOrDefaultAsync(
+                p =>
+                    !p.IsDeleted &&
+                    p.PaymentReservations.Any(link =>
+                        link.ReservationId ==
+                        request.ReservationId),
+                ct);
 
-            if (reservation.Payment is null)
-                throw new Exception("Payment does not exist for this reservation.");
+        if (payment is null)
+        {
+            throw new InvalidOperationException(
+                "Payment does not exist for this reservation.");
+        }
 
-            if (reservation.Payment.Status != PaymentStatus.Pending)
-                throw new Exception("Only pending payments can be confirmed.");
+        if (payment.Status != PaymentStatus.Pending)
+        {
+            throw new InvalidOperationException(
+                "Only pending payments can be confirmed.");
+        }
 
-            if (reservation.Payment.PaymentType is null)
-                throw new Exception("Payment type is missing.");
+        if (payment.PaymentType is null)
+        {
+            throw new InvalidOperationException(
+                "Payment type is missing.");
+        }
 
-            if (!reservation.Payment.PaymentType.isEnabled)
-                throw new Exception("Payment type is not active.");
+        if (!payment.PaymentType.isEnabled)
+        {
+            throw new InvalidOperationException(
+                "Payment type is not active.");
+        }
 
-            if (!reservation.Payment.PaymentType.AllowedAtDesk)
-                throw new Exception("Payment type is not available at arena.");
+        if (!payment.PaymentType.AllowedAtDesk)
+        {
+            throw new InvalidOperationException(
+                "Payment type is not available at arena.");
+        }
 
-            //if (reservation.Payment.PaymentType.Code != "CASH")
-            //    throw new Exception("Only cash payments can be confirmed manually.");
+        if (!string.Equals(
+                payment.PaymentType.Code,
+                "CASH",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                "Only cash payments can be confirmed manually.");
+        }
 
-            reservation.Payment.Status = PaymentStatus.Paid;
-            reservation.Payment.PaymentDate = DateTime.UtcNow;
-            reservation.Payment.TransactionReference = request.TransactionReference;
-            reservation.Payment.Note = request.Note;
+        var now = DateTime.UtcNow;
 
-            reservation.PaymentStatus = PaymentStatus.Paid;
+        payment.Status = PaymentStatus.Paid;
+        payment.PaymentDate = now;
+        payment.TransactionReference =
+            request.TransactionReference?.Trim();
+        payment.Note = request.Note?.Trim();
+        payment.ModifiedAtUtc = now;
 
-            if (reservation.Status == ReservationStatus.Pending)
+        /*
+         * Confirm all reservations linked to this payment.
+         */
+        foreach (var link in payment.PaymentReservations)
+        {
+            var reservation = link.Reservation;
+
+            reservation.PaymentStatus =
+                PaymentStatus.Paid;
+
+            if (reservation.Status ==
+                ReservationStatus.Pending)
             {
-                reservation.Status = ReservationStatus.Confirmed;
+                reservation.Status =
+                    ReservationStatus.Confirmed;
             }
 
-            await ctx.SaveChangesAsync(ct);
-
-            return reservation.Id;
+            reservation.ModifiedAtUtc = now;
         }
+
+        await ctx.SaveChangesAsync(ct);
+
+        return request.ReservationId;
     }
 }

@@ -412,268 +412,435 @@ public static class DynamicDataSeeder
         Console.WriteLine("✅ Dynamic seed: demo equipment added.");
     }
 
-    private static async Task SeedReservationsAsync(DatabaseContext context)
+    private static async Task SeedReservationsAsync(
+    DatabaseContext context)
     {
         if (await context.Reservations.AnyAsync())
         {
-            Console.WriteLine("ℹ️ Dynamic seed: reservations already exist.");
+            Console.WriteLine(
+                "ℹ️ Dynamic seed: reservations already exist.");
+
             return;
         }
 
         var userRoleId = await context.Roles
-            .Where(r => r.Name.StartsWith("User"))
-            .Select(r => r.Id)
+            .Where(role => role.Name.StartsWith("User"))
+            .Select(role => role.Id)
             .FirstAsync();
 
         var users = await context.Users
-            .Where(x => !x.IsDeleted && x.RoleId == userRoleId)
-            .OrderBy(x => x.Id)
+            .Where(user =>
+                !user.IsDeleted &&
+                user.RoleId == userRoleId)
+            .OrderBy(user => user.Id)
             .Take(3)
             .ToListAsync();
 
-        var tracks = await context.Tracks.Where(x => !x.IsDeleted).ToListAsync();
-        var karts = await context.Karts.Where(x => !x.IsDeleted).ToListAsync();
+        var tracks = await context.Tracks
+            .Where(track => !track.IsDeleted)
+            .OrderBy(track => track.Id)
+            .ToListAsync();
 
-        var paymentTypes = await context.PaymentTypes.ToListAsync();
-        var card = paymentTypes.First(x => x.Code == "STRIPE");
-        var cash = paymentTypes.First(x => x.Code == "DESK_CASH");
+        var karts = await context.Karts
+            .Where(kart => !kart.IsDeleted)
+            .OrderBy(kart => kart.Id)
+            .ToListAsync();
+
+        if (users.Count < 3 ||
+            tracks.Count < 2 ||
+            karts.Count < 2)
+        {
+            Console.WriteLine(
+                "ℹ️ Dynamic seed: not enough users, tracks, or karts.");
+
+            return;
+        }
 
         var now = DateTime.UtcNow;
-        var today = DateTime.UtcNow.Date;
+        var today = now.Date;
 
-        var reservations = new List<ReservationEntity>();
-
-        // 1️⃣ COMPLETED + PAID (CARD)
-        reservations.Add(new ReservationEntity
+        var reservations = new List<ReservationEntity>
+    {
+        new()
         {
             UserId = users[0].Id,
+
+            CustomerFirstName = users[0].FirstName,
+            CustomerLastName = users[0].LastName,
+            CustomerEmail = users[0].Email ?? "user1@demo.com",
+            CustomerPhone = "061111111",
+
             TrackId = tracks[0].Id,
             KartId = karts[0].Id,
+
             Date = today.AddDays(-2),
             StartTime = today.AddDays(-2).AddHours(18),
             EndTime = today.AddDays(-2).AddHours(18).AddMinutes(30),
+
+            TotalPrice = 40m,
+
             Status = ReservationStatus.Completed,
             PaymentStatus = PaymentStatus.Paid,
-            CreatedAtUtc = now.AddDays(-3),
-            IsDeleted = false,
-            Payment = new PaymentEntity
-            {
-                Amount = 40,
-                Status = PaymentStatus.Paid,
-                PaymentTypeId = card.Id,
-                PaymentDate = today.AddDays(-2).AddHours(18).AddMinutes(30),
-                TransactionReference = "TX-CARD-001",
-                CreatedAtUtc = now.AddDays(-2),
-                IsDeleted = false
-            }
-        });
 
-        // 2️⃣ COMPLETED + PAID (CASH)
-        reservations.Add(new ReservationEntity
+            CreatedAtUtc = now.AddDays(-3),
+            IsDeleted = false
+        },
+
+        new()
         {
             UserId = users[1].Id,
+
+            CustomerFirstName = users[1].FirstName,
+            CustomerLastName = users[1].LastName,
+            CustomerEmail = users[1].Email ?? "user2@demo.com",
+            CustomerPhone = "062222222",
+
             TrackId = tracks[1].Id,
             KartId = karts[1].Id,
+
             Date = today.AddDays(-1),
             StartTime = today.AddDays(-1).AddHours(14),
             EndTime = today.AddDays(-1).AddHours(14).AddMinutes(45),
+
+            TotalPrice = 55m,
+
             Status = ReservationStatus.Completed,
             PaymentStatus = PaymentStatus.Paid,
-            CreatedAtUtc = now.AddDays(-2),
-            IsDeleted = false,
-            Payment = new PaymentEntity
-            {
-                Amount = 55,
-                Status = PaymentStatus.Paid,
-                PaymentTypeId = cash.Id,
-                PaymentDate = today.AddDays(-1).AddHours(14).AddMinutes(45),
-                TransactionReference = "TX-CASH-002",
-                Note = "Paid at desk",
-                CreatedAtUtc = now.AddDays(-1),
-                IsDeleted = false
-            }
-        });
 
-        // 3️⃣ CANCELLED + FAILED
-        reservations.Add(new ReservationEntity
+            CreatedAtUtc = now.AddDays(-2),
+            IsDeleted = false
+        },
+
+        new()
         {
             UserId = users[2].Id,
+
+            CustomerFirstName = users[2].FirstName,
+            CustomerLastName = users[2].LastName,
+            CustomerEmail = users[2].Email ?? "user3@demo.com",
+            CustomerPhone = "063333333",
+
             TrackId = tracks[0].Id,
             KartId = karts[1].Id,
+
             Date = today.AddDays(-1),
             StartTime = today.AddDays(-1).AddHours(20),
             EndTime = today.AddDays(-1).AddHours(20).AddMinutes(30),
+
+            TotalPrice = 50m,
+
             Status = ReservationStatus.Cancelled,
             PaymentStatus = PaymentStatus.Failed,
-            CreatedAtUtc = now.AddDays(-2),
-            IsDeleted = false,
-            Payment = new PaymentEntity
-            {
-                Amount = 50,
-                Status = PaymentStatus.Failed,
-                PaymentTypeId = card.Id,
-                Note = "User cancelled before payment",
-                CreatedAtUtc = now.AddDays(-1),
-                IsDeleted = false
-            }
-        });
 
-        // 4️⃣ PENDING + PENDING (future booking)
-        reservations.Add(new ReservationEntity
+            CreatedAtUtc = now.AddDays(-2),
+            IsDeleted = false
+        },
+
+        new()
         {
             UserId = users[0].Id,
+
+            CustomerFirstName = users[0].FirstName,
+            CustomerLastName = users[0].LastName,
+            CustomerEmail = users[0].Email ?? "user1@demo.com",
+            CustomerPhone = "061111111",
+
             TrackId = tracks[1].Id,
             KartId = karts[0].Id,
+
             Date = today.AddDays(1),
             StartTime = today.AddDays(1).AddHours(16),
             EndTime = today.AddDays(1).AddHours(16).AddMinutes(20),
+
+            TotalPrice = 30m,
+
             Status = ReservationStatus.Pending,
             PaymentStatus = PaymentStatus.Pending,
-            CreatedAtUtc = now,
-            IsDeleted = false,
-            Payment = new PaymentEntity
-            {
-                Amount = 30,
-                Status = PaymentStatus.Pending,
-                PaymentTypeId = card.Id,
-                CreatedAtUtc = now,
-                IsDeleted = false
-            }
-        });
 
-        // 5️⃣ CONFIRMED + PENDING (reserved but not paid yet)
-        reservations.Add(new ReservationEntity
+            CreatedAtUtc = now,
+            IsDeleted = false
+        },
+
+        new()
         {
             UserId = users[1].Id,
+
+            CustomerFirstName = users[1].FirstName,
+            CustomerLastName = users[1].LastName,
+            CustomerEmail = users[1].Email ?? "user2@demo.com",
+            CustomerPhone = "062222222",
+
             TrackId = tracks[0].Id,
             KartId = karts[0].Id,
+
             Date = today.AddDays(2),
             StartTime = today.AddDays(2).AddHours(19),
             EndTime = today.AddDays(2).AddHours(19).AddMinutes(40),
+
+            TotalPrice = 45m,
+
             Status = ReservationStatus.Confirmed,
             PaymentStatus = PaymentStatus.Pending,
+
             CreatedAtUtc = now,
-            IsDeleted = false,
-            Payment = new PaymentEntity
-            {
-                Amount = 45,
-                Status = PaymentStatus.Pending,
-                PaymentTypeId = card.Id,
-                Note = "Awaiting online payment",
-                CreatedAtUtc = now,
-                IsDeleted = false
-            }
-        });
-        reservations.Add(new ReservationEntity
+            IsDeleted = false
+        },
+
+        new()
         {
             UserId = users[1].Id,
+
+            CustomerFirstName = users[1].FirstName,
+            CustomerLastName = users[1].LastName,
+            CustomerEmail = users[1].Email ?? "user2@demo.com",
+            CustomerPhone = "062222222",
+
             TrackId = tracks[0].Id,
-            KartId = karts[0].Id,
+
+            // Use a different kart to avoid overlapping the previous reservation.
+            KartId = karts[1].Id,
+
             Date = today.AddDays(2),
             StartTime = today.AddDays(2).AddHours(19),
             EndTime = today.AddDays(2).AddHours(19).AddMinutes(40),
+
+            TotalPrice = 45m,
+
             Status = ReservationStatus.Confirmed,
             PaymentStatus = PaymentStatus.Pending,
+
             CreatedAtUtc = now,
-            IsDeleted = false,
-            Payment = new PaymentEntity
-            {
-                Amount = 45,
-                Status = PaymentStatus.Pending,
-                PaymentTypeId = cash.Id,
-                Note = "Desk payment in cash",
-                CreatedAtUtc = now,
-                IsDeleted = false
-            }
-        });
-        context.Reservations.AddRange(reservations);
+            IsDeleted = false
+        }
+    };
+
+        await context.Reservations.AddRangeAsync(reservations);
         await context.SaveChangesAsync();
 
-        Console.WriteLine("✅ Clean demo reservations seeded.");
+        Console.WriteLine(
+            "✅ Dynamic seed: reservations added.");
     }
-    private static async Task SeedPaymentsAsync(DatabaseContext context)
+    private static async Task SeedPaymentsAsync(
+    DatabaseContext context)
     {
         if (await context.Payments.AnyAsync())
         {
-            Console.WriteLine("ℹ️ Dynamic seed: payments already exist.");
+            Console.WriteLine(
+                "ℹ️ Dynamic seed: payments already exist.");
+
             return;
         }
 
         var reservations = await context.Reservations
-            .Where(x => !x.IsDeleted)
-            .OrderBy(x => x.Id)
-            .Take(3)
+            .Where(reservation => !reservation.IsDeleted)
+            .OrderBy(reservation => reservation.Id)
+            .Take(6)
             .ToListAsync();
 
         if (reservations.Count == 0)
         {
-            Console.WriteLine("ℹ️ Dynamic seed: no reservations found - skipping payments.");
+            Console.WriteLine(
+                "ℹ️ Dynamic seed: no reservations found - skipping payments.");
+
             return;
         }
 
-        var paymentType = await context.PaymentTypes
-            .Where(x => !x.IsDeleted)
-            .OrderBy(x => x.Id)
-            .FirstOrDefaultAsync();
+        var card = await context.PaymentTypes
+            .FirstOrDefaultAsync(paymentType =>
+                !paymentType.IsDeleted &&
+                paymentType.Code == "STRIPE");
+
+        var cash = await context.PaymentTypes
+            .FirstOrDefaultAsync(paymentType =>
+                !paymentType.IsDeleted &&
+                paymentType.Code == "DESK_CASH");
+
+        if (card is null || cash is null)
+        {
+            Console.WriteLine(
+                "ℹ️ Dynamic seed: required payment types were not found.");
+
+            return;
+        }
 
         var now = DateTime.UtcNow;
 
         var payments = new List<PaymentEntity>();
+        var links = new List<PaymentReservationEntity>();
 
-        payments.Add(new PaymentEntity
+        if (reservations.Count >= 1)
         {
-            ReservationId = reservations[0].Id,
-            PaymentTypeId = paymentType.Id,
-            Amount = 50.00m,
-            PaymentDate = now,
-            Status = PaymentStatus.Paid,
-            TransactionReference = "DEMO-PAY-001",
-            Note = "Demo paid reservation",
-            CreatedAtUtc = now,
-            ModifiedAtUtc = null,
-            IsDeleted = false
-        });
-
-        if (reservations.Count > 1)
-        {
-            payments.Add(new PaymentEntity
+            var payment = new PaymentEntity
             {
-                ReservationId = reservations[1].Id,
-                PaymentTypeId = paymentType.Id,
-                Amount = 65.00m,
-                PaymentDate = now.AddMinutes(-30),
-                Status = PaymentStatus.Pending,
-                TransactionReference = "DEMO-PAY-002",
-                Note = "Demo pending reservation",
-                CreatedAtUtc = now,
+                PaymentTypeId = card.Id,
+
+                Amount = reservations[0].TotalPrice,
+                Currency = "bam",
+
+                PaymentDate = now.AddDays(-2),
+                Status = PaymentStatus.Paid,
+
+                TransactionReference = "TX-CARD-001",
+                Note = "Demo Stripe card payment",
+
+                CreatedAtUtc = now.AddDays(-2),
                 ModifiedAtUtc = null,
-                IsDeleted = false
+
+                IsDeleted = false,
+                isEnabled = true
+            };
+
+            payments.Add(payment);
+
+            links.Add(new PaymentReservationEntity
+            {
+                Payment = payment,
+                Reservation = reservations[0]
             });
         }
 
-        if (reservations.Count > 2)
+        if (reservations.Count >= 2)
         {
-            payments.Add(new PaymentEntity
+            var payment = new PaymentEntity
             {
-                ReservationId = reservations[2].Id,
-                PaymentTypeId = paymentType.Id,
-                Amount = 40.00m,
-                PaymentDate = now.AddHours(-1),
+                PaymentTypeId = cash.Id,
+
+                Amount = reservations[1].TotalPrice,
+                Currency = "bam",
+
+                PaymentDate = now.AddDays(-1),
+                Status = PaymentStatus.Paid,
+
+                TransactionReference = "TX-CASH-002",
+                Note = "Paid at desk",
+
+                CreatedAtUtc = now.AddDays(-1),
+                ModifiedAtUtc = null,
+
+                IsDeleted = false,
+                isEnabled = true
+            };
+
+            payments.Add(payment);
+
+            links.Add(new PaymentReservationEntity
+            {
+                Payment = payment,
+                Reservation = reservations[1]
+            });
+        }
+
+        if (reservations.Count >= 3)
+        {
+            var payment = new PaymentEntity
+            {
+                PaymentTypeId = card.Id,
+
+                Amount = reservations[2].TotalPrice,
+                Currency = "bam",
+
+                PaymentDate = null,
                 Status = PaymentStatus.Failed,
-                TransactionReference = "DEMO-PAY-003",
-                Note = "Demo failed payment",
-                CreatedAtUtc = now,
+
+                TransactionReference = "TX-CARD-003",
+                Note = "User cancelled before payment",
+
+                CreatedAtUtc = now.AddDays(-1),
                 ModifiedAtUtc = null,
-                IsDeleted = false
+
+                IsDeleted = false,
+                isEnabled = true
+            };
+
+            payments.Add(payment);
+
+            links.Add(new PaymentReservationEntity
+            {
+                Payment = payment,
+                Reservation = reservations[2]
             });
         }
 
-        context.Payments.AddRange(payments);
+        if (reservations.Count >= 4)
+        {
+            var payment = new PaymentEntity
+            {
+                PaymentTypeId = card.Id,
+
+                Amount = reservations[3].TotalPrice,
+                Currency = "bam",
+
+                PaymentDate = null,
+                Status = PaymentStatus.Pending,
+
+                Note = "Awaiting online payment",
+
+                CreatedAtUtc = now,
+                ModifiedAtUtc = null,
+
+                IsDeleted = false,
+                isEnabled = true
+            };
+
+            payments.Add(payment);
+
+            links.Add(new PaymentReservationEntity
+            {
+                Payment = payment,
+                Reservation = reservations[3]
+            });
+        }
+
+        if (reservations.Count >= 6)
+        {
+            // This payment demonstrates one transaction covering
+            // multiple reservations from the same cart.
+            var groupedReservations = reservations
+                .Skip(4)
+                .Take(2)
+                .ToList();
+
+            var groupedPayment = new PaymentEntity
+            {
+                PaymentTypeId = cash.Id,
+
+                Amount = groupedReservations.Sum(
+                    reservation => reservation.TotalPrice),
+
+                Currency = "bam",
+
+                PaymentDate = null,
+                Status = PaymentStatus.Pending,
+
+                Note = "Desk payment for multiple reservations",
+
+                CreatedAtUtc = now,
+                ModifiedAtUtc = null,
+
+                IsDeleted = false,
+                isEnabled = true
+            };
+
+            payments.Add(groupedPayment);
+
+            foreach (var reservation in groupedReservations)
+            {
+                links.Add(new PaymentReservationEntity
+                {
+                    Payment = groupedPayment,
+                    Reservation = reservation
+                });
+            }
+        }
+
+        await context.Payments.AddRangeAsync(payments);
+        await context.PaymentReservations.AddRangeAsync(links);
+
         await context.SaveChangesAsync();
 
-        Console.WriteLine("✅ Dynamic seed: payments added.");
+        Console.WriteLine(
+            "✅ Dynamic seed: payments and payment-reservation links added.");
     }
-
     private static async Task SeedTracksAsync(DatabaseContext context)
     {
         if (await context.Tracks.AnyAsync())

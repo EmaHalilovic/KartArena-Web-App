@@ -6,9 +6,13 @@ public sealed class GetPaymentByIdQueryDto
 {
     public int Id { get; init; }
 
-    public int ReservationId { get; init; }
+    public List<GetPaymentReservationDto> Reservations { get; init; }
+        = new();
 
     public decimal Amount { get; init; }
+
+    public string Currency { get; init; }
+        = string.Empty;
 
     public DateTime? PaymentDate { get; init; }
 

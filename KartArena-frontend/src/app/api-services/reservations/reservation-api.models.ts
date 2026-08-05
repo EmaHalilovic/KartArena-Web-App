@@ -196,6 +196,14 @@ export interface AvailableKartDto {
   pricePerSession?: number | null;
 }
 
+export interface CheckoutReservationsResponse {
+  reservationIds: number[];
+  paymentId: number;
+  paymentStatus: string;
+  checkoutUrl: string | null;
+  stripeCheckoutSessionId: string | null;
+}
+
 export interface ChangeReservationStatusCommand {
   reservationId: number;
   status: ReservationStatus.Completed | ReservationStatus.Cancelled;

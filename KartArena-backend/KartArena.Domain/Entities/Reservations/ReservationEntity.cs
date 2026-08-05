@@ -35,8 +35,8 @@ namespace KartArena.Domain.Entities.Reservations
         public string CustomerPhone { get; set; } = string.Empty;
         public string? CustomerNote { get; set; }
 
-        // one-to-one payment
-        public PaymentEntity? Payment { get; set; }
+        // collections
+        public ICollection<PaymentReservationEntity> PaymentReservations { get; set; } = new List<PaymentReservationEntity>();
 
         public ICollection<ReservationEmployeeEntity> Employees { get; set; } = new List<ReservationEmployeeEntity>();
     }

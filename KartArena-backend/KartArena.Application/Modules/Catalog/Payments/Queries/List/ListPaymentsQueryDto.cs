@@ -8,9 +8,12 @@ public sealed class ListPaymentsQueryDto
 
     public string? CustomerName { get; init; }
 
-    public string? ReservationDate { get; init; }
+    public List<ListPaymentReservationDto> Reservations { get; init; }
+        = new();
 
     public decimal Amount { get; init; }
+
+    public string Currency { get; init; } = string.Empty;
 
     public DateTime? PaymentDate { get; init; }
 
@@ -18,6 +21,3 @@ public sealed class ListPaymentsQueryDto
 
     public PaymentStatus Status { get; init; }
 }
-
-
-

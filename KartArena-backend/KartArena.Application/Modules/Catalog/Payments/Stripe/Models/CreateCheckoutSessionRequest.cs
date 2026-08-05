@@ -8,6 +8,6 @@ namespace KartArena.Application.Modules.Catalog.Payments.Stripe.Models
 {
     public sealed class CreateCheckoutSessionRequest
     {
-        public int ReservationId { get; set; }
+        public int PaymentId { get; set; }
     }
 }

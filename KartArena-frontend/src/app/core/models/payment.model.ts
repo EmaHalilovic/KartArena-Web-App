@@ -1,9 +1,10 @@
 export interface CreateCheckoutSessionRequest {
-  reservationId: number;
+  paymentId: number;
 }
 
 export interface CreateCheckoutSessionResponse {
   checkoutUrl: string;
   sessionId: string;
-  reservationId: number;
+  paymentId: number;
+  reservationIds: number[];
 }

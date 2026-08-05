@@ -6,43 +6,87 @@ namespace KartArena.Application.Modules.Catalog.Payments.Commands.Create;
 public sealed class CreatePaymentCommandHandler(IAppDbContext context)
     : IRequestHandler<CreatePaymentCommand, int>
 {
-    public async Task<int> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(
+        CreatePaymentCommand request,
+        CancellationToken cancellationToken)
     {
-        var reservationExists = await context.Reservations
-            .AnyAsync(x => x.Id == request.ReservationId && !x.IsDeleted, cancellationToken);
+        var reservation = await context.Reservations
+            .SingleOrDefaultAsync(
+                x => x.Id == request.ReservationId &&
+                     !x.IsDeleted,
+                cancellationToken);
 
-        if (!reservationExists)
-            throw new MarketNotFoundException($"Reservation with id {request.ReservationId} was not found.");
-
-       
-            var paymentType = await context.PaymentTypes
-                .FirstOrDefaultAsync(x => x.Id == request.PaymentTypeId && !x.IsDeleted, cancellationToken);
-
-            if (paymentType is null)
-                throw new MarketNotFoundException($"Payment type with id {request.PaymentTypeId} was not found.");
-
-            if (!paymentType.isEnabled)
-                throw new MarketBusinessRuleException(
-                    "payment.create.payment_type_disabled",
-                    "Selected payment type is disabled.");
-        
-
-        var entity = new PaymentEntity
+        if (reservation is null)
         {
-            ReservationId = request.ReservationId,
+            throw new MarketNotFoundException(
+                $"Reservation with id {request.ReservationId} was not found.");
+        }
+
+        var paymentType = await context.PaymentTypes
+            .SingleOrDefaultAsync(
+                x => x.Id == request.PaymentTypeId &&
+                     !x.IsDeleted,
+                cancellationToken);
+
+        if (paymentType is null)
+        {
+            throw new MarketNotFoundException(
+                $"Payment type with id {request.PaymentTypeId} was not found.");
+        }
+
+        if (!paymentType.isEnabled)
+        {
+            throw new MarketBusinessRuleException(
+                "payment.create.payment_type_disabled",
+                "Selected payment type is disabled.");
+        }
+
+        var alreadyHasActivePayment =
+            await context.PaymentReservations
+                .AnyAsync(
+                    link =>
+                        link.ReservationId == request.ReservationId &&
+                        !link.Payment.IsDeleted &&
+                        link.Payment.Status != PaymentStatus.Cancelled &&
+                        link.Payment.Status != PaymentStatus.Failed,
+                    cancellationToken);
+
+        if (alreadyHasActivePayment)
+        {
+            throw new MarketBusinessRuleException(
+                "payment.create.reservation_already_has_payment",
+                "The reservation already has an active payment.");
+        }
+
+        var payment = new PaymentEntity
+        {
             PaymentTypeId = request.PaymentTypeId,
             Amount = request.Amount,
-            PaymentDate = request.PaymentDate ?? DateTime.UtcNow,
-            TransactionReference = request.TransactionReference?.Trim(),
+            Currency = "bam",
+            PaymentDate = request.PaymentDate,
+            TransactionReference =
+                request.TransactionReference?.Trim(),
             Note = request.Note?.Trim(),
             Status = PaymentStatus.Pending,
-            isEnabled=true
+            isEnabled = true
         };
 
-        context.Payments.Add(entity);
+        var paymentReservation =
+            new PaymentReservationEntity
+            {
+                Payment = payment,
+                Reservation = reservation
+            };
 
-        await context.SaveChangesAsync(cancellationToken);
+        context.Payments.Add(payment);
+        context.PaymentReservations.Add(paymentReservation);
 
-        return entity.Id;
+        reservation.PaymentStatus =
+            PaymentStatus.Pending;
+
+        await context.SaveChangesAsync(
+            cancellationToken);
+
+        return payment.Id;
     }
 }

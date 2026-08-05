@@ -1,6 +1,7 @@
 ﻿using KartArena.Application.Abstractions;
 using KartArena.Application.Abstractions;
 using KartArena.Application.Modules.Catalog.Payments.Stripe;
+using KartArena.Infrastructure.BackgroundServices;
 using KartArena.Infrastructure.Common;
 using KartArena.Infrastructure.Database;
 using KartArena.Infrastructure.Payments;

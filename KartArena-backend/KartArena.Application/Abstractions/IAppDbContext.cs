@@ -15,6 +15,7 @@ public interface IAppDbContext
     //payments
     DbSet<PaymentTypeEntity> PaymentTypes { get; }
     DbSet<PaymentEntity> Payments { get; }
+    DbSet<PaymentReservationEntity> PaymentReservations { get; }
 
     DbSet<ReservationEntity> Reservations { get; }
     DbSet<EquipmentTypeEntity> EquipmentEntity { get; }
