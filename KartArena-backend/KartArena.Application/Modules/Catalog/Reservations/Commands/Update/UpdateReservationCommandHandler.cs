@@ -9,8 +9,14 @@ public sealed class UpdateReservationCommandHandler(IAppDbContext ctx)
     public async Task<int> Handle(UpdateReservationCommand request, CancellationToken ct)
     {
         var reservation = await ctx.Reservations
-            .Include(r => r.Payment)
-            .FirstOrDefaultAsync(r => r.Id == request.Id && !r.IsDeleted, ct);
+            .Include(x => x.PaymentReservations)
+                .ThenInclude(x => x.Payment)
+                    .ThenInclude(x => x.PaymentReservations)
+                        .ThenInclude(x => x.Reservation)
+            .FirstOrDefaultAsync(
+                x => x.Id == request.Id &&
+                     !x.IsDeleted,
+                ct);
 
         if (reservation is null)
             throw new Exception("Reservation not found.");

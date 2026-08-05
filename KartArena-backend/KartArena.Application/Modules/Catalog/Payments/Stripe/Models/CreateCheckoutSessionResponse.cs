@@ -14,6 +14,9 @@ namespace KartArena.Application.Modules.Catalog.Payments.Stripe.Models
         public string SessionId { get; set; }
             = string.Empty;
 
-        public int ReservationId { get; set; }
+        public int PaymentId { get; set; }
+
+        public List<int> ReservationIds { get; set; }
+            = new();
     }
 }

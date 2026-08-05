@@ -8,6 +8,7 @@ import {
   GetReservationByIdQueryDto,
   CreateReservationCommand,
   CheckoutReservationsRequest,
+  CheckoutReservationsResponse,
   UpdateReservationCommand,
   MarkReservationCashPaidPayload,
   MarkReservationCashPaidCommand,
@@ -40,8 +41,8 @@ export class ReservationApiService {
     return this.http.post<any>(this.baseUrl, payload);
   }
 
-  checkout(payload: CheckoutReservationsRequest): Observable<number[]> {
-    return this.http.post<number[]>(`${this.apiUrl}/reservations/checkout`, payload);
+  checkout(payload: CheckoutReservationsRequest): Observable<CheckoutReservationsResponse> {
+    return this.http.post<CheckoutReservationsResponse>(`${this.apiUrl}/reservations/checkout`, payload);
   }
 
   getAvailability(date: string, duration: number): Observable<GetReservationAvailabilityDto> {

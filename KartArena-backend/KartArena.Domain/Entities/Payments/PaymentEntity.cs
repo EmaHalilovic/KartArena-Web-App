@@ -33,9 +33,7 @@ namespace KartArena.Domain.Entities.Payments
 
         public PaymentTypeEntity? PaymentType { get; set; }
 
-        // FK Reservation
-        public int ReservationId { get; set; }
-
-        public ReservationEntity Reservation { get; set; } = null!;
+        //  Reservation connecting table
+        public ICollection<PaymentReservationEntity> PaymentReservations { get; set; } = new List<PaymentReservationEntity>();
     }
 }

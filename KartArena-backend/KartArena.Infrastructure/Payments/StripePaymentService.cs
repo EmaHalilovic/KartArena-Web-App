@@ -1,6 +1,5 @@
 ﻿using KartArena.Application.Abstractions;
 using KartArena.Application.Modules.Catalog.Payments.Stripe.Models;
-using KartArena.Application.Modules.Catalog.Payments.Stripe.Models;
 using KartArena.Domain.Entities.Payments;
 using KartArena.Domain.Entities.Reservations;
 using Microsoft.EntityFrameworkCore;
@@ -8,274 +7,295 @@ using Microsoft.Extensions.Configuration;
 using Stripe;
 using Stripe.Checkout;
 
-namespace KartArena.Infrastructure.Payments
-{
-    public sealed class StripePaymentService
-        : IStripePaymentService
-    {
-        private readonly IAppDbContext _context;
-        private readonly IConfiguration _configuration;
+namespace KartArena.Infrastructure.Payments;
 
-        public StripePaymentService(
-            IAppDbContext context,
-            IConfiguration configuration)
+public sealed class StripePaymentService : IStripePaymentService
+{
+    private const string Currency = "bam";
+
+    private readonly IAppDbContext _context;
+    private readonly IConfiguration _configuration;
+
+    public StripePaymentService(
+        IAppDbContext context,
+        IConfiguration configuration)
+    {
+        _context = context;
+        _configuration = configuration;
+    }
+
+    public async Task<CreateCheckoutSessionResponse>
+        CreateCheckoutSessionAsync(
+            int paymentId,
+            CancellationToken cancellationToken)
+    {
+        var payment = await _context.Payments
+            .Include(x => x.PaymentType)
+            .Include(x => x.PaymentReservations)
+                .ThenInclude(x => x.Reservation)
+                    .ThenInclude(x => x.Track)
+            .Include(x => x.PaymentReservations)
+                .ThenInclude(x => x.Reservation)
+                    .ThenInclude(x => x.Kart)
+            .SingleOrDefaultAsync(
+                x => x.Id == paymentId &&
+                     !x.IsDeleted,
+                cancellationToken);
+
+        if (payment is null)
         {
-            _context = context;
-            _configuration = configuration;
+            throw new KeyNotFoundException(
+                "Payment was not found.");
         }
 
-        public async Task<CreateCheckoutSessionResponse>
-            CreateCheckoutSessionAsync(
-                int reservationId,
-                CancellationToken cancellationToken)
+        if (payment.PaymentReservations.Count == 0)
         {
-            var reservation = await _context.Reservations
-                .Include(x => x.Track)
-                .Include(x => x.Kart)
-                .Include(x => x.Payment)
-                .SingleOrDefaultAsync(
-                    x => x.Id == reservationId &&
-                         !x.IsDeleted,
-                    cancellationToken);
+            throw new InvalidOperationException(
+                "Payment does not contain reservations.");
+        }
 
-            if (reservation is null)
+        if (payment.Status == PaymentStatus.Paid)
+        {
+            throw new InvalidOperationException(
+                "Payment is already completed.");
+        }
+
+        var reservations = payment.PaymentReservations
+            .Select(x => x.Reservation)
+            .ToList();
+
+        if (reservations.Any(x =>
+                x.Status == ReservationStatus.Cancelled))
+        {
+            throw new InvalidOperationException(
+                "Cancelled reservations cannot be paid.");
+        }
+
+        if (reservations.Any(x =>
+                x.PaymentStatus == PaymentStatus.Paid))
+        {
+            throw new InvalidOperationException(
+                "One or more reservations are already paid.");
+        }
+
+        if (payment.Amount <= 0)
+        {
+            throw new InvalidOperationException(
+                "Payment amount must be greater than zero.");
+        }
+
+        var stripePaymentType = await _context.PaymentTypes
+            .SingleOrDefaultAsync(
+                x => x.Code == "STRIPE" &&
+                     x.AllowedOnline &&
+                     !x.IsDeleted,
+                cancellationToken);
+
+        if (stripePaymentType is null)
+        {
+            throw new InvalidOperationException(
+                "Stripe payment type is not configured.");
+        }
+
+        var frontendUrl =
+            _configuration["FrontendUrl"];
+
+        if (string.IsNullOrWhiteSpace(frontendUrl))
+        {
+            throw new InvalidOperationException(
+                "Frontend URL is not configured.");
+        }
+
+        var amountInMinorUnits = checked(
+            (long)Math.Round(
+                payment.Amount * 100m,
+                MidpointRounding.AwayFromZero));
+
+        var reservationIds = reservations
+            .Select(x => x.Id)
+            .ToList();
+
+        var options = new SessionCreateOptions
+        {
+            Mode = "payment",
+
+            SuccessUrl =
+                $"{frontendUrl}/payment/success" +
+                "?session_id={{CHECKOUT_SESSION_ID}}",
+
+            CancelUrl =
+                $"{frontendUrl}/payment/cancelled" +
+                $"?paymentId={payment.Id}",
+
+            ClientReferenceId =
+                payment.Id.ToString(),
+
+            CustomerEmail =
+                reservations
+                    .Select(x => x.CustomerEmail)
+                    .FirstOrDefault(x =>
+                        !string.IsNullOrWhiteSpace(x)),
+
+            Metadata = new Dictionary<string, string>
             {
-                throw new KeyNotFoundException(
-                    "Reservation was not found.");
-            }
+                ["paymentId"] =
+                    payment.Id.ToString(),
 
-            if (reservation.Status ==
-                ReservationStatus.Cancelled)
-            {
-                throw new InvalidOperationException(
-                    "Cancelled reservation cannot be paid.");
-            }
+                ["reservationIds"] =
+                    string.Join(",", reservationIds)
+            },
 
-            if (reservation.PaymentStatus ==
-                PaymentStatus.Paid)
-            {
-                throw new InvalidOperationException(
-                    "Reservation is already paid.");
-            }
-
-            if (reservation.TotalPrice <= 0)
-            {
-                throw new InvalidOperationException(
-                    "Reservation price must be greater than zero.");
-            }
-
-            var stripePaymentType =
-                await _context.PaymentTypes
-                    .SingleOrDefaultAsync(
-                        x => x.Code == "STRIPE" &&
-                             !x.IsDeleted,
-                        cancellationToken);
-
-            if (stripePaymentType is null)
-            {
-                throw new InvalidOperationException(
-                    "Stripe payment type is not configured.");
-            }
-
-            var frontendUrl =
-                _configuration["FrontendUrl"];
-
-            if (string.IsNullOrWhiteSpace(frontendUrl))
-            {
-                throw new InvalidOperationException(
-                    "Frontend URL is not configured.");
-            }
-
-            var amountInMinorUnits = checked(
-                (long)Math.Round(
-                    reservation.TotalPrice * 100m,
-                    MidpointRounding.AwayFromZero));
-
-            var options = new SessionCreateOptions
-            {
-                Mode = "payment",
-
-                SuccessUrl =
-                    $"{frontendUrl}/payment/success" +
-                    "?session_id={{CHECKOUT_SESSION_ID}}",
-
-                CancelUrl =
-                    $"{frontendUrl}/payment/cancelled" +
-                    $"?reservationId={reservation.Id}",
-
-                ClientReferenceId =
-                    reservation.Id.ToString(),
-
-                CustomerEmail =
-                    reservation.CustomerEmail,
-
-                Metadata = new Dictionary<string, string>
+            PaymentIntentData =
+                new SessionPaymentIntentDataOptions
                 {
-                    ["reservationId"] =
-                        reservation.Id.ToString(),
-
-                    ["customerEmail"] =
-                        reservation.CustomerEmail
+                    Metadata =
+                        new Dictionary<string, string>
+                        {
+                            ["paymentId"] =
+                                payment.Id.ToString()
+                        }
                 },
 
-                PaymentIntentData =
-                    new SessionPaymentIntentDataOptions
-                    {
-                        Metadata =
-                            new Dictionary<string, string>
-                            {
-                                ["reservationId"] =
-                                    reservation.Id.ToString()
-                            }
-                    },
+            LineItems =
+            [
+                new SessionLineItemOptions
+                {
+                    Quantity = 1,
 
-                LineItems =
-                [
-                    new SessionLineItemOptions
-                    {
-                        Quantity = 1,
+                    PriceData =
+                        new SessionLineItemPriceDataOptions
+                        {
+                            Currency = Currency,
 
-                        PriceData =
-                            new SessionLineItemPriceDataOptions
-                            {
-                                Currency = "bam",
+                            UnitAmount =
+                                amountInMinorUnits,
 
-                                UnitAmount =
-                                    amountInMinorUnits,
+                            ProductData =
+                                new SessionLineItemPriceDataProductDataOptions
+                                {
+                                    Name =
+                                        "Kart Arena reservation checkout",
 
-                                ProductData =
-                                    new SessionLineItemPriceDataProductDataOptions
-                                    {
-                                        Name =
-                                            "Kart Arena reservation",
+                                    Description =
+                                        CreateDescription(
+                                            reservations)
+                                }
+                        }
+                }
+            ]
+        };
 
-                                        Description =
-                                            CreateDescription(
-                                                reservation)
-                                    }
-                            }
-                    }
-                ]
-            };
+        var sessionService =
+            new SessionService();
 
-            var sessionService = new SessionService();
-
-            var requestOptions = new RequestOptions
+        /*
+         * Ako isti payment može imati više pokušaja,
+         * nemoj koristiti uvijek isti idempotency key.
+         *
+         * Payment ID + trenutni broj session pokušaja
+         * ili posebni attempt ID je bolja opcija.
+         */
+        var requestOptions =
+            new RequestOptions
             {
                 IdempotencyKey =
-                    $"reservation-{reservation.Id}-checkout"
+                    $"payment-{payment.Id}-checkout-" +
+                    $"{Guid.NewGuid():N}"
             };
 
-            Session session;
+        Session session;
 
-            try
-            {
-                session = await sessionService.CreateAsync(
+        try
+        {
+            session =
+                await sessionService.CreateAsync(
                     options,
                     requestOptions,
                     cancellationToken);
-            }
-            catch (StripeException exception)
-            {
-                throw new InvalidOperationException(
-                    "Stripe Checkout Session could not be created.",
-                    exception);
-            }
+        }
+        catch (StripeException exception)
+        {
+            throw new InvalidOperationException(
+                "Stripe Checkout Session could not be created.",
+                exception);
+        }
 
-            if (string.IsNullOrWhiteSpace(session.Url))
-            {
-                throw new InvalidOperationException(
-                    "Stripe did not return a checkout URL.");
-            }
+        if (string.IsNullOrWhiteSpace(
+                session.Url))
+        {
+            throw new InvalidOperationException(
+                "Stripe did not return a checkout URL.");
+        }
 
-            if (reservation.Payment is null)
-            {
-                reservation.Payment =
-                    new PaymentEntity
-                    {
-                        Amount =
-                            reservation.TotalPrice,
+        payment.Amount =
+            payment.Amount;
 
-                        Currency = "EUR",
+        payment.Currency =
+            Currency;
 
-                        Status =
-                            PaymentStatus.Pending,
+        payment.Status =
+            PaymentStatus.Pending;
 
-                        StripeCheckoutSessionId =
-                            session.Id,
+        payment.PaymentDate =
+            null;
 
-                        TransactionReference =
-                            session.Id,
+        payment.StripeCheckoutSessionId =
+            session.Id;
 
-                        PaymentTypeId =
-                            stripePaymentType.Id,
+        payment.StripePaymentIntentId =
+            null;
 
-                        ReservationId =
-                            reservation.Id,
+        payment.StripeEventId =
+            null;
 
-                        Note =
-                            "Stripe Checkout Session created."
-                    };
+        payment.TransactionReference =
+            session.Id;
 
-                _context.Payments.Add(
-                    reservation.Payment);
-            }
-            else
-            {
-                // Retrying the payment uses the same Payment record
-                reservation.Payment.Amount =
-                    reservation.TotalPrice;
+        payment.PaymentTypeId =
+            stripePaymentType.Id;
 
-                reservation.Payment.Currency =
-                    "bam";
+        payment.Note =
+            "Stripe Checkout Session created.";
 
-                reservation.Payment.Status =
-                    PaymentStatus.Pending;
+        payment.ModifiedAtUtc =
+            DateTime.UtcNow;
 
-                reservation.Payment.PaymentDate =
-                    null;
-
-                reservation.Payment.StripeCheckoutSessionId =
-                    session.Id;
-
-                reservation.Payment.StripePaymentIntentId =
-                    null;
-
-                reservation.Payment.StripeEventId =
-                    null;
-
-                reservation.Payment.TransactionReference =
-                    session.Id;
-
-                reservation.Payment.PaymentTypeId =
-                    stripePaymentType.Id;
-
-                reservation.Payment.Note =
-                    "New Stripe Checkout Session created.";
-            }
-
+        foreach (var reservation in reservations)
+        {
             reservation.PaymentStatus =
                 PaymentStatus.Pending;
 
-            await _context.SaveChangesAsync(
-                cancellationToken);
-
-            return new CreateCheckoutSessionResponse
-            {
-                CheckoutUrl = session.Url,
-                SessionId = session.Id,
-                ReservationId = reservation.Id
-            };
+            reservation.ModifiedAtUtc =
+                DateTime.UtcNow;
         }
 
-        private static string CreateDescription(
-            ReservationEntity reservation)
+        await _context.SaveChangesAsync(
+            cancellationToken);
+
+        return new CreateCheckoutSessionResponse
         {
+            CheckoutUrl = session.Url,
+            SessionId = session.Id,
+            PaymentId = payment.Id,
+            ReservationIds = reservationIds
+        };
+    }
+
+    private static string CreateDescription(
+        IReadOnlyCollection<ReservationEntity> reservations)
+    {
+        if (reservations.Count == 1)
+        {
+            var reservation =
+                reservations.First();
+
             var trackName =
-                reservation.Track?.Name ?? "Track";
+                reservation.Track?.Name ??
+                "Track";
 
             var kartName =
-                reservation.Kart?.Name ?? "Kart";
+                reservation.Kart?.Name ??
+                "Kart";
 
             return
                 $"{trackName}, {kartName}, " +
@@ -283,5 +303,8 @@ namespace KartArena.Infrastructure.Payments
                 $"{reservation.StartTime:HH:mm} - " +
                 $"{reservation.EndTime:HH:mm}";
         }
+
+        return
+            $"{reservations.Count} Kart Arena reservations";
     }
 }

@@ -83,7 +83,7 @@ namespace KartArena.API.Controllers
                 var response =
                     await stripePaymentService
                         .CreateCheckoutSessionAsync(
-                            request.ReservationId,
+                            request.PaymentId,
                             cancellationToken);
 
                 return Ok(response);

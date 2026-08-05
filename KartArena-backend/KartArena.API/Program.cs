@@ -66,21 +66,6 @@ public partial class Program
             });
            
 
-            builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection(
-        StripeSettings.SectionName));
-
-            var stripeSecretKey =
-                builder.Configuration["Stripe:SecretKey"];
-
-            if (string.IsNullOrWhiteSpace(stripeSecretKey))
-            {
-                throw new InvalidOperationException(
-                    "Stripe secret key is not configured.");
-            }
-
-            StripeConfiguration.ApiKey = stripeSecretKey;
-
-
 
             var app = builder.Build();
 
@@ -98,7 +83,7 @@ public partial class Program
             app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
             app.UseHttpsRedirection();
-            // UseCors ide prije UseAuthorization i UseAuthentification
+           
             app.UseCors("AllowAngularDev");
 
             app.UseAuthentication();

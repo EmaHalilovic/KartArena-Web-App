@@ -19,25 +19,48 @@ export class ListPaymentsRequest extends BasePagedQuery {
 export interface ListPaymentsQueryDto {
   id: number;
   customerName?: string | null;
-  reservationDate?: string | null;
+  reservations: ListPaymentReservationDto[];
   amount: number;
+  currency: string;
   paymentDate?: string | null;
   paymentTypeName?: string | null;
   status: PaymentStatus;
+}
+
+export interface ListPaymentReservationDto {
+  id: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  trackName: string;
+  kartName: string;
 }
 
 export type ListPaymentsResponse = PageResult<ListPaymentsQueryDto>;
 
 export interface GetPaymentByIdQueryDto {
   id: number;
-  reservationId: number;
+  reservations: GetPaymentReservationDto[];
   amount: number;
+  currency: string;
   paymentDate?: string | null;
   paymentTypeId?: number | null;
   paymentTypeName?: string | null;
   status: PaymentStatus;
   transactionReference?: string | null;
   note?: string | null;
+}
+
+export interface GetPaymentReservationDto {
+  id: number;
+  customerName: string;
+  customerEmail: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  trackName: string;
+  kartName: string;
+  totalPrice: number;
 }
 
 export interface CreatePaymentCommand {

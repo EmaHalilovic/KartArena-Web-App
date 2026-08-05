@@ -164,6 +164,38 @@ namespace KartArena.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    TransactionReference = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    StripeCheckoutSessionId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    StripePaymentIntentId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    StripeEventId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    PaymentTypeId = table.Column<int>(type: "int", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    isEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Payments_PaymentTypes_PaymentTypeId",
+                        column: x => x.PaymentTypeId,
+                        principalTable: "PaymentTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Karts",
                 columns: table => new
                 {
@@ -329,6 +361,7 @@ namespace KartArena.Infrastructure.Migrations
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     PaymentStatus = table.Column<int>(type: "int", nullable: false),
                     TrackId = table.Column<int>(type: "int", nullable: false),
@@ -338,6 +371,7 @@ namespace KartArena.Infrastructure.Migrations
                     CustomerLastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CustomerEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerNote = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     isEnabled = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -462,38 +496,23 @@ namespace KartArena.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Payments",
+                name: "PaymentReservations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    Currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
-                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    TransactionReference = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    StripeCheckoutSessionId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    StripePaymentIntentId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    StripeEventId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    Note = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    PaymentTypeId = table.Column<int>(type: "int", nullable: true),
-                    ReservationId = table.Column<int>(type: "int", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    isEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    PaymentId = table.Column<int>(type: "int", nullable: false),
+                    ReservationId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Payments", x => x.Id);
+                    table.PrimaryKey("PK_PaymentReservations", x => new { x.PaymentId, x.ReservationId });
                     table.ForeignKey(
-                        name: "FK_Payments_PaymentTypes_PaymentTypeId",
-                        column: x => x.PaymentTypeId,
-                        principalTable: "PaymentTypes",
+                        name: "FK_PaymentReservations_Payments_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "Payments",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Payments_Reservations_ReservationId",
+                        name: "FK_PaymentReservations_Reservations_ReservationId",
                         column: x => x.ReservationId,
                         principalTable: "Reservations",
                         principalColumn: "Id",
@@ -587,15 +606,14 @@ namespace KartArena.Infrastructure.Migrations
                 column: "UsersId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PaymentReservations_ReservationId",
+                table: "PaymentReservations",
+                column: "ReservationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Payments_PaymentTypeId",
                 table: "Payments",
                 column: "PaymentTypeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Payments_ReservationId",
-                table: "Payments",
-                column: "ReservationId",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_StripeCheckoutSessionId",
@@ -730,7 +748,7 @@ namespace KartArena.Infrastructure.Migrations
                 name: "NotificationEntity");
 
             migrationBuilder.DropTable(
-                name: "Payments");
+                name: "PaymentReservations");
 
             migrationBuilder.DropTable(
                 name: "RefreshTokens");
@@ -748,7 +766,7 @@ namespace KartArena.Infrastructure.Migrations
                 name: "RaceUserEntity");
 
             migrationBuilder.DropTable(
-                name: "PaymentTypes");
+                name: "Payments");
 
             migrationBuilder.DropTable(
                 name: "EquipmentItemEntity");
@@ -758,6 +776,9 @@ namespace KartArena.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "RaceEntity");
+
+            migrationBuilder.DropTable(
+                name: "PaymentTypes");
 
             migrationBuilder.DropTable(
                 name: "EquipmentEntity");

@@ -1,14 +1,17 @@
 ﻿using KartArena.Application.Abstractions;
+using KartArena.Application.Abstractions;
+using KartArena.Application.Modules.Catalog.Payments.Stripe;
+using KartArena.Infrastructure.BackgroundServices;
 using KartArena.Infrastructure.Common;
 using KartArena.Infrastructure.Database;
+using KartArena.Infrastructure.Payments;
 using KartArena.Shared.Constants;
 using KartArena.Shared.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using KartArena.Application.Abstractions;
-using KartArena.Infrastructure.Payments;
+using Stripe;
 
 
 namespace KartArena.Infrastructure;
@@ -47,10 +50,23 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
 
         //// stripe
-        services.AddScoped<IStripePaymentService, StripePaymentService>();
+        services.Configure<StripeSettings>(
+            configuration.GetSection(StripeSettings.SectionName));
 
-        ////webhook service 
+        var stripeSecretKey = configuration["Stripe:SecretKey"];
+
+        if (string.IsNullOrWhiteSpace(stripeSecretKey))
+        {
+            throw new InvalidOperationException(
+                "Stripe secret key is not configured.");
+        }
+
+        StripeConfiguration.ApiKey = stripeSecretKey;
+
+        services.AddScoped<IStripePaymentService, StripePaymentService>();
         services.AddScoped<IStripeWebhookService, StripeWebhookService>();
+
+
 
         services.AddOptions<JwtOptions>()
         .Bind(configuration.GetSection(JwtOptions.SectionName))

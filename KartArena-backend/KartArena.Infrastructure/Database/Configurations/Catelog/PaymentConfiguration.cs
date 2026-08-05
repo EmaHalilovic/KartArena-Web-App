@@ -37,19 +37,14 @@ namespace KartArena.Infrastructure.Persistence.Configurations
             builder.Property(x => x.Note)
                 .HasMaxLength(1000);
 
-            builder.HasIndex(x => x.ReservationId)
-                .IsUnique();
+      
 
             builder.HasIndex(x => x.StripeCheckoutSessionId)
                 .IsUnique();
 
             builder.HasIndex(x => x.StripePaymentIntentId);
 
-            builder.HasOne(x => x.Reservation)
-                .WithOne(x => x.Payment)
-                .HasForeignKey<PaymentEntity>(
-                    x => x.ReservationId)
-                .OnDelete(DeleteBehavior.Restrict);
+          
 
             builder.HasOne(x => x.PaymentType)
                 .WithMany(x => x.Payments)

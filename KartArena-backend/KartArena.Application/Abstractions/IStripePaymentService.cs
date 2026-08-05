@@ -6,7 +6,7 @@ namespace KartArena.Application.Abstractions
     {
         Task<CreateCheckoutSessionResponse>
             CreateCheckoutSessionAsync(
-                int reservationId,
+                int paymentId,
                 CancellationToken cancellationToken);
     }
 }

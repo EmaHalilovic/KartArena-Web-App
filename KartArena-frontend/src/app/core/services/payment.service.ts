@@ -17,10 +17,10 @@ export class PaymentService {
   private readonly baseUrl = `${environment.apiUrl}/payments/controller`;
 
   createCheckoutSession(
-    reservationId: number
+    paymentId: number
   ): Observable<CreateCheckoutSessionResponse> {
     const request: CreateCheckoutSessionRequest = {
-      reservationId
+      paymentId
     };
 
     return this.http.post<CreateCheckoutSessionResponse>(

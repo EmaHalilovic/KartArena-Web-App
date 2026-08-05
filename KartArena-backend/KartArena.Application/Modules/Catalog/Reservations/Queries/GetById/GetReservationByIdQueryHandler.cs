@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using KartArena.Domain.Entities.Payments;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KartArena.Application.Modules.Catalog.Reservations.Queries.GetById
@@ -23,12 +24,69 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Queries.GetById
                     Status = r.Status,
                     PaymentStatus = r.PaymentStatus,
 
-                    PaymentAmount = r.Payment != null ? r.Payment.Amount : null,
-                    PaymentTypeId = r.Payment != null ? r.Payment.PaymentTypeId : null,
-                    PaymentTypeName = r.Payment != null && r.Payment.PaymentType != null ? r.Payment.PaymentType.Name : null,
-                    PaymentDate = r.Payment != null ? r.Payment.PaymentDate : null,
-                    TransactionReference = r.Payment != null ? r.Payment.TransactionReference : null,
-                    PaymentNote = r.Payment != null ? r.Payment.Note : null,
+                    PaymentAmount = r.PaymentReservations
+                    .Where(link => !link.Payment.IsDeleted)
+                    .OrderByDescending(link =>
+                        link.Payment.Status == PaymentStatus.Paid)
+                    .ThenByDescending(link =>
+                        link.Payment.Status == PaymentStatus.Pending)
+                    .ThenByDescending(link => link.Payment.Id)
+                    .Select(link => (decimal?)link.Payment.Amount)
+                    .FirstOrDefault(),
+
+                    PaymentTypeId = r.PaymentReservations
+                    .Where(link => !link.Payment.IsDeleted)
+                    .OrderByDescending(link =>
+                        link.Payment.Status == PaymentStatus.Paid)
+                    .ThenByDescending(link =>
+                        link.Payment.Status == PaymentStatus.Pending)
+                    .ThenByDescending(link => link.Payment.Id)
+                    .Select(link => link.Payment.PaymentTypeId)
+                    .FirstOrDefault(),
+
+                    PaymentTypeName = r.PaymentReservations
+                    .Where(link => !link.Payment.IsDeleted)
+                    .OrderByDescending(link =>
+                        link.Payment.Status == PaymentStatus.Paid)
+                    .ThenByDescending(link =>
+                        link.Payment.Status == PaymentStatus.Pending)
+                    .ThenByDescending(link => link.Payment.Id)
+                    .Select(link =>
+                        link.Payment.PaymentType != null
+                            ? link.Payment.PaymentType.Name
+                            : null)
+                    .FirstOrDefault(),
+
+                    PaymentDate = r.PaymentReservations
+                    .Where(link => !link.Payment.IsDeleted)
+                    .OrderByDescending(link =>
+                        link.Payment.Status == PaymentStatus.Paid)
+                    .ThenByDescending(link =>
+                        link.Payment.Status == PaymentStatus.Pending)
+                    .ThenByDescending(link => link.Payment.Id)
+                    .Select(link => link.Payment.PaymentDate)
+                    .FirstOrDefault(),
+
+                    TransactionReference = r.PaymentReservations
+                    .Where(link => !link.Payment.IsDeleted)
+                    .OrderByDescending(link =>
+                        link.Payment.Status == PaymentStatus.Paid)
+                    .ThenByDescending(link =>
+                        link.Payment.Status == PaymentStatus.Pending)
+                    .ThenByDescending(link => link.Payment.Id)
+                    .Select(link =>
+                        link.Payment.TransactionReference)
+                    .FirstOrDefault(),
+
+                    PaymentNote = r.PaymentReservations
+                    .Where(link => !link.Payment.IsDeleted)
+                    .OrderByDescending(link =>
+                        link.Payment.Status == PaymentStatus.Paid)
+                    .ThenByDescending(link =>
+                        link.Payment.Status == PaymentStatus.Pending)
+                    .ThenByDescending(link => link.Payment.Id)
+                    .Select(link => link.Payment.Note)
+                    .FirstOrDefault(),
 
                     UserFirstName = r.User != null ? r.User.FirstName : null,
                     UserLastName = r.User != null ? r.User.LastName : null,

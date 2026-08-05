@@ -1,5 +1,4 @@
 ﻿using KartArena.Application.Abstractions;
-using KartArena.Application.Abstractions;
 using KartArena.Application.Modules.Catalog.Payments.Stripe;
 using KartArena.Domain.Entities.Payments;
 using KartArena.Domain.Entities.Reservations;
@@ -56,9 +55,9 @@ namespace KartArena.Infrastructure.Payments
             switch (stripeEvent.Type)
             {
                 case EventTypes.CheckoutSessionCompleted:
+                case EventTypes.CheckoutSessionAsyncPaymentSucceeded:
                     {
-                        if (stripeEvent.Data.Object
-                            is Session session)
+                        if (stripeEvent.Data.Object is Session session)
                         {
                             await ProcessCompletedSessionAsync(
                                 session,
@@ -71,8 +70,7 @@ namespace KartArena.Infrastructure.Payments
 
                 case EventTypes.CheckoutSessionExpired:
                     {
-                        if (stripeEvent.Data.Object
-                            is Session session)
+                        if (stripeEvent.Data.Object is Session session)
                         {
                             await ProcessExpiredSessionAsync(
                                 session,
@@ -83,28 +81,11 @@ namespace KartArena.Infrastructure.Payments
                         break;
                     }
 
-                case EventTypes
-                    .CheckoutSessionAsyncPaymentFailed:
+                case EventTypes.CheckoutSessionAsyncPaymentFailed:
                     {
-                        if (stripeEvent.Data.Object
-                            is Session session)
+                        if (stripeEvent.Data.Object is Session session)
                         {
                             await ProcessFailedSessionAsync(
-                                session,
-                                stripeEvent.Id,
-                                cancellationToken);
-                        }
-
-                        break;
-                    }
-
-                case EventTypes
-                    .CheckoutSessionAsyncPaymentSucceeded:
-                    {
-                        if (stripeEvent.Data.Object
-                            is Session session)
-                        {
-                            await ProcessCompletedSessionAsync(
                                 session,
                                 stripeEvent.Id,
                                 cancellationToken);
@@ -120,21 +101,17 @@ namespace KartArena.Infrastructure.Payments
             string stripeEventId,
             CancellationToken cancellationToken)
         {
-            var payment = await _context.Payments
-                .Include(x => x.Reservation)
-                .SingleOrDefaultAsync(
-                    x =>
-                        x.StripeCheckoutSessionId ==
-                        session.Id,
-                    cancellationToken);
+            var payment = await GetPaymentWithReservationsAsync(
+                session.Id,
+                cancellationToken);
 
             if (payment is null)
             {
                 throw new KeyNotFoundException(
-                    $"Payment for Stripe session " +
-                    $"{session.Id} was not found.");
+                    $"Payment for Stripe session {session.Id} was not found.");
             }
 
+            // Stripe može više puta poslati isti događaj.
             if (payment.Status == PaymentStatus.Paid)
             {
                 return;
@@ -155,18 +132,15 @@ namespace KartArena.Infrastructure.Payments
 
             if (session.AmountTotal != expectedAmount)
             {
-                payment.Status =
-                    PaymentStatus.Failed;
-
-                payment.StripeEventId =
-                    stripeEventId;
-
+                payment.Status = PaymentStatus.Failed;
+                payment.StripeEventId = stripeEventId;
                 payment.Note =
-                    "Stripe amount does not match " +
-                    "the expected payment amount.";
+                    "Stripe amount does not match the expected payment amount.";
+                payment.ModifiedAtUtc = DateTime.UtcNow;
 
-                payment.Reservation.PaymentStatus =
-                    PaymentStatus.Failed;
+                SetReservationPaymentStatuses(
+                    payment,
+                    PaymentStatus.Failed);
 
                 await _context.SaveChangesAsync(
                     cancellationToken);
@@ -179,18 +153,15 @@ namespace KartArena.Infrastructure.Payments
                     payment.Currency,
                     StringComparison.OrdinalIgnoreCase))
             {
-                payment.Status =
-                    PaymentStatus.Failed;
-
-                payment.StripeEventId =
-                    stripeEventId;
-
+                payment.Status = PaymentStatus.Failed;
+                payment.StripeEventId = stripeEventId;
                 payment.Note =
-                    "Stripe currency does not match " +
-                    "the expected currency.";
+                    "Stripe currency does not match the expected currency.";
+                payment.ModifiedAtUtc = DateTime.UtcNow;
 
-                payment.Reservation.PaymentStatus =
-                    PaymentStatus.Failed;
+                SetReservationPaymentStatuses(
+                    payment,
+                    PaymentStatus.Failed);
 
                 await _context.SaveChangesAsync(
                     cancellationToken);
@@ -198,29 +169,31 @@ namespace KartArena.Infrastructure.Payments
                 return;
             }
 
-            payment.Status =
-                PaymentStatus.Paid;
+            var now = DateTime.UtcNow;
 
-            payment.PaymentDate =
-                DateTime.UtcNow;
-
+            payment.Status = PaymentStatus.Paid;
+            payment.PaymentDate = now;
             payment.StripePaymentIntentId =
                 session.PaymentIntentId;
-
-            payment.StripeEventId =
-                stripeEventId;
-
+            payment.StripeEventId = stripeEventId;
             payment.TransactionReference =
                 session.PaymentIntentId;
-
             payment.Note =
                 "Stripe payment successfully completed.";
+            payment.ModifiedAtUtc = now;
 
-            payment.Reservation.PaymentStatus =
-                PaymentStatus.Paid;
+            foreach (var link in payment.PaymentReservations)
+            {
+                var reservation = link.Reservation;
 
-            payment.Reservation.Status =
-                ReservationStatus.Confirmed;
+                reservation.PaymentStatus =
+                    PaymentStatus.Paid;
+
+                reservation.Status =
+                    ReservationStatus.Confirmed;
+
+                reservation.ModifiedAtUtc = now;
+            }
 
             await _context.SaveChangesAsync(
                 cancellationToken);
@@ -231,19 +204,17 @@ namespace KartArena.Infrastructure.Payments
             string stripeEventId,
             CancellationToken cancellationToken)
         {
-            var payment = await _context.Payments
-                .Include(x => x.Reservation)
-                .SingleOrDefaultAsync(
-                    x =>
-                        x.StripeCheckoutSessionId ==
-                        session.Id,
-                    cancellationToken);
+            var payment = await GetPaymentWithReservationsAsync(
+                session.Id,
+                cancellationToken);
 
             if (payment is null ||
                 payment.Status == PaymentStatus.Paid)
             {
                 return;
             }
+
+            var now = DateTime.UtcNow;
 
             payment.Status =
                 PaymentStatus.Cancelled;
@@ -254,11 +225,22 @@ namespace KartArena.Infrastructure.Payments
             payment.Note =
                 "Stripe Checkout Session expired.";
 
-            payment.Reservation.PaymentStatus =
-                PaymentStatus.Cancelled;
+            payment.ModifiedAtUtc =
+                now;
 
-            payment.Reservation.Status =
-                ReservationStatus.Cancelled;
+            foreach (var link in payment.PaymentReservations)
+            {
+                var reservation = link.Reservation;
+
+                reservation.PaymentStatus =
+                    PaymentStatus.Cancelled;
+
+                reservation.Status =
+                    ReservationStatus.Cancelled;
+
+                reservation.ModifiedAtUtc =
+                    now;
+            }
 
             await _context.SaveChangesAsync(
                 cancellationToken);
@@ -269,19 +251,17 @@ namespace KartArena.Infrastructure.Payments
             string stripeEventId,
             CancellationToken cancellationToken)
         {
-            var payment = await _context.Payments
-                .Include(x => x.Reservation)
-                .SingleOrDefaultAsync(
-                    x =>
-                        x.StripeCheckoutSessionId ==
-                        session.Id,
-                    cancellationToken);
+            var payment = await GetPaymentWithReservationsAsync(
+                session.Id,
+                cancellationToken);
 
             if (payment is null ||
                 payment.Status == PaymentStatus.Paid)
             {
                 return;
             }
+
+            var now = DateTime.UtcNow;
 
             payment.Status =
                 PaymentStatus.Failed;
@@ -292,11 +272,57 @@ namespace KartArena.Infrastructure.Payments
             payment.Note =
                 "Stripe payment failed.";
 
-            payment.Reservation.PaymentStatus =
-                PaymentStatus.Failed;
+            payment.ModifiedAtUtc =
+                now;
+
+            /*
+             * Rezervacije ostaju Pending kako bi korisnik
+             * mogao ponovo pokušati platiti prije isteka
+             * dozvoljenog vremena.
+             */
+            foreach (var link in payment.PaymentReservations)
+            {
+                link.Reservation.PaymentStatus =
+                    PaymentStatus.Failed;
+
+                link.Reservation.ModifiedAtUtc =
+                    now;
+            }
 
             await _context.SaveChangesAsync(
                 cancellationToken);
+        }
+
+        private async Task<PaymentEntity?>
+            GetPaymentWithReservationsAsync(
+                string stripeCheckoutSessionId,
+                CancellationToken cancellationToken)
+        {
+            return await _context.Payments
+                .Include(x => x.PaymentReservations)
+                    .ThenInclude(x => x.Reservation)
+                .SingleOrDefaultAsync(
+                    x =>
+                        x.StripeCheckoutSessionId ==
+                            stripeCheckoutSessionId &&
+                        !x.IsDeleted,
+                    cancellationToken);
+        }
+
+        private static void SetReservationPaymentStatuses(
+            PaymentEntity payment,
+            PaymentStatus status)
+        {
+            var now = DateTime.UtcNow;
+
+            foreach (var link in payment.PaymentReservations)
+            {
+                link.Reservation.PaymentStatus =
+                    status;
+
+                link.Reservation.ModifiedAtUtc =
+                    now;
+            }
         }
     }
 }

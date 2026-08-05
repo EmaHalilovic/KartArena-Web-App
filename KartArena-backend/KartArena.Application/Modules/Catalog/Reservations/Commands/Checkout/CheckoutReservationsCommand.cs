@@ -2,7 +2,8 @@
 
 namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Checkout;
 
-public sealed class CheckoutReservationsCommand : IRequest<List<int>>
+public sealed class CheckoutReservationsCommand
+    : IRequest<CheckoutReservationsResponse>
 {
     public int? UserId { get; set; }
 
@@ -13,7 +14,10 @@ public sealed class CheckoutReservationsCommand : IRequest<List<int>>
     public string? CustomerNote { get; set; }
 
     public int? PaymentTypeId { get; set; }
+
+    // Frontend može poslati amount, ali backend ga ne smije slijepo koristiti.
     public decimal? Amount { get; set; }
+
     public string? PaymentNote { get; set; }
 
     public List<CheckoutReservationItemDto> Items { get; set; } = new();
@@ -22,9 +26,12 @@ public sealed class CheckoutReservationsCommand : IRequest<List<int>>
 public sealed class CheckoutReservationItemDto
 {
     public DateTime ReservationDate { get; set; }
+
     public DateTime StartTime { get; set; }
+
     public DateTime EndTime { get; set; }
 
     public int TrackId { get; set; }
+
     public int KartId { get; set; }
 }

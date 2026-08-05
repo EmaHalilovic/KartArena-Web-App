@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KartArena.Infrastructure.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20260710002816_AddReservationTotalPrice")]
-    partial class AddReservationTotalPrice
+    [Migration("20260805155524_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -758,9 +758,6 @@ namespace KartArena.Infrastructure.Migrations
                     b.Property<int?>("PaymentTypeId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReservationId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -787,9 +784,6 @@ namespace KartArena.Infrastructure.Migrations
 
                     b.HasIndex("PaymentTypeId");
 
-                    b.HasIndex("ReservationId")
-                        .IsUnique();
-
                     b.HasIndex("StripeCheckoutSessionId")
                         .IsUnique()
                         .HasFilter("[StripeCheckoutSessionId] IS NOT NULL");
@@ -797,6 +791,21 @@ namespace KartArena.Infrastructure.Migrations
                     b.HasIndex("StripePaymentIntentId");
 
                     b.ToTable("Payments", (string)null);
+                });
+
+            modelBuilder.Entity("KartArena.Domain.Entities.Payments.PaymentReservationEntity", b =>
+                {
+                    b.Property<int>("PaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PaymentId", "ReservationId");
+
+                    b.HasIndex("ReservationId");
+
+                    b.ToTable("PaymentReservations", (string)null);
                 });
 
             modelBuilder.Entity("KartArena.Domain.Entities.Payments.PaymentTypeEntity", b =>
@@ -917,6 +926,9 @@ namespace KartArena.Infrastructure.Migrations
 
                     b.Property<string>("CustomerLastName")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerNote")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CustomerPhone")
@@ -1113,13 +1125,24 @@ namespace KartArena.Infrastructure.Migrations
                         .HasForeignKey("PaymentTypeId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.Navigation("PaymentType");
+                });
+
+            modelBuilder.Entity("KartArena.Domain.Entities.Payments.PaymentReservationEntity", b =>
+                {
+                    b.HasOne("KartArena.Domain.Entities.Payments.PaymentEntity", "Payment")
+                        .WithMany("PaymentReservations")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("KartArena.Domain.Entities.Reservations.ReservationEntity", "Reservation")
-                        .WithOne("Payment")
-                        .HasForeignKey("KartArena.Domain.Entities.Payments.PaymentEntity", "ReservationId")
+                        .WithMany("PaymentReservations")
+                        .HasForeignKey("ReservationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("PaymentType");
+                    b.Navigation("Payment");
 
                     b.Navigation("Reservation");
                 });
@@ -1241,6 +1264,11 @@ namespace KartArena.Infrastructure.Migrations
                     b.Navigation("Services");
                 });
 
+            modelBuilder.Entity("KartArena.Domain.Entities.Payments.PaymentEntity", b =>
+                {
+                    b.Navigation("PaymentReservations");
+                });
+
             modelBuilder.Entity("KartArena.Domain.Entities.Payments.PaymentTypeEntity", b =>
                 {
                     b.Navigation("Payments");
@@ -1250,7 +1278,7 @@ namespace KartArena.Infrastructure.Migrations
                 {
                     b.Navigation("Employees");
 
-                    b.Navigation("Payment");
+                    b.Navigation("PaymentReservations");
                 });
 #pragma warning restore 612, 618
         }
