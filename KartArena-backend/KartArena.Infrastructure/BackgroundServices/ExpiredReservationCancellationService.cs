@@ -68,13 +68,16 @@ public sealed class ExpiredReservationCancellationService
             now.Subtract(PaymentExpirationTime);
 
         var expiredPayments = await context.Payments
-            .Include(payment => payment.PaymentReservations)
-                .ThenInclude(link => link.Reservation)
-            .Where(payment =>
-                !payment.IsDeleted &&
-                payment.Status == PaymentStatus.Pending &&
-                payment.CreatedAtUtc <= expirationThreshold)
-            .ToListAsync(cancellationToken);
+       .Include(payment => payment.PaymentType)
+       .Include(payment => payment.PaymentReservations)
+           .ThenInclude(link => link.Reservation)
+       .Where(payment =>
+           !payment.IsDeleted &&
+           payment.Status == PaymentStatus.Pending &&
+           payment.PaymentType != null &&
+           payment.PaymentType.Code == "STRIPE" &&
+           payment.CreatedAtUtc <= expirationThreshold)
+       .ToListAsync(cancellationToken);
 
         if (expiredPayments.Count == 0)
         {
