@@ -327,3 +327,66 @@ $panel-soft: #121a29;
     }
   }
 }
+
+:host-context(.light-theme) {
+  .paginator-bar .paginator-container {
+    background: #ffffff;
+    border-color: rgba(15, 23, 42, 0.14);
+  }
+
+  .paginator-bar .paginator-info,
+  .paginator-bar .paginator-actions .page-size-selector .selector-label {
+    color: #64748b;
+  }
+
+  .paginator-bar .paginator-info .info-divider {
+    color: #94a3b8;
+  }
+
+  .paginator-bar .paginator-actions .page-size-selector .page-size-field {
+    ::ng-deep {
+      .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+        background-color: #f1f5f9 !important;
+      }
+
+      .mat-select-value,
+      .mat-mdc-select-value,
+      .mat-mdc-select-value-text,
+      .mat-mdc-select-min-line,
+      .mat-mdc-select-arrow {
+        color: #172033 !important;
+      }
+    }
+  }
+
+  .paginator-bar .paginator-actions .nav-buttons .nav-btn {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #172033;
+
+    mat-icon {
+      color: #334155;
+    }
+
+    &:not(:disabled):hover {
+      background: #fee2e2;
+      border-color: $primary-color;
+      color: #b91c1c;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+
+      mat-icon {
+        color: #b91c1c;
+      }
+    }
+
+    &:disabled {
+      background: #f1f5f9;
+      border-color: #e2e8f0;
+      color: #94a3b8;
+
+      mat-icon {
+        color: #94a3b8;
+      }
+    }
+  }
+}

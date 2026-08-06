@@ -34,6 +34,460 @@ body {
   margin: 0;
 }
 
+:root {
+  --ka-bg: #050912;
+  --ka-surface: #0a101b;
+  --ka-surface-raised: #111827;
+  --ka-text: #f5f7fb;
+  --ka-text-muted: #8e9ab2;
+  --ka-border: rgba(255, 255, 255, 0.12);
+  --ka-control-bg: rgba(255, 255, 255, 0.05);
+  --ka-control-hover: rgba(255, 255, 255, 0.1);
+  --ka-shadow: rgba(0, 0, 0, 0.28);
+}
+
+html.light-theme {
+  --ka-bg: #f4f6fa;
+  --ka-surface: #ffffff;
+  --ka-surface-raised: #f8fafc;
+  --ka-text: #172033;
+  --ka-text-muted: #64748b;
+  --ka-border: rgba(15, 23, 42, 0.14);
+  --ka-control-bg: rgba(15, 23, 42, 0.05);
+  --ka-control-hover: rgba(15, 23, 42, 0.1);
+  --ka-shadow: rgba(15, 23, 42, 0.12);
+}
+
+body {
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+body.dark-theme {
+  background-color: var(--ka-bg);
+  color: var(--ka-text);
+}
+
+body.light-theme {
+  background-color: var(--ka-bg);
+  color: var(--ka-text);
+}
+
+/* Shared light-mode treatment for the application shells and common content surfaces. */
+body.light-theme .admin-shell,
+body.light-theme .admin-content,
+body.light-theme .sidenav-container,
+body.light-theme .main-content {
+  background: var(--ka-bg) !important;
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .admin-sidenav,
+body.light-theme .sidenav {
+  background: #ffffff !important;
+  border-color: var(--ka-border) !important;
+}
+
+body.light-theme .topbar {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: var(--ka-border) !important;
+}
+
+body.light-theme .page-wrapper {
+  background: radial-gradient(circle at top left, rgba(240, 13, 13, 0.07), transparent 24%), var(--ka-bg) !important;
+}
+
+body.light-theme .brand-title,
+body.light-theme .footer-name,
+body.light-theme .nav-label,
+body.light-theme .nav-icon,
+body.light-theme .mat-mdc-list-item-title,
+body.light-theme .mat-mdc-list-item-icon {
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .nav-group-title,
+body.light-theme .footer-email,
+body.light-theme .system-status,
+body.light-theme .nav-section-title {
+  color: var(--ka-text-muted) !important;
+}
+
+body.light-theme .admin-sidenav .nav-item {
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .admin-sidenav .nav-item:hover {
+  background: #f1f5f9 !important;
+}
+
+body.light-theme .admin-sidenav .nav-item.active {
+  background: #fee2e2 !important;
+  color: #dc1515 !important;
+  box-shadow: inset 0 0 0 1px rgba(220, 21, 21, 0.08);
+}
+
+body.light-theme .admin-sidenav .nav-item.active .nav-label,
+body.light-theme .admin-sidenav .nav-item.active .nav-icon {
+  color: #dc1515 !important;
+}
+
+body.light-theme .sidebar-footer,
+body.light-theme .language-switcher {
+  background: var(--ka-control-bg) !important;
+  border-color: var(--ka-border) !important;
+}
+
+body.light-theme .mat-mdc-card,
+body.light-theme .header-card,
+body.light-theme .form-card,
+body.light-theme .table-card,
+body.light-theme .content-card,
+body.light-theme .details-card,
+body.light-theme .page-header {
+  background-color: var(--ka-surface) !important;
+  color: var(--ka-text) !important;
+  border-color: var(--ka-border) !important;
+  box-shadow: 0 10px 28px var(--ka-shadow) !important;
+}
+
+body.light-theme .mat-mdc-table,
+body.light-theme .mat-mdc-paginator {
+  background-color: var(--ka-surface) !important;
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .mat-mdc-header-row,
+body.light-theme .mat-mdc-row {
+  border-color: var(--ka-border) !important;
+}
+
+/* Complete light treatment for management and client content. */
+body.light-theme .page-wrapper .header-card,
+body.light-theme .page-wrapper .stat-card,
+body.light-theme .page-wrapper .state-block,
+body.light-theme .page-wrapper .mat-elevation-z8,
+body.light-theme .page-wrapper .loading,
+body.light-theme .page-wrapper .error,
+body.light-theme .main-content .header-card,
+body.light-theme .main-content .mat-elevation-z8 {
+  background: var(--ka-surface) !important;
+  border-color: var(--ka-border) !important;
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .page-wrapper h1,
+body.light-theme .page-wrapper h2,
+body.light-theme .page-wrapper h3,
+body.light-theme .page-wrapper .stat-value,
+body.light-theme .page-wrapper .state-copy,
+body.light-theme .page-wrapper .primary-text,
+body.light-theme .page-wrapper .user-name,
+body.light-theme .page-wrapper .time-range,
+body.light-theme .page-wrapper .time-value,
+body.light-theme .page-wrapper .amount-value,
+body.light-theme .page-wrapper .link-button,
+body.light-theme .main-content h1,
+body.light-theme .main-content h2,
+body.light-theme .main-content h3,
+body.light-theme .main-content .primary-text {
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .page-wrapper p,
+body.light-theme .page-wrapper .stat-label,
+body.light-theme .page-wrapper .stat-meta,
+body.light-theme .page-wrapper .secondary-text,
+body.light-theme .page-wrapper .track-name,
+body.light-theme .page-wrapper .kart-name,
+body.light-theme .page-wrapper .reservation-value,
+body.light-theme .page-wrapper .list-summary,
+body.light-theme .page-wrapper .empty-cell {
+  color: var(--ka-text-muted) !important;
+}
+
+body.light-theme .page-wrapper .mat-elevation-z8 table,
+body.light-theme .page-wrapper .mat-elevation-z8 .mat-mdc-table,
+body.light-theme .page-wrapper .mat-elevation-z8 .mdc-data-table__table,
+body.light-theme .page-wrapper .mat-elevation-z8 .mat-mdc-header-row,
+body.light-theme .page-wrapper .mat-elevation-z8 .mat-mdc-row,
+body.light-theme .page-wrapper .mat-elevation-z8 .mat-mdc-header-cell,
+body.light-theme .page-wrapper .mat-elevation-z8 .mat-mdc-cell,
+body.light-theme .main-content .mat-elevation-z8 table,
+body.light-theme .main-content .mat-elevation-z8 .mat-mdc-table,
+body.light-theme .main-content .mat-elevation-z8 .mat-mdc-header-row,
+body.light-theme .main-content .mat-elevation-z8 .mat-mdc-row,
+body.light-theme .main-content .mat-elevation-z8 .mat-mdc-header-cell,
+body.light-theme .main-content .mat-elevation-z8 .mat-mdc-cell {
+  background: var(--ka-surface) !important;
+}
+
+body.light-theme .page-wrapper .mat-mdc-header-cell,
+body.light-theme .main-content .mat-mdc-header-cell {
+  color: #475569 !important;
+  border-bottom-color: var(--ka-border) !important;
+}
+
+body.light-theme .page-wrapper .mat-mdc-cell,
+body.light-theme .main-content .mat-mdc-cell {
+  color: var(--ka-text) !important;
+  border-bottom-color: var(--ka-border) !important;
+}
+
+body.light-theme .page-wrapper .mat-mdc-row:hover .mat-mdc-cell,
+body.light-theme .main-content .mat-mdc-row:hover .mat-mdc-cell {
+  background: #f8fafc !important;
+}
+
+body.light-theme .page-wrapper app-fit-paginator-bar,
+body.light-theme .main-content app-fit-paginator-bar,
+body.light-theme .page-wrapper .mat-mdc-paginator,
+body.light-theme .main-content .mat-mdc-paginator {
+  background: #f8fafc !important;
+  border-color: var(--ka-border) !important;
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .page-wrapper .mat-mdc-text-field-wrapper,
+body.light-theme .main-content .mat-mdc-text-field-wrapper,
+body.light-theme .page-wrapper .quick-filters .mat-mdc-slide-toggle,
+body.light-theme .page-wrapper .active-toggle {
+  background: #f1f5f9 !important;
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .page-wrapper .mat-mdc-input-element,
+body.light-theme .page-wrapper .mat-mdc-select-value,
+body.light-theme .page-wrapper .mat-mdc-select-value-text,
+body.light-theme .page-wrapper .mat-mdc-select-arrow,
+body.light-theme .page-wrapper .mat-mdc-floating-label,
+body.light-theme .page-wrapper .mdc-floating-label,
+body.light-theme .page-wrapper .mat-datepicker-toggle,
+body.light-theme .page-wrapper .quick-filters .mdc-label,
+body.light-theme .main-content .mat-mdc-input-element,
+body.light-theme .main-content .mat-mdc-select-value,
+body.light-theme .main-content .mat-mdc-select-value-text,
+body.light-theme .main-content .mat-mdc-floating-label {
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .page-wrapper .mat-mdc-input-element::placeholder,
+body.light-theme .main-content .mat-mdc-input-element::placeholder {
+  color: var(--ka-text-muted) !important;
+  opacity: 1;
+}
+
+body.light-theme .page-wrapper .mdc-notched-outline__leading,
+body.light-theme .page-wrapper .mdc-notched-outline__notch,
+body.light-theme .page-wrapper .mdc-notched-outline__trailing,
+body.light-theme .main-content .mdc-notched-outline__leading,
+body.light-theme .main-content .mdc-notched-outline__notch,
+body.light-theme .main-content .mdc-notched-outline__trailing {
+  border-color: #cbd5e1 !important;
+}
+
+body.light-theme .page-wrapper .clear-filters-button {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .page-wrapper .clear-filters-button:disabled {
+  background: #f8fafc !important;
+  color: #94a3b8 !important;
+}
+
+body.light-theme .page-wrapper .create-button,
+body.light-theme .page-wrapper .add-btn,
+body.light-theme .page-wrapper .create-btn,
+body.light-theme .page-wrapper .primary-button {
+  background: #e51616 !important;
+  border-color: #c91010 !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(229, 22, 22, 0.22) !important;
+  font-weight: 700 !important;
+}
+
+body.light-theme .page-wrapper .create-button mat-icon,
+body.light-theme .page-wrapper .add-btn mat-icon,
+body.light-theme .page-wrapper .create-btn mat-icon,
+body.light-theme .page-wrapper .primary-button mat-icon {
+  color: #ffffff !important;
+}
+
+body.light-theme .page-wrapper .create-button:hover,
+body.light-theme .page-wrapper .add-btn:hover,
+body.light-theme .page-wrapper .create-btn:hover,
+body.light-theme .page-wrapper .primary-button:hover {
+  background: #c91010 !important;
+  border-color: #ad0d0d !important;
+}
+
+body.light-theme .page-wrapper .row-action-btn,
+body.light-theme .page-wrapper .row-edit-btn {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+body.light-theme .cdk-overlay-pane .mat-mdc-select-panel,
+body.light-theme .mat-mdc-menu-panel,
+body.light-theme .mat-datepicker-content,
+body.light-theme .mat-mdc-dialog-surface {
+  background: #ffffff !important;
+  color: var(--ka-text) !important;
+  border-color: var(--ka-border) !important;
+}
+
+body.light-theme .mat-mdc-option,
+body.light-theme .mat-mdc-menu-item,
+body.light-theme .mat-calendar-body-cell-content,
+body.light-theme .mat-calendar-table-header,
+body.light-theme .mat-calendar-body-label {
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .mat-mdc-option:hover:not(.mdc-list-item--disabled),
+body.light-theme .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled),
+body.light-theme .mat-mdc-menu-item:hover {
+  background: #f1f5f9 !important;
+}
+
+/* Reservation details in Admin and Employee modules. */
+body.light-theme .page-wrapper .reservation-details-page {
+  background: var(--ka-bg) !important;
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .page-wrapper .reservation-details-page .summary-card,
+body.light-theme .page-wrapper .reservation-details-page .detail-section,
+body.light-theme .page-wrapper .reservation-details-page .state-panel,
+body.light-theme .page-wrapper .reservation-details-page .payment-section,
+body.light-theme .page-wrapper .reservation-details-page .assignment-section,
+body.light-theme .page-wrapper .reservation-details-page .metadata-section {
+  background: #ffffff !important;
+  border-color: var(--ka-border) !important;
+  color: var(--ka-text) !important;
+  box-shadow: 0 10px 28px var(--ka-shadow) !important;
+}
+
+body.light-theme .page-wrapper .reservation-details-page .summary-card {
+  background: radial-gradient(circle at top right, rgba(229, 22, 22, 0.09), transparent 30%), #ffffff !important;
+}
+
+body.light-theme .page-wrapper .reservation-details-page .summary-meta > div,
+body.light-theme .page-wrapper .reservation-details-page .status-block,
+body.light-theme .page-wrapper .reservation-details-page .info-item,
+body.light-theme .page-wrapper .reservation-details-page .assignment-item,
+body.light-theme .page-wrapper .reservation-details-page .assignment-tags strong {
+  background: #f8fafc !important;
+  border-color: #dbe3ee !important;
+}
+
+body.light-theme .page-wrapper .reservation-details-page .summary-primary h1,
+body.light-theme .page-wrapper .reservation-details-page .summary-primary p,
+body.light-theme .page-wrapper .reservation-details-page .summary-meta strong,
+body.light-theme .page-wrapper .reservation-details-page .info-item strong,
+body.light-theme .page-wrapper .reservation-details-page .assignment-item strong,
+body.light-theme .page-wrapper .reservation-details-page .section-heading h2,
+body.light-theme .page-wrapper .reservation-details-page .state-copy h2 {
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .page-wrapper .reservation-details-page .eyebrow,
+body.light-theme .page-wrapper .reservation-details-page .meta-label,
+body.light-theme .page-wrapper .reservation-details-page .info-item span,
+body.light-theme .page-wrapper .reservation-details-page .assignment-item span,
+body.light-theme .page-wrapper .reservation-details-page .section-heading p,
+body.light-theme .page-wrapper .reservation-details-page .state-copy p,
+body.light-theme .page-wrapper .reservation-details-page .placeholder {
+  color: var(--ka-text-muted) !important;
+}
+
+body.light-theme .page-wrapper .reservation-details-page .back-button {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+body.light-theme .page-wrapper .reservation-details-page .accent-button {
+  background: #e51616 !important;
+  color: #ffffff !important;
+}
+
+/* Equipment details in Admin and Employee modules. */
+body.light-theme .page-wrapper app-equipment-detail .container,
+body.light-theme .page-wrapper app-equipment-detail .loading-state,
+body.light-theme .page-wrapper app-equipment-detail .error-state {
+  background: var(--ka-bg) !important;
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .page-wrapper app-equipment-detail .page-header,
+body.light-theme .page-wrapper app-equipment-detail .type-card,
+body.light-theme .page-wrapper app-equipment-detail .items-card {
+  background: #ffffff !important;
+  border-color: var(--ka-border) !important;
+  color: var(--ka-text) !important;
+  box-shadow: 0 10px 28px var(--ka-shadow) !important;
+}
+
+body.light-theme .page-wrapper app-equipment-detail .summary-card {
+  background: #ffffff !important;
+  border-color: var(--ka-border) !important;
+  color: var(--ka-text) !important;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+}
+
+body.light-theme .page-wrapper app-equipment-detail .header-copy h1,
+body.light-theme .page-wrapper app-equipment-detail .type-grid strong,
+body.light-theme .page-wrapper app-equipment-detail .description-block p,
+body.light-theme .page-wrapper app-equipment-detail .summary-card strong,
+body.light-theme .page-wrapper app-equipment-detail .section-header h2,
+body.light-theme .page-wrapper app-equipment-detail td {
+  color: var(--ka-text) !important;
+}
+
+body.light-theme .page-wrapper app-equipment-detail .header-copy p,
+body.light-theme .page-wrapper app-equipment-detail .type-grid label,
+body.light-theme .page-wrapper app-equipment-detail .description-block label,
+body.light-theme .page-wrapper app-equipment-detail .summary-card span,
+body.light-theme .page-wrapper app-equipment-detail .section-header span,
+body.light-theme .page-wrapper app-equipment-detail th {
+  color: var(--ka-text-muted) !important;
+}
+
+body.light-theme .page-wrapper app-equipment-detail .items-filters .mat-mdc-text-field-wrapper {
+  background: #f8fafc !important;
+}
+
+body.light-theme .page-wrapper app-equipment-detail .items-filters .mat-mdc-input-element,
+body.light-theme .page-wrapper app-equipment-detail .items-filters .mat-mdc-select-min-line,
+body.light-theme .page-wrapper app-equipment-detail .items-filters .mat-mdc-select-value-text,
+body.light-theme .page-wrapper app-equipment-detail .items-filters .mat-mdc-form-field-icon-suffix,
+body.light-theme .page-wrapper app-equipment-detail .items-filters .mat-mdc-select-arrow {
+  color: var(--ka-text) !important;
+  -webkit-text-fill-color: var(--ka-text) !important;
+}
+
+body.light-theme .page-wrapper app-equipment-detail table,
+body.light-theme .page-wrapper app-equipment-detail .mat-mdc-table,
+body.light-theme .page-wrapper app-equipment-detail .mat-mdc-header-row,
+body.light-theme .page-wrapper app-equipment-detail .mat-mdc-row,
+body.light-theme .page-wrapper app-equipment-detail .mat-mdc-header-cell,
+body.light-theme .page-wrapper app-equipment-detail .mat-mdc-cell {
+  background: #ffffff !important;
+}
+
+body.light-theme .page-wrapper app-equipment-detail th,
+body.light-theme .page-wrapper app-equipment-detail td {
+  border-bottom-color: var(--ka-border) !important;
+}
+
+body.light-theme .page-wrapper app-equipment-detail .bulk-btn {
+  background: #e51616 !important;
+  color: #ffffff !important;
+}
+
 
 html, body {
   height: 100%;

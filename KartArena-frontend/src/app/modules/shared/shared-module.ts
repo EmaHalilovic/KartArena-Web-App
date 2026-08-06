@@ -10,6 +10,7 @@ import {DialogHelperService} from './services/dialog-helper.service';
 import { FitLoadingBarComponent } from './components/fit-loading-bar/fit-loading-bar.component';
 import { FitTableSkeletonComponent } from './components/fit-table-skeleton/fit-table-skeleton.component';
 import { AppHeaderComponent } from './components/app-header/app-header.component';
+import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
 
 
 
@@ -22,6 +23,7 @@ import { AppHeaderComponent } from './components/app-header/app-header.component
     FitLoadingBarComponent,
     FitTableSkeletonComponent,
     AppHeaderComponent,
+    ThemeToggleComponent,
   ],
   imports: [
     RouterModule,
@@ -36,6 +38,7 @@ import { AppHeaderComponent } from './components/app-header/app-header.component
   ],
   exports:[
     AppHeaderComponent,
+    ThemeToggleComponent,
     RouterModule,
     FitPaginatorBarComponent,
     CommonModule,

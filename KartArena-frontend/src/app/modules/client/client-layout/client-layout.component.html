@@ -33,6 +33,7 @@
 
       <!-- Language Selector -->
       <div class="language-selector">
+        <app-theme-toggle></app-theme-toggle>
         <button mat-icon-button [matMenuTriggerFor]="langMenu" class="lang-button">
           <span class="flag-icon">{{ getCurrentLanguage()?.flag }}</span>
           <mat-icon>arrow_drop_down</mat-icon>

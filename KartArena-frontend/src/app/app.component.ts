@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { ThemeService } from './core/services/theme/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +12,7 @@ export class AppComponent implements OnInit {
   protected readonly title = signal('rs1-frontend-2025-26');
   currentLang: string = 'bs';
 
-  constructor(private translate: TranslateService) {
+  constructor(private translate: TranslateService, private themeService: ThemeService) {
     console.log('AppComponent constructor - initializing TranslateService');
 
     // Inicijalizacija translate servisa

@@ -1,0 +1,16 @@
+:host {
+  display: inline-flex;
+}
+
+.theme-toggle {
+  border: 1px solid var(--ka-border) !important;
+  border-radius: 10px !important;
+  background: var(--ka-control-bg) !important;
+  color: var(--ka-text) !important;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.theme-toggle:hover {
+  background: var(--ka-control-hover) !important;
+  transform: translateY(-1px);
+}
