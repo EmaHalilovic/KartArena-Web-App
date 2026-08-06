@@ -4,6 +4,10 @@
       <h1><mat-icon>calendar_month</mat-icon>{{ 'RESERVATION.TITLE' | translate }}</h1>
 
       <div class="toolbar-shell">
+        <button mat-raised-button color="primary" type="button" class="create-button" (click)="onCreate()">
+          <mat-icon>add</mat-icon>
+          Create reservation
+        </button>
         <mat-form-field class="search-field" appearance="fill" floatLabel="always">
           <mat-label>Search</mat-label>
           <input

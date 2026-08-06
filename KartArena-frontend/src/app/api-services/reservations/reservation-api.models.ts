@@ -84,18 +84,20 @@ export interface GetReservationByIdQueryDto {
   modifiedAt?: string | null;
 }
 
-export interface CreateReservationCommand {
-  userId?: number | null;
-  trackId: number;
-  kartId: number;
-  reservationDate?: string;
+export interface CreateReservationRequest {
+  reservationDate: string;
   startTime: string;
   endTime: string;
-  status?: ReservationStatus;
-  paymentStatus?: PaymentStatus;
-  amount?: number;
-  paymentTypeId?: number;
-  paymentNote?: string | null;
+  userId: number | null;
+  customerFirstName: string;
+  customerLastName: string;
+  customerEmail: string;
+  customerPhone: string;
+  customerNote: string | null;
+  kartId: number;
+  trackId: number;
+  paymentTypeId: number | null;
+  paymentNote: string | null;
 }
 
 export interface CheckoutReservationsRequest {

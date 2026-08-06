@@ -102,7 +102,9 @@ export class ReservationComponent
     this.loadPagedData();
   }
 
-
+  onCreate(): void {
+    this.router.navigate(['/employee/reservation/add']);
+  }
 
   onDelete(item: ListReservationQueryDto): void {
     const ref = this.dialog.open(ConfirmDeleteDialogReservationComponent, {

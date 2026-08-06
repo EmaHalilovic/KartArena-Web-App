@@ -9,6 +9,7 @@ public sealed class CreateReservationCommandHandler(IAppDbContext ctx)
     : IRequestHandler<CreateReservationCommand, int>
 {
     private const int MaxDriversPerTrackSlot = 6;
+    private const string DeskCashPaymentCode = "DESK_CASH";
     private const string DefaultCurrency = "bam";
 
     public async Task<int> Handle(
@@ -81,6 +82,11 @@ public sealed class CreateReservationCommandHandler(IAppDbContext ctx)
                     "Selected payment type is not available for online payment.");
             }
         }
+
+        var isDeskCashPayment = string.Equals(
+ paymentType.Code,
+ DeskCashPaymentCode,
+ StringComparison.OrdinalIgnoreCase);
 
         var date = request.ReservationDate.Date;
 
@@ -168,7 +174,7 @@ public sealed class CreateReservationCommandHandler(IAppDbContext ctx)
             StartTime = request.StartTime,
             EndTime = request.EndTime,
 
-            Status = ReservationStatus.Pending,
+            Status = isDeskCashPayment?ReservationStatus.Confirmed:ReservationStatus.Pending,
             PaymentStatus = PaymentStatus.Pending,
 
             TotalPrice = totalPrice,
