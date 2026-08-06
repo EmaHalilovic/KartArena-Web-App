@@ -18,6 +18,7 @@ import { EquipmentEditItemDialogComponent } from './equipment/dialogs/equipment-
 
 import { ReservationComponent } from './reservation/reservation.component';
 import { ReservationAddComponent } from './reservation/reservation-add/reservation-add.component';
+import { ReservationEditComponent } from './reservation/reservation-edit/reservation-edit.component';
 import { ReservationDetailsComponent } from './reservation/reservation-details/reservation-details.component';
 import { ConfirmDeleteDialogReservationComponent } from './reservation/dialogs/confirm-delete/confirm-delete-dialog.component';
 import { ReservationCashPaymentDialogComponent } from './reservation/dialogs/reservation-cash-payment-dialog/reservation-cash-payment-dialog.component';
@@ -43,6 +44,7 @@ import { ConfirmDeletePaymentTypeDialogComponent } from './payment-types/dialogs
     EquipmentEditItemDialogComponent,
     ReservationComponent,
     ReservationAddComponent,
+    ReservationEditComponent,
     ReservationDetailsComponent,
     ConfirmDeleteDialogReservationComponent,
     ReservationCashPaymentDialogComponent,

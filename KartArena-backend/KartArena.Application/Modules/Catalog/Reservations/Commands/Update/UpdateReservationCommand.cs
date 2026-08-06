@@ -5,7 +5,7 @@ public sealed class UpdateReservationCommand : IRequest<int>
     [JsonIgnore]
     public int Id { get; set; }
 
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
     public int TrackId { get; set; }
     public int KartId { get; set; }
 

@@ -14,6 +14,7 @@ import { ReservationApiService } from '../../../api-services/reservations/reserv
 import { PaymentStatus } from '../../../api-services/payments/payments-api.models';
 
 import { BaseListPagedComponent } from '../../../core/components/base-classes/base-list-paged-component';
+import { PageRequest } from '../../../core/models/paging/page-request';
 import { ToasterService } from '../../../core/services/toaster.service';
 import { ConfirmDeleteDialogReservationComponent } from './dialogs/confirm-delete/confirm-delete-dialog.component';
 import { ReservationCashPaymentDialogComponent } from './dialogs/reservation-cash-payment-dialog/reservation-cash-payment-dialog.component';
@@ -73,7 +74,7 @@ export class ReservationComponent
   constructor() {
     super();
     this.request = new ListReservationRequest();
-    this.request.paging = this.request.paging ?? { page: 1, pageSize: 10 };
+    this.request.paging = new PageRequest(1, 10);
   }
 
   ngOnInit(): void {
@@ -86,6 +87,15 @@ export class ReservationComponent
     this.api.list(this.buildRequest()).subscribe({
       next: (response) => {
         this.handlePageResult(response);
+
+        // A delete can leave the current page outside the new backend range.
+        // Move to the last valid page and request it instead of showing an empty table.
+        if (this.totalPages > 0 && this.paging.page > this.totalPages) {
+          this.paging.page = this.totalPages;
+          this.loadPagedData();
+          return;
+        }
+
         this.applyClientSideUpcomingFilter();
         this.stopLoading();
       },
@@ -198,6 +208,15 @@ export class ReservationComponent
     this.router.navigate(['/admin/reservations', item.id]);
   }
 
+  openEdit(item: ListReservationQueryDto): void {
+    if (!this.canEdit(item)) {
+      this.toaster.error('Only confirmed reservations can be edited');
+      return;
+    }
+
+    this.router.navigate(['/admin/reservation/edit', item.id]);
+  }
+
   openMarkCashPaid(item: ListReservationQueryDto): void {
     if (!this.canMarkCashPaid(item)) {
       this.toaster.error('Only confirmed reservations can be marked as paid in cash');
@@ -287,6 +306,10 @@ export class ReservationComponent
     return this.isConfirmedReservation(r)
       && this.isCashPayment(r)
       && this.hasPaymentStatus(r, ['pending', 'awaitingpayment', 'processing']);
+  }
+
+  canEdit(r: ListReservationQueryDto): boolean {
+    return this.isConfirmedReservation(r);
   }
 
   canAssignResources(r: ListReservationQueryDto): boolean {
@@ -411,7 +434,7 @@ export class ReservationComponent
 
   private buildRequest(): ListReservationRequest {
     const request = new ListReservationRequest();
-    request.paging = this.request.paging;
+    request.paging = new PageRequest(this.paging.page, this.paging.pageSize);
     request.search = this.request.search?.trim() || null;
     request.userId = this.request.userId ?? null;
     request.trackId = this.request.trackId ?? null;

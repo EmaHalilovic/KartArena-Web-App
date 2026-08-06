@@ -7,11 +7,6 @@
       </div>
 
       <div class="actions-container">
-        <button mat-stroked-button type="button" (click)="onExportPdf()">
-          <mat-icon>picture_as_pdf</mat-icon>
-          Export PDF
-        </button>
-
         <button mat-flat-button class="add-btn" type="button" (click)="onCreate()">
           <mat-icon>add</mat-icon>
           New type
@@ -41,6 +36,16 @@
           <mat-option [value]="null">All stock</mat-option>
           <mat-option *ngFor="let status of stockStatusOptions" [value]="status">{{ status }}</mat-option>
         </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Size</mat-label>
+        <input
+          matInput
+          placeholder="Filter by size"
+          [ngModel]="request.size"
+          (ngModelChange)="onSizeChange($event)"
+        />
       </mat-form-field>
 
       <mat-slide-toggle

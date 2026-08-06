@@ -13,6 +13,7 @@ import { PaymentsComponent } from './payments/payments.component';
 import { PaymentTypesComponent } from './payment-types/payment-types.component';
 import { PaymentTypesEditComponent } from './payment-types/payment-types-edit/payment-types-edit.component';
 import { EmployeeSettingsComponent } from './employee-settings/employee-settings.component';
+import { ReservationEditComponent } from './reservation/reservation-edit/reservation-edit.component';
 
 const routes: Routes = [
   {
@@ -46,6 +47,10 @@ const routes: Routes = [
       {
         path: 'reservations/:id',
         component: ReservationDetailsComponent,
+      },
+      {
+        path: 'reservation/edit/:id',
+        component: ReservationEditComponent,
       },
    
      

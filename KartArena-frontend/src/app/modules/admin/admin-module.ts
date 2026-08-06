@@ -6,6 +6,7 @@ import { SharedModule } from '../shared/shared-module';
 
 import { AdminLayoutComponent } from './admin-layout/admin-layout.component';
 import { AdminSettingsComponent } from './admin-settings/admin-settings.component';
+import { ReportsComponent } from './reports/reports.component';
 
 import { EquipmentComponent } from './equipment/equipment.component';
 import { EquipmentAddComponent } from './equipment/equipment-add/equipment-add.component';
@@ -40,6 +41,7 @@ import { ConfirmDeletePaymentTypeDialogComponent } from './payment-types/dialogs
   declarations: [
     AdminLayoutComponent,
     AdminSettingsComponent,
+    ReportsComponent,
     EquipmentComponent,
     EquipmentAddComponent,
     EquipmentEditComponent,

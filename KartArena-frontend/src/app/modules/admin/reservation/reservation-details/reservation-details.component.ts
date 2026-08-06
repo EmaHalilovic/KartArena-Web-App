@@ -85,6 +85,14 @@ export class ReservationDetailsComponent implements OnInit {
     this.router.navigate(['/admin/reservations']);
   }
 
+  openEdit(): void {
+    if (this.reservationId == null || !this.canEdit()) {
+      return;
+    }
+
+    this.router.navigate(['/admin/reservation/edit', this.reservationId]);
+  }
+
   openMarkCashPaid(): void {
     if (!this.reservation) {
       return;
@@ -310,6 +318,11 @@ export class ReservationDetailsComponent implements OnInit {
       && this.isConfirmedReservation(reservation)
       && this.isCashPayment(reservation)
       && this.hasPaymentStatus(reservation, ['pending', 'awaitingpayment', 'processing']);
+  }
+
+  canEdit(): boolean {
+    const reservation = this.reservation;
+    return !!reservation && this.isConfirmedReservation(reservation);
   }
 
   canAssignResources(): boolean {

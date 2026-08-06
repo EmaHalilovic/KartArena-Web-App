@@ -3,6 +3,24 @@
     "TITLE": "Welcome to our app",
     "DESCRIPTION": "This is an example of localization."
   },
+  "REPORTS": {
+    "NAV": "Reports",
+    "EYEBROW": "Administration",
+    "TITLE": "PDF Reports",
+    "SUBTITLE": "Generate filtered reservation and payment reports.",
+    "RESERVATIONS": { "TITLE": "Reservations Report", "DESCRIPTION": "Reservation, customer, track, kart and status details." },
+    "PAYMENTS": { "TITLE": "Payments Report", "DESCRIPTION": "Payment amounts, methods, statuses and transaction details." },
+    "FIELDS": { "ID": "Optional ID", "DATE_FROM": "Start date", "DATE_TO": "End date" },
+    "GENERATE": "Generate PDF",
+    "GENERATING": "Generating...",
+    "MESSAGES": {
+      "SUCCESS": "PDF report downloaded successfully.",
+      "INVALID_RANGE": "Start date cannot be later than end date.",
+      "INVALID_FILTERS": "The report filters are invalid.",
+      "EMPTY": "No records match the selected filters.",
+      "ERROR": "The PDF report could not be generated."
+    }
+  },
   "AUTH": {
     "LOGIN": {
       "TITLE": "Login",

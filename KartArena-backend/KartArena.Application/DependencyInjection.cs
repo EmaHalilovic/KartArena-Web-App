@@ -1,5 +1,7 @@
 ﻿using KartArena.Application.Common.Behaviors;
 using Microsoft.Extensions.DependencyInjection;
+using KartArena.Application.Modules.Reports;
+using QuestPDF.Infrastructure;
 using System.Reflection;
 
 namespace KartArena.Application;
@@ -21,6 +23,8 @@ public static class DependencyInjection
 
         // TimeProvider — if used by handlers
         services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<PdfReportService>();
+        QuestPDF.Settings.License = LicenseType.Community;
 
         return services;
     }

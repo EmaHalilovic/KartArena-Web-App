@@ -26,6 +26,12 @@ public sealed class ListEquipmentQueryHandler(IAppDbContext ctx)
         if (request.Category is not null)
             q = q.Where(x => x.Category == request.Category);
 
+        if (!string.IsNullOrWhiteSpace(request.Size))
+        {
+            var size = request.Size.Trim().ToLower();
+            q = q.Where(x => x.Size.ToLower().Contains(size));
+        }
+
 
         var projectedQuery = q.OrderBy(x => x.Name)
             .ThenBy(x => x.Size)
