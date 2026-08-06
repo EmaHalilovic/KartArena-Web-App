@@ -29,6 +29,7 @@ export class ReservationFormService {
         trackId: [null, [Validators.required, Validators.min(1)]],
         kartId: [null, [Validators.required, Validators.min(1)]],
         reservationDate: ['', [Validators.required]],
+        duration: [10, [Validators.required]],
         startTime: ['', [Validators.required]],
         endTime: ['', [Validators.required]],
         paymentTypeId: [null, [Validators.min(1)]],

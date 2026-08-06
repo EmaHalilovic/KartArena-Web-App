@@ -1,108 +1,139 @@
 <div class="container">
-  <div class="header">
+  <div class="header-card mat-elevation-z2">
     <h1>{{ 'RESERVATION.CREATE_TITLE' | translate }}</h1>
   </div>
 
-  <form class="form" [formGroup]="form" (ngSubmit)="save()">
-    <div class="row">
-      <mat-form-field appearance="outline" class="half">
+  <div class="form-card mat-elevation-z2">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div *ngIf="errorMessage" class="error-banner">
+        <mat-icon>error</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div *ngIf="isLoading" class="loading-overlay">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Saving reservation...</p>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>User ID (optional)</mat-label>
         <input matInput type="number" formControlName="userId" />
         <mat-error *ngIf="form.get('userId')?.touched && form.get('userId')?.invalid">{{ getErrorMessage('userId') }}</mat-error>
       </mat-form-field>
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>Track ID</mat-label>
-        <input matInput type="number" formControlName="trackId" />
-        <mat-error *ngIf="form.get('trackId')?.touched && form.get('trackId')?.invalid">{{ getErrorMessage('trackId') }}</mat-error>
-      </mat-form-field>
-    </div>
 
-    <div class="row">
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>Customer first name</mat-label>
-        <input matInput formControlName="customerFirstName" />
-        <mat-error *ngIf="form.get('customerFirstName')?.touched && form.get('customerFirstName')?.invalid">{{ getErrorMessage('customerFirstName') }}</mat-error>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>Customer last name</mat-label>
-        <input matInput formControlName="customerLastName" />
-        <mat-error *ngIf="form.get('customerLastName')?.touched && form.get('customerLastName')?.invalid">{{ getErrorMessage('customerLastName') }}</mat-error>
-      </mat-form-field>
-    </div>
+      <div class="row">
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>Customer first name</mat-label>
+          <input matInput formControlName="customerFirstName" autocomplete="given-name" />
+          <mat-error *ngIf="form.get('customerFirstName')?.touched && form.get('customerFirstName')?.invalid">{{ getErrorMessage('customerFirstName') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>Customer last name</mat-label>
+          <input matInput formControlName="customerLastName" autocomplete="family-name" />
+          <mat-error *ngIf="form.get('customerLastName')?.touched && form.get('customerLastName')?.invalid">{{ getErrorMessage('customerLastName') }}</mat-error>
+        </mat-form-field>
+      </div>
 
-    <div class="row">
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>Customer email</mat-label>
-        <input matInput type="email" formControlName="customerEmail" />
-        <mat-error *ngIf="form.get('customerEmail')?.touched && form.get('customerEmail')?.invalid">{{ getErrorMessage('customerEmail') }}</mat-error>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>Customer phone</mat-label>
-        <input matInput type="tel" formControlName="customerPhone" />
-        <mat-error *ngIf="form.get('customerPhone')?.touched && form.get('customerPhone')?.invalid">{{ getErrorMessage('customerPhone') }}</mat-error>
-      </mat-form-field>
-    </div>
+      <div class="row">
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>Customer email</mat-label>
+          <input matInput type="email" formControlName="customerEmail" autocomplete="email" />
+          <mat-error *ngIf="form.get('customerEmail')?.touched && form.get('customerEmail')?.invalid">{{ getErrorMessage('customerEmail') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>Customer phone</mat-label>
+          <input matInput type="tel" formControlName="customerPhone" autocomplete="tel" />
+          <mat-error *ngIf="form.get('customerPhone')?.touched && form.get('customerPhone')?.invalid">{{ getErrorMessage('customerPhone') }}</mat-error>
+        </mat-form-field>
+      </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Customer note</mat-label>
-      <textarea matInput rows="3" formControlName="customerNote"></textarea>
-      <mat-error *ngIf="form.get('customerNote')?.touched && form.get('customerNote')?.invalid">{{ getErrorMessage('customerNote') }}</mat-error>
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Customer note</mat-label>
+        <textarea matInput rows="3" formControlName="customerNote"></textarea>
+        <mat-error *ngIf="form.get('customerNote')?.touched && form.get('customerNote')?.invalid">{{ getErrorMessage('customerNote') }}</mat-error>
+      </mat-form-field>
 
-    <div class="row">
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>Kart ID</mat-label>
-        <input matInput type="number" formControlName="kartId" />
-        <mat-error *ngIf="form.get('kartId')?.touched && form.get('kartId')?.invalid">{{ getErrorMessage('kartId') }}</mat-error>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>{{ 'RESERVATION.FIELDS.DATE' | translate }}</mat-label>
-        <input matInput [matDatepicker]="picker" formControlName="reservationDate" />
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-        <mat-error *ngIf="form.get('reservationDate')?.touched && form.get('reservationDate')?.invalid">{{ getErrorMessage('reservationDate') }}</mat-error>
-      </mat-form-field>
-    </div>
+      <div class="row">
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>{{ 'RESERVATION.FIELDS.DATE' | translate }}</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="reservationDate" />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="form.get('reservationDate')?.touched && form.get('reservationDate')?.invalid">{{ getErrorMessage('reservationDate') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>Duration</mat-label>
+          <mat-select formControlName="duration" panelClass="reservation-select-panel">
+            <mat-option *ngFor="let duration of durationOptions" [value]="duration">{{ duration }} minutes</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
 
-    <div class="row">
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>Start time</mat-label>
-        <input matInput type="time" formControlName="startTime" />
-        <mat-error *ngIf="form.get('startTime')?.touched && form.get('startTime')?.invalid">{{ getErrorMessage('startTime') }}</mat-error>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>End time</mat-label>
-        <input matInput type="time" formControlName="endTime" />
-        <mat-error *ngIf="form.get('endTime')?.touched && form.get('endTime')?.invalid">{{ getErrorMessage('endTime') }}</mat-error>
-      </mat-form-field>
-    </div>
+      <div class="row">
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>Start time</mat-label>
+          <mat-select formControlName="startTime" panelClass="reservation-select-panel">
+            <mat-option *ngFor="let time of startTimeOptions" [value]="time">{{ formatTime(time) }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('startTime')?.touched && form.get('startTime')?.invalid">{{ getErrorMessage('startTime') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>End time</mat-label>
+          <mat-select formControlName="endTime" panelClass="reservation-select-panel">
+            <mat-option *ngFor="let time of endTimeOptions" [value]="time">{{ formatTime(time) }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('endTime')?.touched && form.get('endTime')?.invalid">{{ getErrorMessage('endTime') }}</mat-error>
+        </mat-form-field>
+      </div>
 
-    <div class="form-error" *ngIf="form.touched && form.errors?.['invalidTimeRange']">
-      End time must be after start time
-    </div>
+      <div class="form-error" *ngIf="form.touched && form.errors?.['invalidTimeRange']">
+        End time must be after start time
+      </div>
 
-    <div class="row">
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>Payment type ID (optional)</mat-label>
-        <input matInput type="number" formControlName="paymentTypeId" />
-        <mat-error *ngIf="form.get('paymentTypeId')?.touched && form.get('paymentTypeId')?.invalid">{{ getErrorMessage('paymentTypeId') }}</mat-error>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="half">
-        <mat-label>Payment note</mat-label>
-        <textarea matInput rows="2" formControlName="paymentNote"></textarea>
-        <mat-error *ngIf="form.get('paymentNote')?.touched && form.get('paymentNote')?.invalid">{{ getErrorMessage('paymentNote') }}</mat-error>
-      </mat-form-field>
-    </div>
+      <div class="row">
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>Track</mat-label>
+          <mat-select formControlName="trackId" panelClass="reservation-select-panel">
+            <mat-option *ngFor="let track of trackOptions" [value]="track.trackId">
+              {{ track.trackName }} ({{ track.availableSlots }} available)
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('trackId')?.touched && form.get('trackId')?.invalid">{{ getErrorMessage('trackId') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>Kart</mat-label>
+          <mat-select formControlName="kartId" panelClass="reservation-select-panel">
+            <mat-option *ngFor="let kart of kartOptions" [value]="kart.kartId">{{ kart.kartName }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('kartId')?.touched && form.get('kartId')?.invalid">{{ getErrorMessage('kartId') }}</mat-error>
+        </mat-form-field>
+      </div>
 
-    <div class="actions">
-      <button type="button" mat-stroked-button (click)="onCancel()" [disabled]="isLoading">
-        <mat-icon>close</mat-icon>
-        {{ 'COMMON.CANCEL' | translate }}
-      </button>
-      <button type="submit" mat-raised-button color="primary" [disabled]="form.invalid || isLoading">
-        <mat-icon>save</mat-icon>
-        {{ 'COMMON.SAVE' | translate }}
-      </button>
-    </div>
-  </form>
+      <div class="row">
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>Payment type</mat-label>
+          <mat-select formControlName="paymentTypeId" panelClass="reservation-select-panel">
+            <mat-option *ngFor="let paymentType of paymentTypeOptions" [value]="paymentType.id">{{ paymentType.name }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('paymentTypeId')?.touched && form.get('paymentTypeId')?.invalid">{{ getErrorMessage('paymentTypeId') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>Payment note</mat-label>
+          <textarea matInput rows="2" formControlName="paymentNote"></textarea>
+          <mat-error *ngIf="form.get('paymentNote')?.touched && form.get('paymentNote')?.invalid">{{ getErrorMessage('paymentNote') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" mat-stroked-button (click)="onCancel()" [disabled]="isLoading">
+          <mat-icon>close</mat-icon>
+          {{ 'COMMON.CANCEL' | translate }}
+        </button>
+        <button type="submit" mat-raised-button color="primary" [disabled]="form.invalid || isLoading">
+          <mat-icon>save</mat-icon>
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

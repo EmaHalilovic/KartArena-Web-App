@@ -70,7 +70,7 @@ $hover-bg: rgba(240, 13, 13, 0.08);
     position: relative;
 
     &::after {
-      content: 'handyman';
+      content: 'event_available';
       font-family: 'Material Icons';
       font-size: 28px;
       color: white;
@@ -153,12 +153,14 @@ $hover-bg: rgba(240, 13, 13, 0.08);
       width: 100%;
     }
 
-    .half-width {
+    .half-width,
+    .half {
       flex: 1;
       min-width: 0;
     }
 
-    .form-row {
+    .form-row,
+    .row {
       display: flex;
       gap: 16px;
       width: 100%;
@@ -467,9 +469,57 @@ $hover-bg: rgba(240, 13, 13, 0.08);
   opacity: 0.75;
 }
 
+:host ::ng-deep input.mat-mdc-input-element:-webkit-autofill,
+:host ::ng-deep input.mat-mdc-input-element:-webkit-autofill:hover,
+:host ::ng-deep input.mat-mdc-input-element:-webkit-autofill:focus {
+  -webkit-text-fill-color: $text-primary !important;
+  caret-color: $text-primary;
+  box-shadow: 0 0 0 1000px #1a1620 inset !important;
+  transition: background-color 9999s ease-out 0s;
+}
+
 :host ::ng-deep .mat-mdc-form-field {
   --mdc-outlined-text-field-input-text-color: #ffffff;
   --mdc-outlined-text-field-focus-input-text-color: #ffffff;
   --mdc-outlined-text-field-caret-color: #ffffff;
+}
+
+:host ::ng-deep .mat-mdc-select-trigger {
+  min-height: 24px;
+  align-items: center;
+}
+
+:host ::ng-deep .mat-mdc-select-value,
+:host ::ng-deep .mat-mdc-select-arrow {
+  color: $text-primary !important;
+}
+
+::ng-deep .reservation-select-panel.mat-mdc-select-panel {
+  padding: 6px;
+  background: #0a101b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+
+  .mat-mdc-option {
+    min-height: 44px;
+    margin: 2px 0;
+    border-radius: 8px;
+    color: $text-primary;
+  }
+
+  .mdc-list-item__primary-text {
+    color: inherit !important;
+  }
+
+  .mat-mdc-option:hover,
+  .mat-mdc-option.mat-mdc-option-active {
+    background: rgba(240, 13, 13, 0.12);
+  }
+
+  .mat-mdc-option.mdc-list-item--selected {
+    background: rgba(240, 13, 13, 0.2);
+    color: #ffd6d6;
+  }
 }
 
