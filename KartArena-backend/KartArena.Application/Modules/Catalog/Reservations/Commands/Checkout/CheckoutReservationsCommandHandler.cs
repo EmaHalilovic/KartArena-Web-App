@@ -16,6 +16,7 @@ public sealed class CheckoutReservationsCommandHandler(
 {
     private const int MaxDriversPerTrackSlot = 6;
     private const string StripePaymentCode = "STRIPE";
+    private const string DeskCashPaymentCode = "DESK_CASH";
     private const string DefaultCurrency = "bam";
 
     public async Task<CheckoutReservationsResponse> Handle(
@@ -73,6 +74,11 @@ public sealed class CheckoutReservationsCommandHandler(
             throw new InvalidOperationException(
                 "Selected payment type is not available for online payment.");
         }
+
+        var isDeskCashPayment = string.Equals(
+    paymentType.Code,
+    DeskCashPaymentCode,
+    StringComparison.OrdinalIgnoreCase);
 
         var kartIds = request.Items
             .Select(x => x.KartId)
@@ -239,7 +245,10 @@ public sealed class CheckoutReservationsCommandHandler(
 
                     TotalPrice = itemAmount,
 
-                    Status = ReservationStatus.Pending,
+
+                    Status = isDeskCashPayment
+                        ? ReservationStatus.Confirmed
+                        : ReservationStatus.Pending,
                     PaymentStatus = PaymentStatus.Pending,
 
                     IsDeleted = false
