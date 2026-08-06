@@ -4,10 +4,7 @@ import { Router } from '@angular/router';
 import { BaseFormComponent } from '../../../../core/components/base-classes/base-form-component';
 import { ToasterService } from '../../../../core/services/toaster.service';
 
-import {
-  CreateReservationCommand,
-  GetReservationByIdQueryDto,
-} from '../../../../api-services/reservations/reservation-api.models';
+import { GetReservationByIdQueryDto } from '../../../../api-services/reservations/reservation-api.models';
 
 import { ReservationApiService } from '../../../../api-services/reservations/reservation-api.service';
 import { ReservationFormService } from '../services/reservation-form.service';
@@ -52,7 +49,7 @@ const date = this.toShortIsoDate(rawDate);
 const startTime: string = this.form.value.startTime; // "HH:mm"
 const endTime: string = this.form.value.endTime;     // "HH:mm"
 
-// const command: CreateReservationCommand = {
+// const command = {
 //   userId: Number(this.form.value.userId),
 //   trackId: Number(this.form.value.trackId),
 //   kartId: Number(this.form.value.kartId),

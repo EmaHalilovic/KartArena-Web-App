@@ -6,7 +6,7 @@ import {
   ListReservationRequest,
   ListReservationResponse,
   GetReservationByIdQueryDto,
-  CreateReservationCommand,
+  CreateReservationRequest,
   CheckoutReservationsRequest,
   CheckoutReservationsResponse,
   UpdateReservationCommand,
@@ -37,8 +37,8 @@ export class ReservationApiService {
     return this.http.get<GetReservationByIdQueryDto>(`${this.baseUrl}/${id}`);
   }
 
-  create(payload: CreateReservationCommand): Observable<any> {
-    return this.http.post<any>(this.baseUrl, payload);
+  create(payload: CreateReservationRequest): Observable<number> {
+    return this.http.post<number>(`${this.apiUrl}/reservations`, payload);
   }
 
   checkout(payload: CheckoutReservationsRequest): Observable<CheckoutReservationsResponse> {

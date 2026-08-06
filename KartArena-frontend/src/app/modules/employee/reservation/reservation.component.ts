@@ -103,7 +103,7 @@ export class ReservationComponent
   }
 
   onCreate(): void {
-    this.router.navigate(['/client/reservation/add']);
+    this.router.navigate(['/employee/reservation/add']);
   }
 
   onDelete(item: ListReservationQueryDto): void {

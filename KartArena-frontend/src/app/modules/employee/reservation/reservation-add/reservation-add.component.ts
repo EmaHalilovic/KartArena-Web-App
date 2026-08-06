@@ -1,15 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { CreateReservationRequest, GetReservationByIdQueryDto } from '../../../../api-services/reservations/reservation-api.models';
+import { ReservationApiService } from '../../../../api-services/reservations/reservation-api.service';
 import { BaseFormComponent } from '../../../../core/components/base-classes/base-form-component';
 import { ToasterService } from '../../../../core/services/toaster.service';
-
-import {
-  CreateReservationCommand,
-  GetReservationByIdQueryDto,
-} from '../../../../api-services/reservations/reservation-api.models';
-
-import { ReservationApiService } from '../../../../api-services/reservations/reservation-api.service';
 import { ReservationFormService } from '../services/reservation-form.service';
 
 @Component({
@@ -32,67 +27,77 @@ export class ReservationAddComponent
     this.initForm(false);
   }
 
-  protected loadData(): void {
-    // Add mode: no data to load
-  }
+  protected loadData(): void {}
 
   protected override initForm(isEdit: boolean): void {
     super.initForm(isEdit);
-    this.form = this.formService.createReservationForm();
+    this.form = this.formService.createReservationCreateForm();
   }
 
   protected save(): void {
     if (this.form.invalid || this.isLoading) {
+      this.form.markAllAsTouched();
       return;
     }
 
-    this.startLoading();
-
-    const reservationDate: string = this.form.value.reservationDate; // "YYYY-MM-DD"
-    const startTime: string = this.form.value.startTime;             // "HH:mm"
-    const endTime: string = this.form.value.endTime;                 // "HH:mm"
-
-    // ✅ backend traži DateTime -> "YYYY-MM-DDTHH:mm:ss"
-    const command: CreateReservationCommand = {
-      userId: Number(this.form.value.userId),
-      trackId: Number(this.form.value.trackId),
-      kartId: Number(this.form.value.kartId),
-      reservationDate: reservationDate,
-      startTime: `${reservationDate}T${startTime}:00`,
-      endTime: `${reservationDate}T${endTime}:00`,
-      amount: Number(this.form.value.amount ?? 0),
-      paymentTypeId: Number(this.form.value.paymentTypeId ?? 0),
-      paymentNote: this.form.value.paymentNote?.trim() || null,
+    const value = this.form.getRawValue();
+    const reservationDate = this.toLocalIsoDate(value.reservationDate);
+    const request: CreateReservationRequest = {
+      reservationDate,
+      startTime: this.toIsoDateTime(reservationDate, value.startTime),
+      endTime: this.toIsoDateTime(reservationDate, value.endTime),
+      userId: this.toNullableNumber(value.userId),
+      customerFirstName: value.customerFirstName.trim(),
+      customerLastName: value.customerLastName.trim(),
+      customerEmail: value.customerEmail.trim(),
+      customerPhone: value.customerPhone.trim(),
+      customerNote: value.customerNote?.trim() || null,
+      kartId: Number(value.kartId),
+      trackId: Number(value.trackId),
+      paymentTypeId: this.toNullableNumber(value.paymentTypeId),
+      paymentNote: value.paymentNote?.trim() || null,
     };
 
-    // ✅ backend traži wrapper: { command: ... }
-    this.api.create(command as any).subscribe({
+    this.startLoading();
+    this.api.create(request).subscribe({
       next: () => {
         this.stopLoading();
         this.toaster.success('Reservation created successfully');
-        this.router.navigate(['/client/reservation']);
+        this.router.navigate(['/employee/reservations']);
       },
       error: (err) => {
         this.stopLoading('Failed to create reservation');
+        this.toaster.error(err?.error?.message ?? 'Failed to create reservation');
         console.error('Create reservation error:', err);
       },
     });
   }
 
   onCancel(): void {
-    this.router.navigate(['/client/reservation']);
+    this.router.navigate(['/employee/reservations']);
   }
 
   getErrorMessage(controlName: string): string {
-    // uskladi ime metode sa tvojim form service-om
-    // ako imaš getError(...) umjesto getErrorMessage(...), promijeni ovdje:
     return this.formService.getError(this.form, controlName);
   }
 
   private toIsoDateTime(date: string, time: string): string {
-    // time može biti "HH:mm" ili "HH:mm:ss"
-    if (!date || !time) return '';
-    const t = /^\d{2}:\d{2}$/.test(time) ? `${time}:00` : time;
-    return `${date}T${t}`;
+    const normalizedTime = /^\d{2}:\d{2}$/.test(time) ? `${time}:00` : time;
+    return `${date}T${normalizedTime}`;
+  }
+
+  private toLocalIsoDate(value: string | Date): string {
+    if (typeof value === 'string') {
+      return value.includes('T') ? value.split('T')[0] : value;
+    }
+
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private toNullableNumber(value: unknown): number | null {
+    return value === null || value === undefined || value === '' ? null : Number(value);
   }
 }
