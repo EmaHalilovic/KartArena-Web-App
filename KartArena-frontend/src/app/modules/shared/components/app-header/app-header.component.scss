@@ -9,6 +9,28 @@
   border-bottom: 1px solid rgba(255,255,255,.10);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+:host-context(.light-theme) .hdr {
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom-color: rgba(15, 23, 42, 0.12);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+:host-context(.light-theme) .brand,
+:host-context(.light-theme) .nav a,
+:host-context(.light-theme) .nav a.active {
+  color: #172033;
+}
+
+:host-context(.light-theme) .nav a:hover {
+  color: #e10600;
+}
+
 .row{
   display:flex;
   align-items:center;
