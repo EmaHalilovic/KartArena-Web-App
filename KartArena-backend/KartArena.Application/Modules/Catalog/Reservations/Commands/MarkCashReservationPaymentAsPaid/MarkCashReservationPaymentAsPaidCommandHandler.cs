@@ -69,7 +69,7 @@ public sealed class MarkCashReservationPaymentAsPaidCommandHandler(
 
         if (!string.Equals(
                 payment.PaymentType.Code,
-                "CASH",
+                "DESK_CASH",
                 StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException(
