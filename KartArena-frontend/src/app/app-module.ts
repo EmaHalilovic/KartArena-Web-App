@@ -12,6 +12,7 @@ import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import {CustomTranslateLoader} from './core/services/custom-translate-loader';
 import {materialModules} from './modules/shared/material-modules';
 import {SharedModule} from './modules/shared/shared-module';
+import { BUSINESS_CULTURE } from './core/services/business-date-time';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,7 @@ import {SharedModule} from './modules/shared/shared-module';
         errorLoggingInterceptor
       ])
     ),
-    { provide: LOCALE_ID, useValue: 'bs-BA' }
+    { provide: LOCALE_ID, useValue: BUSINESS_CULTURE }
   ],
   exports: [
   ],

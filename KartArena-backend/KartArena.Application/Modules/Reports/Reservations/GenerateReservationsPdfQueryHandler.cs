@@ -1,6 +1,9 @@
 namespace KartArena.Application.Modules.Reports.Reservations;
 
-public sealed class GenerateReservationsPdfQueryHandler(IAppDbContext db, PdfReportService pdf)
+public sealed class GenerateReservationsPdfQueryHandler(
+    IAppDbContext db,
+    PdfReportService pdf,
+    IBusinessClock businessClock)
     : IRequestHandler<GenerateReservationsPdfQuery, ReportFileResult>
 {
     public async Task<ReportFileResult> Handle(GenerateReservationsPdfQuery request, CancellationToken ct)
@@ -29,11 +32,11 @@ public sealed class GenerateReservationsPdfQueryHandler(IAppDbContext db, PdfRep
             x.Id.ToString(), x.Date.ToString("dd.MM.yyyy"), x.StartTime.ToString("HH:mm"), x.EndTime.ToString("HH:mm"),
             $"{x.FirstName ?? string.Empty} {x.LastName ?? string.Empty}".Trim(), x.Email ?? "-",
             x.Track ?? "-", x.Kart ?? "-", x.Status.ToString(),
-            x.PaymentStatus.ToString(), x.CreatedAtUtc.ToString("dd.MM.yyyy HH:mm")
+            x.PaymentStatus.ToString(), businessClock.ToBusinessTime(x.CreatedAtUtc).ToString("dd.MM.yyyy HH:mm")
         }).ToList();
         var bytes = pdf.Generate("Reservations Report", Filters(request.Id, request.DateFrom, request.DateTo),
             new[] { "ID", "Date", "Start", "End", "Customer", "Email", "Track", "Kart", "Status", "Payment", "Created" }, rows);
-        return new(bytes, $"reservations-report-{DateTime.Today:yyyy-MM-dd}.pdf");
+        return new(bytes, $"reservations-report-{businessClock.Today:yyyy-MM-dd}.pdf");
     }
     private static string Filters(int? id, DateTime? from, DateTime? to) => id is null && from is null && to is null
         ? "All records" : $"ID: {id?.ToString() ?? "Any"}; From: {from?.ToString("dd.MM.yyyy") ?? "Any"}; To: {to?.ToString("dd.MM.yyyy") ?? "Any"}";

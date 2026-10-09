@@ -1,4 +1,4 @@
-// Glavne boje - teget paleta #4976b5
+
 $primary-color: #4976b5;
 $primary-light: #6b96d1;
 $primary-lighter: #e8f0f9;
@@ -74,7 +74,7 @@ $hover-bg: rgba(73, 118, 181, 0.04);
         flex-shrink: 0;
       }
 
-      // Ikona preko ::before elementa
+  
       position: relative;
 
       &::after {
@@ -248,7 +248,7 @@ $hover-bg: rgba(73, 118, 181, 0.04);
       color: $text-primary;
       font-size: 14px;
 
-      // Ikone za enabled/disabled
+  
       .icon-enabled {
         color: $success-color;
         font-size: 24px;
@@ -336,7 +336,7 @@ $hover-bg: rgba(73, 118, 181, 0.04);
   }
 }
 
-// Responzivnost
+
 @media (max-width: 1024px) {
   .header-card {
     .header-card-content {

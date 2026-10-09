@@ -1,8 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
-
+import {
+  getBusinessDateTimeKey,
+} from '../../../core/services/business-date-time';
 import { ReservationApiService } from '../../../api-services/reservations/reservation-api.service';
 import {
   ListReservationRequest,
@@ -26,13 +29,10 @@ export class ReservationComponent implements OnInit {
   isLoading = false;
   errorMessage: string | null = null;
 
-  // ✅ HTML koristi [dataSource]="data"
   data: ListReservationQueryDto[] = [];
 
-  // ✅ za <tr mat-header-row ...>
   displayedColumns: string[] = ['id', 'userId', 'trackId', 'kartId', 'date', 'startTime', 'endTime', 'actions'];
 
-  // paging (ako kasnije dodaš paginator)
   page = 1;
   pageSize = 10;
   totalCount = 0;
@@ -57,33 +57,27 @@ export class ReservationComponent implements OnInit {
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: (res: ListReservationResponse) => {
-          // prilagodi ako se PageResult zove drugačije
-          const items = (res as any).items ?? (res as any).data ?? [];
-          this.data = items as ListReservationQueryDto[];
-
-          this.totalCount = (res as any).totalCount ?? (res as any).total ?? 0;
+          this.data = res.items ?? [];
+          this.totalCount = res.total ?? res.totalItems ?? this.data.length;
         },
-        error: (err) => {
+        error: (err: unknown) => {
           console.error('Load reservations error:', err);
-          this.errorMessage =
-            err?.error?.message ??
-            err?.message ??
-            'Greška prilikom učitavanja rezervacija.';
+          this.errorMessage = this.readErrorMessage(
+            err,
+            'Greška prilikom učitavanja rezervacija.'
+          );
         },
       });
   }
 
-  // ✅ HTML: (click)="onAdd()"
   onAdd(): void {
     this.router.navigate(['/client/reservation/add']);
   }
 
-  // ✅ HTML: (click)="onEdit(r.id!)"
   onEdit(id: number): void {
     this.router.navigate(['/client/reservation/edit', id]);
   }
 
-  // ✅ HTML: (click)="onDelete(r.id!)"
   onDelete(id: number): void {
     const ref = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '420px',
@@ -106,18 +100,17 @@ export class ReservationComponent implements OnInit {
         .pipe(finalize(() => (this.isLoading = false)))
         .subscribe({
           next: () => this.load(),
-          error: (err) => {
+          error: (err: unknown) => {
             console.error('Delete reservation error:', err);
-            this.errorMessage =
-              err?.error?.message ??
-              err?.message ??
-              'Greška prilikom brisanja rezervacije.';
+            this.errorMessage = this.readErrorMessage(
+              err,
+              'Greška prilikom brisanja rezervacije.'
+            );
           },
         });
     });
   }
 
-  // Helpers (ako ih želiš koristiti u HTML-u)
   toShortTime(value?: string | null): string {
     if (!value) return '';
     return value.length >= 5 ? value.substring(0, 5) : value;
@@ -129,30 +122,85 @@ export class ReservationComponent implements OnInit {
   }
 
   canModify(r: ListReservationQueryDto): boolean {
-  const start = this.parseStartDateTime(r);
-  if (!start) return false;
+  const startKey = this.getReservationStartKey(r);
+  if (!startKey) return false;
 
-  const diffMs = start.getTime() - Date.now();
-  const twoHoursMs = 2 * 60 * 60 * 1000;
+  const nowKey = getBusinessDateTimeKey();
 
-  return diffMs >= twoHoursMs;
+  const startMs =
+    this.dateTimeKeyToComparableValue(startKey);
+
+  const nowMs =
+    this.dateTimeKeyToComparableValue(nowKey);
+
+  const twoHoursMs =
+    2 * 60 * 60 * 1000;
+
+  return startMs - nowMs >= twoHoursMs;
 }
 
-private parseStartDateTime(r: ListReservationQueryDto): Date | null {
-  // Najčešće: ISO "2026-02-22T23:11:00"
-  if (r.startTime && r.startTime.includes('T')) {
-    const d = new Date(r.startTime);
-    return isNaN(d.getTime()) ? null : d;
+private getReservationStartKey(
+  r: ListReservationQueryDto
+): string | null {
+  if (!r.date || !r.startTime) {
+    return null;
   }
 
-  // Fallback: ako nekad dođe samo "HH:mm" + datum odvojeno
-  const dateStr: any = (r as any).reservationDate ?? (r as any).date;
-  if (!dateStr || !r.startTime) return null;
+  const day = r.date.includes('T')
+    ? r.date.split('T')[0]
+    : r.date;
 
-  const day = String(dateStr).includes('T') ? String(dateStr).split('T')[0] : String(dateStr);
-  const iso = `${day}T${String(r.startTime).length === 5 ? r.startTime + ':00' : r.startTime}`;
-  const d = new Date(iso);
-  return isNaN(d.getTime()) ? null : d;
+  let time = r.startTime.includes('T')
+    ? r.startTime.split('T')[1]
+    : r.startTime;
+
+  if (time.length === 5) {
+    time += ':00';
+  }
+
+  return `${day}T${time.substring(0, 8)}`;
 }
+
+private dateTimeKeyToComparableValue(
+  value: string
+): number {
+  const [datePart, timePart] =
+    value.split('T');
+
+  const [year, month, day] =
+    datePart.split('-').map(Number);
+
+  const [hour, minute, second = 0] =
+    timePart.split(':').map(Number);
+
+  return Date.UTC(
+    year,
+    month - 1,
+    day,
+    hour,
+    minute,
+    second
+  );
+}
+
+ 
+
+  private readErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof HttpErrorResponse) {
+      if (this.hasMessage(error.error)) return error.error.message;
+      if (error.message) return error.message;
+    }
+
+    return error instanceof Error && error.message ? error.message : fallback;
+  }
+
+  private hasMessage(value: unknown): value is { message: string } {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      'message' in value &&
+      typeof value.message === 'string'
+    );
+  }
 
 }

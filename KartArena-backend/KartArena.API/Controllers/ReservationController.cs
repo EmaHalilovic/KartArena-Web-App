@@ -1,10 +1,10 @@
-using KartArena.Application.Features.ReservationEmployeeAssignments.Commands.AssignReservationResources;
+﻿using KartArena.Application.Features.ReservationEmployeeAssignments.Commands.AssignReservationResources;
 using KartArena.Application.Features.ReservationEmployeeAssignments.Commands.RemoveReservationEmployeeAssignment;
 using KartArena.Application.Features.ReservationEmployeeAssignments.DTOs;
 using KartArena.Application.Features.ReservationEmployeeAssignments.Queries.GetAvailableEquipmentForReservation;
 using KartArena.Application.Features.ReservationEmployeeAssignments.Queries.GetReservationAssignmentsByReservationId;
-using KartArena.Application.Modules.Catalog.Reservations.Commands.Checkout;
 using KartArena.Application.Modules.Catalog.Reservations.Commands.ChangeStatus;
+using KartArena.Application.Modules.Catalog.Reservations.Commands.Checkout;
 using KartArena.Application.Modules.Catalog.Reservations.Commands.Create;
 using KartArena.Application.Modules.Catalog.Reservations.Commands.Delete;
 using KartArena.Application.Modules.Catalog.Reservations.Commands.MarkCashPaymentAsPaid;
@@ -12,31 +12,36 @@ using KartArena.Application.Modules.Catalog.Reservations.Commands.Update;
 using KartArena.Application.Modules.Catalog.Reservations.Queries.Availability;
 using KartArena.Application.Modules.Catalog.Reservations.Queries.GetById;
 using KartArena.Application.Modules.Catalog.Reservations.Queries.List;
+using System.Security.Claims;
 
 namespace KartArena.Api.Controllers.Catalog
 {
-    [AllowAnonymous]
-    [Route("reservations")]
+    [Authorize]
     [Route("api/reservations")]
     [ApiController]
     public sealed class ReservationsController(ISender sender) : ControllerBase
     {
+        [Authorize(Roles = "Admin,Employee")]
         [HttpPost]
         public async Task<ActionResult<int>> Create([FromBody] CreateReservationCommand command, CancellationToken cancellationToken)
         {
+            
             var id = await sender.Send(command, cancellationToken);
             return Ok(id);
         }
 
         [HttpPost("checkout")]
         [AllowAnonymous]
-        public async Task<ActionResult<CheckoutReservationsResponse>> Checkout(CheckoutReservationsCommand command,CancellationToken ct)
+        public async Task<ActionResult<CheckoutReservationsResponse>> Checkout(CheckoutReservationsCommand command, CancellationToken ct)
         {
+            // anonymous checkout remains a guest reservation only.
+            command.UserId = null;
             var reservationIds = await sender.Send(command, ct);
 
             return Ok(reservationIds);
         }
 
+        [Authorize(Roles = "Admin,Employee")]
         [HttpPut("{id:int}")]
         public async Task<ActionResult<int>> Update(
             int id,
@@ -48,6 +53,7 @@ namespace KartArena.Api.Controllers.Catalog
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin,Employee")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(
             int id,
@@ -57,6 +63,7 @@ namespace KartArena.Api.Controllers.Catalog
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin,Employee")]
         [HttpGet("{id:int}")]
         public async Task<ActionResult<GetReservationByIdQueryDto>> GetById(
             int id,
@@ -66,6 +73,7 @@ namespace KartArena.Api.Controllers.Catalog
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin,Employee")]
         [HttpGet]
         public async Task<ActionResult<PageResult<ListReservationsQueryDto>>> List(
             [FromQuery] ListReservationsQuery query,
@@ -74,10 +82,10 @@ namespace KartArena.Api.Controllers.Catalog
             var result = await sender.Send(query, cancellationToken);
             return Ok(result);
         }
-        
-        [HttpGet("availability")]
+
         [AllowAnonymous]
-        public async Task<ActionResult<GetReservationAvailabilityDto>> GetAvailability( [FromQuery] DateTime date,[FromQuery] int duration, CancellationToken ct)
+        [HttpGet("availability")]
+        public async Task<ActionResult<GetReservationAvailabilityDto>> GetAvailability([FromQuery] DateTime date, [FromQuery] int duration, CancellationToken ct)
         {
             var result = await sender.Send(new GetReservationAvailabilityQuery
             {
@@ -89,8 +97,8 @@ namespace KartArena.Api.Controllers.Catalog
         }
 
 
+        [Authorize(Roles = "Admin,Employee")]
         [HttpPut("{reservationId:int}/pay-cash")]
-        [AllowAnonymous]
         public async Task<ActionResult<int>> MarkCashPaymentAsPaid(
             int reservationId,
             [FromBody] MarkCashReservationPaymentAsPaidCommand command,
@@ -101,17 +109,19 @@ namespace KartArena.Api.Controllers.Catalog
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin,Employee")]
         [HttpPut("{reservationId:int}/status")]
         public async Task<ActionResult<int>> ChangeStatus(
-            int reservationId,
-            [FromBody] ChangeReservationStatusCommand command,
-            CancellationToken cancellationToken)
+           int reservationId,
+           [FromBody] ChangeReservationStatusCommand command,
+           CancellationToken cancellationToken)
         {
             command.ReservationId = reservationId;
             var result = await sender.Send(command, cancellationToken);
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin,Employee")]
         [HttpGet("{reservationId:int}/assignments")]
         public async Task<ActionResult<List<ReservationEmployeeAssignmentDto>>> GetAssignments(
             int reservationId,
@@ -124,6 +134,7 @@ namespace KartArena.Api.Controllers.Catalog
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin,Employee")]
         [HttpGet("{reservationId:int}/available-equipment")]
         public async Task<ActionResult<List<AvailableEquipmentItemDto>>> GetAvailableEquipment(
             int reservationId,
@@ -141,6 +152,7 @@ namespace KartArena.Api.Controllers.Catalog
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin,Employee")]
         [HttpPost("{reservationId:int}/assignments")]
         public async Task<ActionResult<int>> SaveAssignments(
             int reservationId,
@@ -152,6 +164,7 @@ namespace KartArena.Api.Controllers.Catalog
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin,Employee")]
         [HttpDelete("assignments/{assignmentId:int}")]
         public async Task<IActionResult> DeleteAssignment(
             int assignmentId,
@@ -163,5 +176,7 @@ namespace KartArena.Api.Controllers.Catalog
 
             return NoContent();
         }
+
+        
     }
 }

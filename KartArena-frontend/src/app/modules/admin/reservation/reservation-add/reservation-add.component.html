@@ -15,11 +15,7 @@
         <p>Saving reservation...</p>
       </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>User ID (optional)</mat-label>
-        <input matInput type="number" formControlName="userId" />
-        <mat-error *ngIf="form.get('userId')?.touched && form.get('userId')?.invalid">{{ getErrorMessage('userId') }}</mat-error>
-      </mat-form-field>
+     
 
       <div class="row">
         <mat-form-field appearance="outline" class="half">

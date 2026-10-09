@@ -1,4 +1,11 @@
-﻿namespace KartArena.Application.Modules.Catalog.Users.Commands.Delete
+﻿using KartArena.Application.Modules.Catalog.Payments.Commands.Delete;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace KartArena.Application.Modules.Catalog.Users.Commands.Delete
 {
     public sealed class DeleteUserCommandHandler(IAppDbContext context)
         : IRequestHandler<DeleteUserCommand, Unit>

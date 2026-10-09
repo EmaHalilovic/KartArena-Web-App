@@ -126,7 +126,13 @@ export function buildEquipmentSummaryCards(
 }
 
 export function getEquipmentCategories(): EquipmentCategory[] {
-  return Object.values(EquipmentCategory);
+  return [
+    EquipmentCategory.Helmet,
+    EquipmentCategory.Suit,
+    EquipmentCategory.Gloves,
+    EquipmentCategory.Balaclava,
+    EquipmentCategory.Other,
+  ];
 }
 
 function countByStatus(items: ListWithItemsEquipmentQueryDtoItem[], status: EquipmentItemStatus): number {

@@ -24,7 +24,7 @@ export class KartsComponent implements OnInit {
   loading = false;
   errorMessage: string | null = null;
 
-  // Template compatibility (HTML koristi isLoading)
+ 
   get isLoading(): boolean {
     return this.loading;
   }
@@ -54,7 +54,7 @@ export class KartsComponent implements OnInit {
       next: (res) => {
         this.items = res.items || [];
         this.totalCount = res.totalItems ?? 0;
-        // ako backend vraća page/pageSize, možeš ih syncati ovdje
+       
         this.loading = false;
       },
       error: (err: any) => {

@@ -11,7 +11,6 @@ namespace KartArena.Domain.Entities.Reservations
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public decimal TotalPrice { get; set; }
-
         public ReservationStatus Status { get; set; } = ReservationStatus.Pending;
 
         // optional but very useful

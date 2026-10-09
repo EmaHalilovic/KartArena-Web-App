@@ -13,6 +13,7 @@ import {
   AvailableReservationEquipmentItemDto,
   ReservationEmployeeAssignmentDto,
 } from '../../../../../api-services/reservations/reservation-api.models';
+import { AuthFacadeService } from '../../../../../core/services/auth/auth-facade.service';
 
 export interface ReservationAssignDialogData {
   reservationId: number;
@@ -38,9 +39,11 @@ export class ReservationAssignDialogComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly equipmentApi = inject(EquipmentApiService);
   private readonly reservationApi = inject(ReservationApiService);
+  private readonly auth=inject(AuthFacadeService);
+  readonly currentUser = this.auth.currentUser;
 
   readonly form = this.fb.group({
-    employeeName: ['', [Validators.required]],
+  
     equipmentTypeId: [null as number | null],
     pendingEquipmentItemIds: [[] as number[]],
   });
@@ -117,14 +120,22 @@ export class ReservationAssignDialogComponent implements OnInit {
   }
 
   save(): void {
+
+     const user = this.auth.currentUser();
+
+    if (!user) {
+      this.loadError = 'Please sign in before assigning equipment.';
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
     const payload: AssignReservationResourcesPayload = {
-      employeeId: null,
-      employeeName: this.form.value.employeeName?.trim() || null,
+      employeeId: user.userId,
+      employeeName: null,
       equipmentItemIds: this.selectedAssignments.map((item) => item.equipmentItemId),
       replaceExistingAssignments: true,
     };
@@ -198,10 +209,7 @@ export class ReservationAssignDialogComponent implements OnInit {
   }
 
   private applyExistingAssignments(assignments: ReservationEmployeeAssignmentDto[]): void {
-    const employeeNames = [...new Set(assignments.map((item) => item.employeeName?.trim()).filter(Boolean))];
-    this.form.patchValue({
-      employeeName: employeeNames.length === 1 ? employeeNames[0] : '',
-    });
+   
 
     this.selectedAssignments = assignments
       .filter((item) => item.equipmentItemId != null)

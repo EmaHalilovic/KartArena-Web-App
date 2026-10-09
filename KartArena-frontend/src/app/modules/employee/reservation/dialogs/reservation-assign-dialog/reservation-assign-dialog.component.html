@@ -20,12 +20,10 @@
     Loading assignment context...
   </div>
 
-  <mat-form-field appearance="fill">
-    <mat-label>Assigned employee</mat-label>
-    <input matInput formControlName="employeeName" placeholder="Enter employee name, username, or email" />
-    <mat-hint>Employee assignment is still manual, so enter an existing employee value directly for now.</mat-hint>
-    <mat-error *ngIf="form.controls.employeeName.invalid">Employee is required.</mat-error>
-  </mat-form-field>
+ <div>
+    <span class="label">Assigned employee</span>
+    <strong>{{ currentUser()?.email || 'Please sign in before assigning equipment.' }}</strong>
+  </div>
 
   <div class="picker-grid">
     <mat-form-field appearance="fill">
@@ -107,7 +105,7 @@
     color="primary"
     type="button"
     (click)="save()"
-    [disabled]="isLoadingInitial || isLoadingAvailableEquipment"
+    [disabled]="isLoadingInitial || isLoadingAvailableEquipment || !currentUser()"
   >
     Save assignments
   </button>

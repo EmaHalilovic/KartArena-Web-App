@@ -4,13 +4,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { ToasterService } from '../../../../core/services/toaster.service';
 import { ReservationApiService } from '../../../../api-services/reservations/reservation-api.service';
+
+import { ReservationFormService } from '../services/reservation-form.service';
+import { formatLocalCalendarDate, getBusinessToday } from '../../../../core/services/business-date-time';
 import {
   GetReservationByIdQueryDto,
   ReservationStatus,
   UpdateReservationCommand,
 } from '../../../../api-services/reservations/reservation-api.models';
-import { ReservationFormService } from '../services/reservation-form.service';
-
 @Component({
   selector: 'app-reservation-edit',
   standalone: false,
@@ -30,7 +31,7 @@ export class ReservationEditComponent implements OnInit {
   isSaving = false;
   errorMessage = '';
   reservation: GetReservationByIdQueryDto | null = null;
-  readonly minDate = new Date();
+  readonly minDate = getBusinessToday();
   id!: number;
 
   ngOnInit(): void {
@@ -83,11 +84,12 @@ export class ReservationEditComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-
-    const value = this.form.getRawValue();
+const value = this.form.getRawValue();
     const reservationDate = this.toIsoDate(value.reservationDate);
     const startTime = this.toTimeInput(value.startTime);
     const endTime = this.toTimeInput(value.endTime);
+
+  
 
     if (!reservationDate || !startTime || !endTime || endTime <= startTime) {
       this.errorMessage = 'End time must be after start time.';
@@ -95,7 +97,6 @@ export class ReservationEditComponent implements OnInit {
     }
 
     const command: UpdateReservationCommand = {
-      userId: value.userId == null ? null : Number(value.userId),
       trackId: Number(value.trackId),
       kartId: Number(value.kartId),
       reservationDate,
@@ -154,10 +155,7 @@ export class ReservationEditComponent implements OnInit {
     if (!value) return '';
     if (typeof value === 'string') return value.split('T')[0];
 
-    const year = value.getFullYear();
-    const month = String(value.getMonth() + 1).padStart(2, '0');
-    const day = String(value.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return formatLocalCalendarDate(value);
   }
 
   private toTimeInput(value?: string | null): string {

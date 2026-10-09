@@ -1,4 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
@@ -29,6 +30,11 @@ export class PaymentTypesComponent
   private toaster = inject(ToasterService);
 
   paymentMethodFilter: PaymentMethodFilter = 'all';
+  readonly nameControl = new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] });
+  readonly codeControl = new FormControl('', { nonNullable: true, validators: [Validators.maxLength(50)] });
+  readonly paymentMethodControl = new FormControl<PaymentMethodFilter>('all', { nonNullable: true });
+  readonly allowedOnlineControl = new FormControl<boolean | null>(null);
+  readonly enabledOnlyControl = new FormControl(true, { nonNullable: true });
 
   displayedColumns: string[] = [
     'name',
@@ -53,9 +59,11 @@ export class PaymentTypesComponent
 
   protected loadPagedData(): void {
     this.startLoading();
+   
+
     this.api.list(this.buildApiRequest()).subscribe({
       next: (response) => {
-        this.handlePageResult(response);
+         this.handlePageResult(response);
         this.stopLoading();
       },
       error: (err) => {
@@ -108,7 +116,7 @@ export class PaymentTypesComponent
     });
   }
 
-  onNameFilterChange(value: string): void {
+ onNameFilterChange(value: string): void {
     this.request.paging.page = 1;
     this.request.name = value?.trim() || null;
     this.loadPagedData();
@@ -120,8 +128,8 @@ export class PaymentTypesComponent
     this.loadPagedData();
   }
 
-  onToggleEnabledFilter(checked: boolean): void {
-    this.request.onlyEnabled = checked;
+  onAllowedOnlineFilterChange(value: boolean | null): void {
+    this.request.allowedOnline = value;
     this.request.paging.page = 1;
     this.loadPagedData();
   }
@@ -133,16 +141,15 @@ export class PaymentTypesComponent
     this.loadPagedData();
   }
 
-  onAllowedOnlineFilterChange(value: boolean | null): void {
-    this.request.allowedOnline = value;
-    this.request.paging.page = 1;
-    this.loadPagedData();
-  }
-
   formatDescription(item: ListPaymentTypesQueryDto): string {
     return (item.description ?? '').trim() || '-';
   }
 
+    onToggleEnabledFilter(checked: boolean): void {
+    this.request.onlyEnabled = checked;
+    this.request.paging.page = 1;
+    this.loadPagedData();
+  }
   private buildApiRequest(): ListPaymentTypesRequest {
     const request = new ListPaymentTypesRequest();
     request.name = this.request.name?.trim() || null;
@@ -154,6 +161,9 @@ export class PaymentTypesComponent
     request.paging.pageSize = this.request.paging.pageSize;
     return request;
   }
+
+ 
+ 
 
   private performDelete(item: ListPaymentTypesQueryDto): void {
     this.startLoading();

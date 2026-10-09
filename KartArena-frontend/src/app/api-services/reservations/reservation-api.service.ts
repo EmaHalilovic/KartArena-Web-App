@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, defer, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   ListReservationRequest,
@@ -25,7 +25,7 @@ import { buildHttpParams } from '../../core/models/build-http-params';
 @Injectable({ providedIn: 'root' })
 export class ReservationApiService {
   private readonly apiUrl = `${environment.apiUrl}/api`;
-  private readonly baseUrl = `${environment.apiUrl}/reservations`;
+  private readonly baseUrl = `${environment.apiUrl}/api/reservations`;
   private http = inject(HttpClient);
 
   list(request?: ListReservationRequest): Observable<ListReservationResponse> {
@@ -62,12 +62,6 @@ export class ReservationApiService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
-  }
-
-  confirmReservation(id: number): Observable<void> {
-    return defer(() =>
-      throwError(() => new Error(`TODO: connect reservation confirm endpoint for reservation ${id}.`))
-    );
   }
 
   markCashPaid(id: number, payload: MarkReservationCashPaidPayload): Observable<number> {

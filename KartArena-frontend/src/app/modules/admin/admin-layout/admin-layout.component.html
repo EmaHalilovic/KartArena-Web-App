@@ -46,11 +46,11 @@
               <span class="nav-label">Payment Types</span>
             </a>
 
-            <a class="nav-item" routerLink="/admin/reports" routerLinkActive="active">
+               <a class="nav-item" routerLink="/admin/reports" routerLinkActive="active">
               <mat-icon class="nav-icon">picture_as_pdf</mat-icon>
               <span class="nav-label">{{ 'REPORTS.NAV' | translate }}</span>
             </a>
-
+            
             <a class="nav-item" routerLink="/admin/customers" routerLinkActive="active">
               <mat-icon class="nav-icon">groups_2</mat-icon>
               <span class="nav-label">Customers</span>
@@ -69,12 +69,23 @@
       </div>
 
       <div class="sidebar-footer">
-        <div class="footer-avatar">AD</div>
-        <div class="footer-user">
-          <div class="footer-name">Admin</div>
-          <div class="footer-email">{{ auth.currentUser()?.email }}</div>
-        </div>
-      </div>
+  <div class="footer-avatar">AD</div>
+
+  <div class="footer-user">
+    <div class="footer-name">Admin</div>
+    <div class="footer-email">{{ auth.currentUser()?.email }}</div>
+  </div>
+
+  <button
+    mat-icon-button
+    type="button"
+    class="logout-btn"
+    aria-label="Logout"
+    (click)="logout()"
+  >
+    <mat-icon>logout</mat-icon>
+  </button>
+</div>
     </div>
   </mat-sidenav>
 
@@ -87,11 +98,7 @@
       </div>
 
       <div class="topbar-right">
-        <app-theme-toggle></app-theme-toggle>
-        <div class="system-status">
-          <span class="status-dot"></span>
-          <span>System Online</span>
-        </div>
+         <app-theme-toggle></app-theme-toggle>
 
         <div class="language-switcher" aria-label="Language switcher">
           <mat-icon class="lang-icon">translate</mat-icon>

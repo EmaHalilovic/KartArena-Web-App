@@ -16,6 +16,11 @@
           <div class="nav-group">
             <div class="nav-group-title">Operations</div>
 
+            <a class="nav-item" routerLink="/employee/dashboard" routerLinkActive="active">
+              <mat-icon class="nav-icon">dashboard</mat-icon>
+              <span class="nav-label">Dashboard</span>
+            </a>
+
             <a class="nav-item" routerLink="/employee/reservations" routerLinkActive="active">
               <mat-icon class="nav-icon">calendar_month</mat-icon>
               <span class="nav-label">Reservations</span>
@@ -49,12 +54,23 @@
       </div>
 
       <div class="sidebar-footer">
-        <div class="footer-avatar">EM</div>
-        <div class="footer-user">
-          <div class="footer-name">Employee</div>
-          <div class="footer-email">{{ auth.currentUser()?.email }}</div>
-        </div>
-      </div>
+  <div class="footer-avatar">EM</div>
+
+  <div class="footer-user">
+    <div class="footer-name">Employee</div>
+    <div class="footer-email">{{ auth.currentUser()?.email }}</div>
+  </div>
+
+  <button
+    mat-icon-button
+    type="button"
+    class="logout-btn"
+    aria-label="Logout"
+    (click)="logout()"
+  >
+    <mat-icon>logout</mat-icon>
+  </button>
+</div>
     </div>
   </mat-sidenav>
 
@@ -67,11 +83,7 @@
       </div>
 
       <div class="topbar-right">
-        <app-theme-toggle></app-theme-toggle>
-        <div class="system-status">
-          <span class="status-dot"></span>
-          <span>System Online</span>
-        </div>
+         <app-theme-toggle></app-theme-toggle>
 
         <div class="language-switcher" aria-label="Language switcher">
           <mat-icon class="lang-icon">translate</mat-icon>

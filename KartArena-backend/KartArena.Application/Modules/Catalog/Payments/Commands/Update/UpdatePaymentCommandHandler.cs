@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KartArena.Application.Modules.Catalog.Payments.Commands.Update;
 
-public sealed class UpdatePaymentCommandHandler(IAppDbContext context)
+public sealed class UpdatePaymentCommandHandler(IAppDbContext context, IBusinessClock businessClock)
     : IRequestHandler<UpdatePaymentCommand, Unit>
 {
     public async Task<Unit> Handle(UpdatePaymentCommand request, CancellationToken cancellationToken)
@@ -33,7 +33,11 @@ public sealed class UpdatePaymentCommandHandler(IAppDbContext context)
         
 
         entity.Amount = request.Amount;
-        entity.PaymentDate = request.PaymentDate ?? entity.PaymentDate ?? DateTime.UtcNow;
+          if (request.PaymentDate.HasValue)
+        {
+            entity.PaymentDate =
+                businessClock.ToUtc(request.PaymentDate.Value);
+        }
         entity.PaymentTypeId = request.PaymentTypeId;
         entity.TransactionReference = request.TransactionReference?.Trim();
         entity.Note = request.Note?.Trim();

@@ -17,7 +17,7 @@ public partial class DatabaseContext
             {
                 case EntityState.Added:
                     entry.Entity.CreatedAtUtc = UtcNow;
-                    entry.Entity.ModifiedAtUtc = null; // ili = UtcNow
+                    entry.Entity.ModifiedAtUtc = null; // or = UtcNow
                     entry.Entity.IsDeleted = false;
                     break;
 
@@ -45,13 +45,13 @@ public partial class DatabaseContext
     {
         base.OnModelCreating(modelBuilder);
 
-        //bugfix 27.10.2025.nakon nastave - učitaj sve konfiguracije iz Infrastructure.Database.Configurations
+        
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DatabaseContext).Assembly);
 
         ApplyGlobalFielters(modelBuilder);
 
         //StaticDataSeeder.Seed(modelBuilder); // static data
-
+       
     }
 
     private void ApplyGlobalFielters(ModelBuilder modelBuilder)

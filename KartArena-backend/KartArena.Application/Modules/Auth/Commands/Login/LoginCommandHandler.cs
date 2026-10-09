@@ -17,15 +17,15 @@ public sealed class LoginCommandHandler(
                 x.isEnabled &&
                 !x.IsDeleted,
                 ct)
-            ?? throw new MarketNotFoundException("Korisnik nije pronađen ili je onemogućen.");
+            ?? throw new MarketNotFoundException("The user was not found or is disabled.");
 
 
         if (string.IsNullOrWhiteSpace(user.PasswordHash))
-            throw new MarketConflictException("Korisnički nalog nije ispravno konfigurisan.");
+            throw new MarketConflictException("The user account is not configured correctly.");
 
         var verify = hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
         if (verify == PasswordVerificationResult.Failed)
-            throw new MarketConflictException("Pogrešni kredencijali.");
+            throw new MarketConflictException("Invalid credentials.");
 
         var tokens = jwt.IssueTokens(user);
 

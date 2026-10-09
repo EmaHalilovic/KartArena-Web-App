@@ -11,6 +11,7 @@
     </div>
 
     <div class="header-actions">
+      
       <button mat-stroked-button type="button" (click)="onToggleActive()">
         <mat-icon>{{ type.isActive ? 'toggle_off' : 'toggle_on' }}</mat-icon>
         {{ type.isActive ? 'Deactivate' : 'Activate' }}
@@ -85,13 +86,13 @@
     <div class="items-filters">
       <mat-form-field appearance="outline" class="filter-search">
         <mat-label>Search items</mat-label>
-        <input matInput [(ngModel)]="itemSearch" placeholder="Search by code or notes" />
+        <input matInput [formControl]="itemSearchControl" placeholder="Search by code or notes" />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="filter-status">
         <mat-label>Status</mat-label>
-        <mat-select [(ngModel)]="selectedItemStatus">
+        <mat-select [formControl]="itemStatusControl">
           <mat-option value="all">All statuses</mat-option>
           <mat-option *ngFor="let status of itemStatusOptions" [value]="status">
             {{ getItemLabel(status) }}

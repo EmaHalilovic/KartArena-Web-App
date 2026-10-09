@@ -14,7 +14,7 @@ namespace KartArena.Infrastructure.Persistence.Configurations.Catalog
 
             builder.HasKey(x => x.Id);
 
-         
+
 
             // === Employee ===
             builder

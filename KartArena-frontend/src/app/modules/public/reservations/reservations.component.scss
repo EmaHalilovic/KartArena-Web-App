@@ -143,7 +143,7 @@ background: rgba(198, 20, 20, 0);
       gap: 7px;
 
       &::after {
-        content: "Datum, vrijeme, staza, kart";
+        content: "Date, time, track, kart";
         color: rgba(255, 255, 255, 0.62);
         font-size: 10px;
         font-weight: 700;
@@ -154,11 +154,11 @@ background: rgba(198, 20, 20, 0);
     }
 
     &:nth-child(2) span:last-child::after {
-      content: "Podaci o kupcu i kontakt informacije";
+      content: "Customer details and contact information";
     }
 
     &:nth-child(3) span:last-child::after {
-      content: "Provjera i potvrda rezervacije";
+      content: "Review and confirm reservation";
     }
 
     &.active {

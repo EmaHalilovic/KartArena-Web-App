@@ -34,7 +34,7 @@
         </button>
 
         <div class="summary-actions">
-          <button *ngIf="canEdit()" mat-stroked-button type="button" (click)="openEdit()">
+           <button *ngIf="canEdit()" mat-stroked-button type="button" (click)="openEdit()">
             <mat-icon>edit</mat-icon>
             Edit
           </button>
@@ -107,7 +107,7 @@
             <span>Customer</span>
             <strong>{{ userLabel }}</strong>
           </div>
-          <div class="info-item">
+           <div class="info-item">
             <span>Email</span>
             <strong>{{ reservation.customerEmail || '-' }}</strong>
           </div>
@@ -167,7 +167,7 @@
           </div>
           <div class="info-item">
             <span>Transaction reference</span>
-            <strong class="transaction-reference">{{ reservation.transactionReference || '-' }}</strong>
+             <strong class="transaction-reference">{{ reservation.transactionReference || '-' }}</strong>
           </div>
           <div class="info-item info-item-wide">
             <span>Payment note</span>

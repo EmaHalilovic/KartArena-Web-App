@@ -11,7 +11,7 @@ namespace KartArena.Application.Modules.Catalog.Users.Commands.Create
     {
         public async Task<int> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            //provjeri da li email postoji
+            
             var emailExists = await context.Users.AnyAsync
                 (x => x.Email == request.Email, cancellationToken);
             if (emailExists)
@@ -19,7 +19,7 @@ namespace KartArena.Application.Modules.Catalog.Users.Commands.Create
                 throw new InvalidOperationException($"The user with: {request.Email} already exists.");
             }
 
-            //provjeri da li grad postoji
+            
             var cityExists = await context.Cities.AnyAsync
                 (x => x.Id == request.CityId, cancellationToken);
             if (!cityExists)
@@ -27,7 +27,7 @@ namespace KartArena.Application.Modules.Catalog.Users.Commands.Create
                 throw new KeyNotFoundException($"The city with id: {request.CityId} does not exist.");
             }
 
-            // provjeri da li username postoji
+           
             var usernameExists = await context.Users.AnyAsync(
                 x => x.Username.ToLower() == request.Username.ToLower() && !x.IsDeleted,
                 cancellationToken);

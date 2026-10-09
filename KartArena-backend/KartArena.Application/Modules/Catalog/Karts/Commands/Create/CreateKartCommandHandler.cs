@@ -16,7 +16,7 @@ namespace KartArena.Application.Modules.Catalog.Karts.Commands.Create
             if (string.IsNullOrWhiteSpace(normalizedName))
                 throw new ValidationException("Name is required.");
 
-            // provjera da li već postoji kart s istim imenom
+            
             bool exists = await context.Karts
                 .AnyAsync(x => x.Name == normalizedName, cancellationToken);
 

@@ -1,4 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
@@ -34,6 +35,8 @@ export class EquipmentComponent
   private dialog = inject(MatDialog);
   private toaster = inject(ToasterService);
 
+  readonly stockStatusLabel = getEquipmentStockLabel;
+  
   displayedColumns: string[] = [
     'name',
     'category',
@@ -46,9 +49,18 @@ export class EquipmentComponent
     'actions',
   ];
 
-  stockStatusOptions = Object.values(EquipmentStockStatus);
+  stockStatusOptions = [
+    EquipmentStockStatus.Good,
+    EquipmentStockStatus.Low,
+    EquipmentStockStatus.OutOfStock,
+  ];
   categoryOptions = getEquipmentCategories();
   onlyActive = true;
+  readonly searchControl = new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] });
+  readonly categoryControl = new FormControl<EquipmentCategory | null>(null);
+  readonly stockStatusControl = new FormControl<EquipmentStockStatus | null>(null);
+  readonly sizeControl = new FormControl('', { nonNullable: true, validators: [Validators.maxLength(50)] });
+  readonly activeOnlyControl = new FormControl(true, { nonNullable: true });
 
   constructor() {
     super();
@@ -66,7 +78,7 @@ export class EquipmentComponent
 
     this.api.list(this.buildApiRequest()).subscribe({
       next: (response) => {
-        this.handlePageResult(response);
+         this.handlePageResult(response);
         this.stopLoading();
       },
       error: (err) => {
@@ -150,7 +162,7 @@ export class EquipmentComponent
     this.loadPagedData();
   }
 
-  onSizeChange(size: string): void {
+onSizeChange(size: string): void {
     this.request.size = size?.trim() || null;
     this.request.paging.page = 1;
     this.loadPagedData();
@@ -172,13 +184,17 @@ export class EquipmentComponent
     const request = new ListEquipmentRequest();
     request.search = this.request.search?.trim() || null;
     request.onlyActive = this.request.onlyActive ?? this.onlyActive;
-    request.category = this.request.category ?? null;
+   request.category = this.request.category ?? null;
     request.stockStatus = this.request.stockStatus ?? null;
     request.size = this.request.size?.trim() || null;
     request.paging.page = this.request.paging.page;
     request.paging.pageSize = this.request.paging.pageSize;
     return request;
   }
+
+ 
+
+  
 
   private performDelete(item: ListEquipmentQueryDto): void {
     this.startLoading();
@@ -195,4 +211,5 @@ export class EquipmentComponent
     });
   }
 
+  
 }

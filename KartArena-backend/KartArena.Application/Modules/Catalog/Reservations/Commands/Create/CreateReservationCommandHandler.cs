@@ -1,14 +1,17 @@
-﻿using KartArena.Domain.Entities.Payments;
+﻿using KartArena.Application.Modules.Catalog.Reservations.Services;
+using KartArena.Domain.Entities.Payments;
 using KartArena.Domain.Entities.Reservations;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create;
 
-public sealed class CreateReservationCommandHandler(IAppDbContext ctx)
+public sealed class CreateReservationCommandHandler(
+    IAppDbContext ctx,
+    IReservationRulesService reservationRulesService)
     : IRequestHandler<CreateReservationCommand, int>
 {
-    private const int MaxDriversPerTrackSlot = 6;
+   
     private const string DeskCashPaymentCode = "DESK_CASH";
     private const string DefaultCurrency = "bam";
 
@@ -16,143 +19,61 @@ public sealed class CreateReservationCommandHandler(IAppDbContext ctx)
         CreateReservationCommand request,
         CancellationToken ct)
     {
-        var track = await ctx.Tracks
+       
+       
+
+        if (request.PaymentTypeId is not int paymentTypeId)
+        {
+            throw new MarketBusinessRuleException(
+                "PAYMENT_TYPE_REQUIRED",
+                "Please select a payment type.");
+        }
+
+        var paymentType = await ctx.PaymentTypes
             .FirstOrDefaultAsync(
-                x => x.Id == request.TrackId &&
-                     !x.IsDeleted,
+                x => x.Id == paymentTypeId && !x.IsDeleted,
                 ct);
 
-        if (track is null)
+        if (paymentType is null)
         {
-            throw new InvalidOperationException(
-                "Track does not exist.");
+            throw new MarketBusinessRuleException(
+                "PAYMENT_TYPE_NOT_FOUND",
+                "Selected payment type does not exist.");
         }
 
-        var kart = await ctx.Karts
-            .FirstOrDefaultAsync(
-                x => x.Id == request.KartId &&
-                     !x.IsDeleted,
-                ct);
-
-        if (kart is null)
+        if (!paymentType.isEnabled)
         {
-            throw new InvalidOperationException(
-                "Kart does not exist.");
+            throw new MarketBusinessRuleException(
+                "PAYMENT_TYPE_DISABLED",
+                "Selected payment type is not active.");
         }
 
-        if (request.UserId.HasValue)
+        if (!paymentType.AllowedOnline)
         {
-            var userExists = await ctx.Users.AnyAsync(
-                x => x.Id == request.UserId.Value &&
-                     !x.IsDeleted,
-                ct);
-
-            if (!userExists)
-            {
-                throw new InvalidOperationException(
-                    "User does not exist.");
-            }
-        }
-
-        PaymentTypeEntity? paymentType = null;
-
-        if (request.PaymentTypeId.HasValue)
-        {
-            paymentType = await ctx.PaymentTypes
-                .FirstOrDefaultAsync(
-                    x => x.Id == request.PaymentTypeId.Value &&
-                         !x.IsDeleted,
-                    ct);
-
-            if (paymentType is null)
-            {
-                throw new InvalidOperationException(
-                    "Selected payment type does not exist.");
-            }
-
-            if (!paymentType.isEnabled)
-            {
-                throw new InvalidOperationException(
-                    "Selected payment type is not active.");
-            }
-
-            if (!paymentType.AllowedOnline)
-            {
-                throw new InvalidOperationException(
-                    "Selected payment type is not available for online payment.");
-            }
+            throw new MarketBusinessRuleException(
+                "PAYMENT_TYPE_NOT_ALLOWED",
+                "Selected payment type is not available for online booking.");
         }
 
         var isDeskCashPayment = string.Equals(
- paymentType.Code,
- DeskCashPaymentCode,
- StringComparison.OrdinalIgnoreCase);
+            paymentType.Code,
+            DeskCashPaymentCode,
+            StringComparison.OrdinalIgnoreCase);
 
-        var date = request.ReservationDate.Date;
-
-        if (request.EndTime <= request.StartTime)
-        {
-            throw new InvalidOperationException(
-                "Reservation end time must be after the start time.");
-        }
-
-        if (date != request.StartTime.Date ||
-            date != request.EndTime.Date)
-        {
-            throw new InvalidOperationException(
-                "Reservation date, start time and end time must be on the same day.");
-        }
-
-        var durationMinutes =
-            (request.EndTime - request.StartTime).TotalMinutes;
-
-        var totalPrice = (track.Outdoors, durationMinutes) switch
-        {
-            (false, 10) => 15m,
-            (false, 15) => 20m,
-
-            (true, 10) => 20m,
-            (true, 15) => 25m,
-
-            _ => throw new InvalidOperationException(
-                "Only 10-minute and 15-minute sessions are allowed.")
-        };
-
-        var kartBusy = await ctx.Reservations.AnyAsync(
-            reservation =>
-                !reservation.IsDeleted &&
-                reservation.KartId == request.KartId &&
-                reservation.Date.Date == date &&
-                reservation.StartTime < request.EndTime &&
-                reservation.EndTime > request.StartTime &&
-                reservation.Status != ReservationStatus.Cancelled,
-            ct);
-
-        if (kartBusy)
-        {
-            throw new InvalidOperationException(
-                "Selected kart is not available for the chosen time.");
-        }
-
-        var trackReservationsCount = await ctx.Reservations
-            .Where(reservation =>
-                !reservation.IsDeleted &&
-                reservation.TrackId == request.TrackId &&
-                reservation.Date.Date == date &&
-                reservation.StartTime < request.EndTime &&
-                reservation.EndTime > request.StartTime &&
-                reservation.Status != ReservationStatus.Cancelled)
-            .CountAsync(ct);
-
-        if (trackReservationsCount >= MaxDriversPerTrackSlot)
-        {
-            throw new InvalidOperationException(
-                "Track is not available. Maximum 6 drivers are allowed for this time slot.");
-        }
+        var rulesResult =
+            await reservationRulesService.ValidateAsync(
+                new ReservationRulesRequest(
+                    request.ReservationDate,
+                    request.StartTime,
+                    request.EndTime,
+                    request.TrackId,
+                    request.KartId),
+                pendingSlots: null,
+                ct);
 
         var reservation = new ReservationEntity
         {
-            UserId = request.UserId,
+           
 
             CustomerFirstName =
                 request.CustomerFirstName.Trim(),
@@ -170,14 +91,18 @@ public sealed class CreateReservationCommandHandler(IAppDbContext ctx)
             TrackId = request.TrackId,
             KartId = request.KartId,
 
-            Date = date,
+            Date = request.ReservationDate.Date,
             StartTime = request.StartTime,
             EndTime = request.EndTime,
 
-            Status = isDeskCashPayment?ReservationStatus.Confirmed:ReservationStatus.Pending,
+            Status = isDeskCashPayment
+                ? ReservationStatus.Confirmed
+                : ReservationStatus.Pending,
+
             PaymentStatus = PaymentStatus.Pending,
 
-            TotalPrice = totalPrice,
+            TotalPrice = rulesResult.TotalPrice,
+
             IsDeleted = false
         };
 
@@ -191,16 +116,16 @@ public sealed class CreateReservationCommandHandler(IAppDbContext ctx)
             {
                 PaymentTypeId = paymentType.Id,
 
-                Amount = totalPrice,
+                Amount = rulesResult.TotalPrice,
                 Currency = DefaultCurrency,
 
                 Status = PaymentStatus.Pending,
                 PaymentDate = null,
 
                 Note = string.IsNullOrWhiteSpace(
-                    request.PaymentNote)
-                    ? null
-                    : request.PaymentNote.Trim(),
+                request.PaymentNote)
+                ? null
+                : request.PaymentNote.Trim(),
 
                 IsDeleted = false,
                 isEnabled = true

@@ -1,4 +1,4 @@
-﻿using KartArena.Application.Abstractions;
+using KartArena.Application.Abstractions;
 using KartArena.Application.Modules.Catalog.Payments.Stripe;
 using KartArena.Domain.Entities.Payments;
 using KartArena.Domain.Entities.Reservations;
@@ -7,322 +7,290 @@ using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
 
-namespace KartArena.Infrastructure.Payments
+namespace KartArena.Infrastructure.Payments;
+
+public sealed class StripeWebhookService : IStripeWebhookService
 {
-    public sealed class StripeWebhookService
-        : IStripeWebhookService
+    private readonly IAppDbContext _context;
+    private readonly StripeSettings _settings;
+    private readonly IBusinessClock _businessClock;
+
+    public StripeWebhookService(IAppDbContext context, IOptions<StripeSettings> settings, IBusinessClock businessClock)
     {
-        private readonly IAppDbContext _context;
-        private readonly StripeSettings _settings;
+        _context = context;
+        _settings = settings.Value;
+        _businessClock =businessClock;
+    }
 
-        public StripeWebhookService(
-            IAppDbContext context,
-            IOptions<StripeSettings> settings)
+    public async Task ProcessWebhookAsync(
+        string json,
+        string stripeSignature,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(_settings.WebhookSecret))
+            throw new InvalidOperationException("Stripe webhook secret is not configured.");
+
+        Event stripeEvent;
+        try
         {
-            _context = context;
-            _settings = settings.Value;
+            stripeEvent = EventUtility.ConstructEvent(
+                json, stripeSignature, _settings.WebhookSecret);
+        }
+        catch (StripeException exception)
+        {
+            throw new InvalidOperationException(
+                "Stripe webhook signature is invalid.", exception);
         }
 
-        public async Task ProcessWebhookAsync(
-            string json,
-            string stripeSignature,
-            CancellationToken cancellationToken)
+        if (stripeEvent.Data.Object is not Session session)
+            return;
+
+        switch (stripeEvent.Type)
         {
-            if (string.IsNullOrWhiteSpace(
-                    _settings.WebhookSecret))
-            {
-                throw new InvalidOperationException(
-                    "Stripe webhook secret is not configured.");
-            }
+            case EventTypes.CheckoutSessionCompleted:
+            case EventTypes.CheckoutSessionAsyncPaymentSucceeded:
+                await ProcessCompletedSessionAsync(
+                    session, stripeEvent.Id, cancellationToken);
+                break;
 
-            Event stripeEvent;
+            case EventTypes.CheckoutSessionExpired:
+                await ProcessExpiredSessionAsync(
+                    session, stripeEvent.Id, cancellationToken);
+                break;
 
-            try
-            {
-                stripeEvent =
-                    EventUtility.ConstructEvent(
-                        json,
-                        stripeSignature,
-                        _settings.WebhookSecret);
-            }
-            catch (StripeException exception)
-            {
-                throw new InvalidOperationException(
-                    "Stripe webhook signature is invalid.",
-                    exception);
-            }
-
-            switch (stripeEvent.Type)
-            {
-                case EventTypes.CheckoutSessionCompleted:
-                case EventTypes.CheckoutSessionAsyncPaymentSucceeded:
-                    {
-                        if (stripeEvent.Data.Object is Session session)
-                        {
-                            await ProcessCompletedSessionAsync(
-                                session,
-                                stripeEvent.Id,
-                                cancellationToken);
-                        }
-
-                        break;
-                    }
-
-                case EventTypes.CheckoutSessionExpired:
-                    {
-                        if (stripeEvent.Data.Object is Session session)
-                        {
-                            await ProcessExpiredSessionAsync(
-                                session,
-                                stripeEvent.Id,
-                                cancellationToken);
-                        }
-
-                        break;
-                    }
-
-                case EventTypes.CheckoutSessionAsyncPaymentFailed:
-                    {
-                        if (stripeEvent.Data.Object is Session session)
-                        {
-                            await ProcessFailedSessionAsync(
-                                session,
-                                stripeEvent.Id,
-                                cancellationToken);
-                        }
-
-                        break;
-                    }
-            }
+            case EventTypes.CheckoutSessionAsyncPaymentFailed:
+                await ProcessFailedSessionAsync(
+                    session, stripeEvent.Id, cancellationToken);
+                break;
         }
+    }
 
-        private async Task ProcessCompletedSessionAsync(
-            Session session,
-            string stripeEventId,
-            CancellationToken cancellationToken)
+    private async Task ProcessCompletedSessionAsync(
+        Session session,
+        string stripeEventId,
+        CancellationToken cancellationToken)
+    {
+        var now = _businessClock.UtcNow;
+
+        var attempt = await GetAttemptWithPaymentAsync(session.Id, cancellationToken);
+        if (attempt is null || attempt.Status is PaymentAttemptStatus.Paid or PaymentAttemptStatus.Refunded)
+            return;
+
+        if (!string.Equals(session.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        var payment = attempt.Payment;
+        var expectedAmount = checked((long)Math.Round(
+            payment.Amount * 100m, MidpointRounding.AwayFromZero));
+
+        if (session.AmountTotal != expectedAmount ||
+            !string.Equals(session.Currency, payment.Currency, StringComparison.OrdinalIgnoreCase))
         {
-            var payment = await GetPaymentWithReservationsAsync(
-                session.Id,
-                cancellationToken);
+            attempt.Status = PaymentAttemptStatus.Failed;
+            attempt.IsActive = false;
+            attempt.StripeEventId = stripeEventId;
 
-            if (payment is null)
-            {
-                throw new KeyNotFoundException(
-                    $"Payment for Stripe session {session.Id} was not found.");
-            }
-
-            // Stripe može više puta poslati isti događaj.
-            if (payment.Status == PaymentStatus.Paid)
-            {
-                return;
-            }
-
-            if (!string.Equals(
-                    session.PaymentStatus,
-                    "paid",
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            var expectedAmount = checked(
-                (long)Math.Round(
-                    payment.Amount * 100m,
-                    MidpointRounding.AwayFromZero));
-
-            if (session.AmountTotal != expectedAmount)
-            {
-                payment.Status = PaymentStatus.Failed;
-                payment.StripeEventId = stripeEventId;
-                payment.Note =
-                    "Stripe amount does not match the expected payment amount.";
-                payment.ModifiedAtUtc = DateTime.UtcNow;
-
-                SetReservationPaymentStatuses(
-                    payment,
-                    PaymentStatus.Failed);
-
-                await _context.SaveChangesAsync(
-                    cancellationToken);
-
-                return;
-            }
-
-            if (!string.Equals(
-                    session.Currency,
-                    payment.Currency,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                payment.Status = PaymentStatus.Failed;
-                payment.StripeEventId = stripeEventId;
-                payment.Note =
-                    "Stripe currency does not match the expected currency.";
-                payment.ModifiedAtUtc = DateTime.UtcNow;
-
-                SetReservationPaymentStatuses(
-                    payment,
-                    PaymentStatus.Failed);
-
-                await _context.SaveChangesAsync(
-                    cancellationToken);
-
-                return;
-            }
-
-            var now = DateTime.UtcNow;
-
-            payment.Status = PaymentStatus.Paid;
-            payment.PaymentDate = now;
-            payment.StripePaymentIntentId =
-                session.PaymentIntentId;
+            payment.Status = PaymentStatus.Failed;
             payment.StripeEventId = stripeEventId;
-            payment.TransactionReference =
-                session.PaymentIntentId;
-            payment.Note =
-                "Stripe payment successfully completed.";
-            payment.ModifiedAtUtc = now;
+            payment.PaymentDate = null;
+            payment.Note = "Stripe amount or currency does not match the expected payment.";
 
-            foreach (var link in payment.PaymentReservations)
-            {
-                var reservation = link.Reservation;
-
-                reservation.PaymentStatus =
-                    PaymentStatus.Paid;
-
-                reservation.Status =
-                    ReservationStatus.Confirmed;
-
-                reservation.ModifiedAtUtc = now;
-            }
-
-            await _context.SaveChangesAsync(
-                cancellationToken);
+            SetReservationStatuses(payment, PaymentStatus.Failed, ReservationStatus.Cancelled, now);
+            await _context.SaveChangesAsync(cancellationToken);
+            return;
         }
 
-        private async Task ProcessExpiredSessionAsync(
-            Session session,
-            string stripeEventId,
-            CancellationToken cancellationToken)
+        var reservationWasCancelled = payment.Status == PaymentStatus.Cancelled ||
+            payment.PaymentReservations.Any(x =>
+                x.Reservation.Status == ReservationStatus.Cancelled);
+
+        if (reservationWasCancelled)
         {
-            var payment = await GetPaymentWithReservationsAsync(
-                session.Id,
-                cancellationToken);
+            await RefundLatePaymentAsync(
+                attempt, session, stripeEventId, cancellationToken);
+            return;
+        }
 
-            if (payment is null ||
-                payment.Status == PaymentStatus.Paid)
-            {
-                return;
-            }
+       
+        attempt.Status = PaymentAttemptStatus.Paid;
+        attempt.IsActive = false;
+        attempt.StripeEventId = stripeEventId;
+        
+        payment.Status = PaymentStatus.Paid;
+        payment.PaymentDate = now;
+        payment.StripePaymentIntentId = session.PaymentIntentId;
+        payment.StripeEventId = stripeEventId;
+        payment.TransactionReference = session.PaymentIntentId;
+        payment.Note = "Stripe payment successfully completed.";
 
-            var now = DateTime.UtcNow;
+        SetReservationStatuses(payment, PaymentStatus.Paid, ReservationStatus.Confirmed, now);
 
-            payment.Status =
-                PaymentStatus.Cancelled;
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 
-            payment.StripeEventId =
-                stripeEventId;
+    private async Task RefundLatePaymentAsync(
+        PaymentAttemptEntity attempt,
+        Session session,
+        string stripeEventId,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(session.PaymentIntentId))
+            throw new InvalidOperationException(
+                "A late Stripe payment cannot be refunded because its PaymentIntent is missing.");
 
-            payment.Note =
+        await new RefundService().CreateAsync(
+            new RefundCreateOptions { PaymentIntent = session.PaymentIntentId },
+            new RequestOptions { IdempotencyKey = $"late-payment-refund-{stripeEventId}" },
+            cancellationToken);
+
+        var now = _businessClock.UtcNow;
+
+        attempt.Status = PaymentAttemptStatus.Refunded;
+        attempt.IsActive = false;
+        attempt.StripeEventId = stripeEventId;
+
+        attempt.Payment.Status = PaymentStatus.Refunded;
+        attempt.Payment.PaymentDate = null;
+        attempt.Payment.StripePaymentIntentId = session.PaymentIntentId;
+        attempt.Payment.StripeEventId = stripeEventId;
+        attempt.Payment.TransactionReference = session.PaymentIntentId;
+        attempt.Payment.Note =
+            "Stripe payment arrived after reservation expiry and was automatically refunded.";
+
+        SetReservationStatuses(
+            attempt.Payment, PaymentStatus.Refunded, ReservationStatus.Cancelled, now);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProcessExpiredSessionAsync(
+        Session session,
+        string stripeEventId,
+        CancellationToken cancellationToken)
+    {
+        var attempt = await GetAttemptWithPaymentAsync(session.Id, cancellationToken);
+        if (attempt is null || attempt.Status == PaymentAttemptStatus.Paid)
+            return;
+
+        var now = _businessClock.UtcNow;
+        var wasActive = attempt.IsActive;
+
+        attempt.Status = PaymentAttemptStatus.Expired;
+        attempt.IsActive = false;
+        attempt.StripeEventId = stripeEventId;
+
+        if (wasActive &&
+            attempt.Payment.Status != PaymentStatus.Paid)
+        {
+            attempt.Payment.Status = PaymentStatus.Cancelled;
+            attempt.Payment.PaymentDate = null;
+            attempt.Payment.StripeEventId = stripeEventId;
+            attempt.Payment.Note =
                 "Stripe Checkout Session expired.";
 
-            payment.ModifiedAtUtc =
-                now;
+            SetReservationStatuses(
+                attempt.Payment,
+                PaymentStatus.Cancelled,
+                ReservationStatus.Cancelled,
+                now);
+        }
 
-            foreach (var link in payment.PaymentReservations)
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProcessFailedSessionAsync(
+        Session session,
+        string stripeEventId,
+        CancellationToken cancellationToken)
+    {
+        var attempt = await GetAttemptWithPaymentAsync(session.Id, cancellationToken);
+        
+        if (attempt is null ||
+        attempt.Status is PaymentAttemptStatus.Paid
+            or PaymentAttemptStatus.Failed
+            or PaymentAttemptStatus.Expired)
+        {
+            return;
+        }
+
+        var now = _businessClock.UtcNow;
+
+        attempt.Status = PaymentAttemptStatus.Failed;
+        attempt.IsActive = false;
+        attempt.StripeEventId = stripeEventId;
+
+        if (attempt.Payment.Status == PaymentStatus.Pending)
+        {
+            attempt.Payment.Status = PaymentStatus.Failed;
+            attempt.Payment.StripeEventId = stripeEventId;
+            attempt.Payment.PaymentDate = null;
+            attempt.Payment.Note = "Stripe payment failed.";
+
+            foreach (var link in attempt.Payment.PaymentReservations)
             {
                 var reservation = link.Reservation;
 
-                reservation.PaymentStatus =
-                    PaymentStatus.Cancelled;
+                if (reservation.PaymentStatus == PaymentStatus.Paid)
+                    continue;
 
-                reservation.Status =
-                    ReservationStatus.Cancelled;
-
-                reservation.ModifiedAtUtc =
-                    now;
+                reservation.PaymentStatus = PaymentStatus.Failed;
+                reservation.Status = ReservationStatus.Cancelled;
             }
-
-            await _context.SaveChangesAsync(
-                cancellationToken);
         }
 
-        private async Task ProcessFailedSessionAsync(
-            Session session,
-            string stripeEventId,
-            CancellationToken cancellationToken)
-        {
-            var payment = await GetPaymentWithReservationsAsync(
-                session.Id,
-                cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 
-            if (payment is null ||
-                payment.Status == PaymentStatus.Paid)
-            {
-                return;
-            }
-
-            var now = DateTime.UtcNow;
-
-            payment.Status =
-                PaymentStatus.Failed;
-
-            payment.StripeEventId =
-                stripeEventId;
-
-            payment.Note =
-                "Stripe payment failed.";
-
-            payment.ModifiedAtUtc =
-                now;
-
-            /*
-             * Rezervacije ostaju Pending kako bi korisnik
-             * mogao ponovo pokušati platiti prije isteka
-             * dozvoljenog vremena.
-             */
-            foreach (var link in payment.PaymentReservations)
-            {
-                link.Reservation.PaymentStatus =
-                    PaymentStatus.Failed;
-
-                link.Reservation.ModifiedAtUtc =
-                    now;
-            }
-
-            await _context.SaveChangesAsync(
-                cancellationToken);
-        }
-
-        private async Task<PaymentEntity?>
-            GetPaymentWithReservationsAsync(
-                string stripeCheckoutSessionId,
-                CancellationToken cancellationToken)
-        {
-            return await _context.Payments
-                .Include(x => x.PaymentReservations)
+    private async Task<PaymentAttemptEntity?> GetAttemptWithPaymentAsync(
+        string stripeCheckoutSessionId,
+        CancellationToken cancellationToken)
+    {
+        var attempt = await _context.PaymentAttempts
+            .Include(x => x.Payment)
+                .ThenInclude(x => x.PaymentReservations)
                     .ThenInclude(x => x.Reservation)
-                .SingleOrDefaultAsync(
-                    x =>
-                        x.StripeCheckoutSessionId ==
-                            stripeCheckoutSessionId &&
-                        !x.IsDeleted,
-                    cancellationToken);
-        }
+            .SingleOrDefaultAsync(
+                x => x.StripeCheckoutSessionId == stripeCheckoutSessionId && !x.IsDeleted,
+                cancellationToken);
 
-        private static void SetReservationPaymentStatuses(
-            PaymentEntity payment,
-            PaymentStatus status)
+        if (attempt is not null)
+            return attempt;
+
+        // Preserve webhook handling for sessions created before PaymentAttempts existed.
+        var legacyPayment = await _context.Payments
+            .Include(x => x.PaymentReservations)
+                .ThenInclude(x => x.Reservation)
+            .SingleOrDefaultAsync(
+                x => x.StripeCheckoutSessionId == stripeCheckoutSessionId && !x.IsDeleted,
+                cancellationToken);
+
+        if (legacyPayment is null)
+            return null;
+
+        attempt = new PaymentAttemptEntity
         {
-            var now = DateTime.UtcNow;
+            PaymentId = legacyPayment.Id,
+            Payment = legacyPayment,
+            IdempotencyKey = $"legacy-session-{stripeCheckoutSessionId}",
+            StripeCheckoutSessionId = stripeCheckoutSessionId,
+            Status = PaymentAttemptStatus.Pending,
+            IsActive = legacyPayment.Status == PaymentStatus.Pending
+        };
 
-            foreach (var link in payment.PaymentReservations)
-            {
-                link.Reservation.PaymentStatus =
-                    status;
+        _context.PaymentAttempts.Add(attempt);
+        return attempt;
+    }
 
-                link.Reservation.ModifiedAtUtc =
-                    now;
-            }
+    private static void SetReservationStatuses(
+    PaymentEntity payment,
+    PaymentStatus paymentStatus,
+    ReservationStatus reservationStatus,
+    DateTime now)
+    {
+        foreach (var link in payment.PaymentReservations)
+        {
+            link.Reservation.PaymentStatus = paymentStatus;
+            link.Reservation.Status = reservationStatus;
         }
     }
 }

@@ -13,6 +13,10 @@ public sealed class UpdatePaymentTypeCommandValidator : AbstractValidator<Update
             .NotEmpty()
             .MaximumLength(100);
 
+        RuleFor(x => x.Code)
+           .NotEmpty()
+           .MaximumLength(15);
+
         RuleFor(x => x.Description)
             .MaximumLength(500);
 

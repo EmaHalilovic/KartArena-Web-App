@@ -21,10 +21,10 @@ public class GetAvailableEquipmentForReservationQueryHandler : IRequestHandler<G
             .FirstOrDefaultAsync(x => x.Id == request.ReservationId && !x.IsDeleted, cancellationToken);
 
         if (reservation is null)
-            throw new KeyNotFoundException("Reservation not found.");
+            throw new MarketNotFoundException("Reservation not found.");
 
         if (reservation.Status != ReservationStatus.Confirmed)
-            throw new InvalidOperationException("Equipment availability can only be checked for confirmed reservations.");
+            throw new MarketBusinessRuleException("EQUIPMENT_AVAILABILITY_NOT_ALLOWED", "Equipment availability can only be checked for confirmed reservations.");
 
         var blockedEquipmentIds = await _context.ReservationEmployees
             .Where(x =>

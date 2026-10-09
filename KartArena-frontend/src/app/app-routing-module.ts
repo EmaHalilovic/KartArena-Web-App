@@ -5,24 +5,30 @@ import {myAuthData, myAuthGuard} from './core/guards/my-auth-guard';
 const routes: Routes = [
   {
   path: 'admin',
-  data: myAuthData({ requireAuth: false, requireAdmin: false }),
+  canActivate: [myAuthGuard],
+  data: myAuthData({ requireAuth: true, requireAdmin: true }),
   loadChildren: () =>
     import('./modules/admin/admin-module').then(m => m.AdminModule)
-  },
-  {
+},
+   {
     path: 'employee',
-    data: myAuthData({ requireAuth: false, requireEmployee: false }),
+    canActivate: [myAuthGuard],
+    data: myAuthData({ requireAuth: true, requireEmployee: true }),
     loadChildren: () =>
       import('./modules/employee/employee-module').then(m => m.EmployeeModule)
   },
   
   {
-    path: 'client',
-    canActivate: [myAuthGuard],
-    data: myAuthData({ requireAuth: true }),// bilo ko logiran
-    loadChildren: () =>
-      import('./modules/client/client-module').then(m => m.ClientModule)
+    path: 'auth',
+    loadChildren: () => import('./modules/auth/auth.module').then(m => m.AuthModule)
   },
+  // {
+  //   path: 'client',
+  //   canActivate: [myAuthGuard],
+  //   data: myAuthData({ requireAuth: true }),
+  //   loadChildren: () =>
+  //     import('./modules/client/client-module').then(m => m.ClientModule)
+  // },
   {
     path: '',
     loadChildren: () =>

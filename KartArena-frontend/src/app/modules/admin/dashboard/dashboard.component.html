@@ -1,0 +1,84 @@
+<section class="dashboard-page">
+  <header class="dashboard-header">
+    <div>
+      <p class="eyebrow">Overview</p>
+      <h1>Admin Dashboard</h1>
+      <p>Track bookings, revenue, and operational attention points in one place.</p>
+    </div>
+    <button mat-stroked-button type="button" (click)="loadDashboard()" [disabled]="loading">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </header>
+
+  <div class="loading" *ngIf="loading">
+    <mat-spinner diameter="34"></mat-spinner>
+    <span>Loading dashboard data…</span>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <div class="metric-grid">
+      <article class="metric-card" *ngFor="let metric of metrics" [class]="'tone-' + metric.tone">
+        <div class="metric-icon"><mat-icon>{{ metric.icon }}</mat-icon></div>
+        <div>
+          <p>{{ metric.label }}</p>
+          <strong>{{ metric.value }}</strong>
+          <span>{{ metric.detail }}</span>
+        </div>
+      </article>
+    </div>
+
+    <div class="content-grid">
+      <article class="panel chart-panel">
+        <div class="panel-heading">
+          <div><p class="panel-eyebrow">Last 7 days</p><h2>Reservation activity</h2></div>
+          <mat-icon>bar_chart</mat-icon>
+        </div>
+        <div class="bar-chart">
+          <div class="bar-column" *ngFor="let day of reservationChart">
+            <span class="bar-value">{{ day.count }}</span>
+            <div class="bar-track"><div class="bar-fill" [style.height.%]="day.height"></div></div>
+            <span class="bar-label">{{ day.label }}</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel attention-panel">
+        <div class="panel-heading">
+          <div><p class="panel-eyebrow">Operations</p><h2>Needs attention</h2></div>
+          <mat-icon>notifications_active</mat-icon>
+        </div>
+        <div class="attention-list" *ngIf="attentionItems.length; else allClear">
+          <div class="attention-item" *ngFor="let item of attentionItems">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            <div><strong>{{ item.label }}</strong><span>{{ item.value }}</span></div>
+          </div>
+        </div>
+        <ng-template #allClear><p class="empty-copy">Everything is running smoothly.</p></ng-template>
+      </article>
+    </div>
+
+    <article class="panel reservations-panel">
+      <div class="panel-heading">
+        <div><p class="panel-eyebrow">Latest records</p><h2>Recent reservations</h2></div>
+        <a mat-stroked-button routerLink="/admin/reservations">View all</a>
+      </div>
+      <div class="reservation-list" *ngIf="recentReservations.length; else noReservations">
+        <a class="reservation-row" *ngFor="let reservation of recentReservations" [routerLink]="['/admin/reservations', reservation.id]">
+          <span class="reservation-code">RSV-{{ reservation.id | number : '3.0-0' }}</span>
+          <span>{{ reservation.customerFirstName || reservation.userFirstName || 'Guest' }} {{ reservation.customerLastName || reservation.userLastName || '' }}</span>
+          <span>{{ reservation.date | date : 'MMM d' }} · {{ reservation.startTime }}</span>
+          <span class="status" [class]="'status-' + getReservationStatusLabel(reservation.status).toLowerCase()">{{ getReservationStatusLabel(reservation.status) }}</span>
+          <mat-icon>chevron_right</mat-icon>
+        </a>
+      </div>
+      <ng-template #noReservations><p class="empty-copy">No reservation records are available yet.</p></ng-template>
+    </article>
+
+    <div class="quick-actions">
+      <a mat-flat-button routerLink="/admin/reservation/add"><mat-icon>add_circle</mat-icon>New reservation</a>
+      <a mat-stroked-button routerLink="/admin/karts/add"><mat-icon>directions_car</mat-icon>Add kart</a>
+      <a mat-stroked-button routerLink="/admin/equipment/add"><mat-icon>construction</mat-icon>Add equipment</a>
+    </div>
+  </ng-container>
+</section>

@@ -35,10 +35,10 @@
       <mat-form-field appearance="outline">
         <mat-label>Status</mat-label>
         <mat-select formControlName="status">
-          <mat-option value="Available">Available</mat-option>
-          <mat-option value="InUse">In use</mat-option>
-          <mat-option value="Maintenance">Maintenance</mat-option>
-          <mat-option value="Lost">Lost</mat-option>
+          <mat-option [value]="0">Available</mat-option>
+          <mat-option [value]="1">In use</mat-option>
+          <mat-option [value]="2">Maintenance</mat-option>
+          <mat-option [value]="3">Lost</mat-option>
         </mat-select>
       </mat-form-field>
 

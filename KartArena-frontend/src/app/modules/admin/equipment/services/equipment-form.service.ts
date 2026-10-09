@@ -10,13 +10,7 @@ import {
 @Injectable()
 export class EquipmentFormService {
   private fb = inject(FormBuilder);
-  private readonly categoryOptions = [
-    EquipmentCategory.Helmet,
-    EquipmentCategory.Suit,
-    EquipmentCategory.Gloves,
-    EquipmentCategory.Balaclava,
-    EquipmentCategory.Other,
-  ] as const;
+  
 
   createEquipmentTypeForm(equipment?: EquipmentTypeDetailsDto): FormGroup {
     return this.fb.group({
@@ -63,34 +57,11 @@ export class EquipmentFormService {
     });
   }
 
-  toCategoryOptionValue(category?: EquipmentCategory | null): number {
-    if (!category) {
-      return 0;
-    }
+  toCategoryOptionValue(category?: EquipmentCategory | null): EquipmentCategory {
+  return category ?? EquipmentCategory.Helmet;
+}
 
-    const index = this.categoryOptions.indexOf(category);
-    return index >= 0 ? index : 0;
-  }
 
-  toCategoryEnum(value: unknown): EquipmentCategory {
-    if (typeof value === 'number' && this.categoryOptions[value]) {
-      return this.categoryOptions[value];
-    }
-
-    if (typeof value === 'string') {
-      const numericValue = Number(value);
-      if (!Number.isNaN(numericValue) && this.categoryOptions[numericValue]) {
-        return this.categoryOptions[numericValue];
-      }
-
-      const matchedCategory = this.categoryOptions.find((category) => category === value);
-      if (matchedCategory) {
-        return matchedCategory;
-      }
-    }
-
-    return EquipmentCategory.Helmet;
-  }
 
   getErrorMessage(form: FormGroup, controlName: string): string {
     const control = form.get(controlName);

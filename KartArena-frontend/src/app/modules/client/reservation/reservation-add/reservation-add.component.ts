@@ -84,31 +84,20 @@ private toShortIsoDate(date: string | Date): string {
     return `${y}-${m}-${d}`;
   }
 
-  // string (maybe ISO)
+ 
   return date.includes('T') ? date.split('T')[0] : date;
 }
 
-private toIsoLocalDateTime(date: string, time: string): string {
-  if (!date || !time) return '';
 
-  const t = /^\d{2}:\d{2}$/.test(time) ? `${time}:00` : time; // "HH:mm" -> "HH:mm:00"
-  return `${date}T${t}`; // "YYYY-MM-DDTHH:mm:ss"
-}
 
   onCancel(): void {
     this.router.navigate(['/client/reservation']);
   }
 
   getErrorMessage(controlName: string): string {
-    // uskladi ime metode sa tvojim form service-om
-    // ako imaš getError(...) umjesto getErrorMessage(...), promijeni ovdje:
+    
     return this.formService.getError(this.form, controlName);
   }
 
-  private toIsoDateTime(date: string, time: string): string {
-    // time može biti "HH:mm" ili "HH:mm:ss"
-    if (!date || !time) return '';
-    const t = /^\d{2}:\d{2}$/.test(time) ? `${time}:00` : time;
-    return `${date}T${t}`;
-  }
+
 }

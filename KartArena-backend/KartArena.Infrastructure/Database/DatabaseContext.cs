@@ -17,10 +17,10 @@ public partial class DatabaseContext : DbContext, IAppDbContext
     //payment
     public DbSet<PaymentTypeEntity> PaymentTypes => Set<PaymentTypeEntity>();
     public DbSet<PaymentEntity> Payments => Set<PaymentEntity>();
-
-    public DbSet<PaymentReservationEntity> PaymentReservations => Set<PaymentReservationEntity>();
+    public DbSet<PaymentAttemptEntity> PaymentAttempts => Set<PaymentAttemptEntity>();
 
     public DbSet<ReservationEntity> Reservations => Set<ReservationEntity>();
+    public DbSet<PaymentReservationEntity> PaymentReservations => Set <PaymentReservationEntity>();
 
     public DbSet<EquipmentTypeEntity> EquipmentEntity => Set<EquipmentTypeEntity>();
 
@@ -29,8 +29,6 @@ public partial class DatabaseContext : DbContext, IAppDbContext
     //kart
     public DbSet<KartEntity> Karts => Set<KartEntity>();
     public DbSet<TrackEntity> Tracks => Set<TrackEntity>();
-
-    
 
 
     private readonly TimeProvider _clock;

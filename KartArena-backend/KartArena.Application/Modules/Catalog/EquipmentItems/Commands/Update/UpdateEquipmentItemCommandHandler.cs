@@ -1,4 +1,7 @@
-﻿namespace KartArena.Application.Modules.Catalog.EquipmentItems.Commands.Update;
+using KartArena.Domain.Entities.Equipment;
+using KartArena.Domain.Entities.Reservations;
+
+namespace KartArena.Application.Modules.Catalog.EquipmentItems.Commands.Update;
 
 public sealed class UpdateEquipmentItemCommandHandler(IAppDbContext ctx)
     : IRequestHandler<UpdateEquipmentItemCommand, Unit>
@@ -11,6 +14,23 @@ public sealed class UpdateEquipmentItemCommandHandler(IAppDbContext ctx)
 
         if (entity is null)
             throw new MarketNotFoundException($"Equipment item (ID={request.Id}) was not found.");
+
+        if (request.Status == EquipmentItemStatus.Available)
+        {
+            var hasActiveAssignment = await ctx.ReservationEmployees
+                .AnyAsync(x =>
+                    !x.IsDeleted &&
+                    x.EquipmentItemId == request.Id &&
+                    x.Reservation != null &&
+                    !x.Reservation.IsDeleted &&
+                    x.Reservation.Status != ReservationStatus.Completed &&
+                    x.Reservation.Status != ReservationStatus.Cancelled, ct);
+
+            if (hasActiveAssignment)
+                throw new MarketBusinessRuleException(
+                    "EQUIPMENT_STILL_ASSIGNED",
+                    "Equipment cannot be marked as available while assigned to an active reservation. Remove its assignment first.");
+        }
 
         var itemCode = request.ItemCode?.Trim();
 

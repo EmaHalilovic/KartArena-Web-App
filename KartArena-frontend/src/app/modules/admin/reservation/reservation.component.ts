@@ -1,4 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { finalize, Observable } from 'rxjs';
@@ -14,11 +15,17 @@ import { ReservationApiService } from '../../../api-services/reservations/reserv
 import { PaymentStatus } from '../../../api-services/payments/payments-api.models';
 
 import { BaseListPagedComponent } from '../../../core/components/base-classes/base-list-paged-component';
-import { PageRequest } from '../../../core/models/paging/page-request';
 import { ToasterService } from '../../../core/services/toaster.service';
 import { ConfirmDeleteDialogReservationComponent } from './dialogs/confirm-delete/confirm-delete-dialog.component';
 import { ReservationCashPaymentDialogComponent } from './dialogs/reservation-cash-payment-dialog/reservation-cash-payment-dialog.component';
 import { ReservationAssignDialogComponent } from './dialogs/reservation-assign-dialog/reservation-assign-dialog.component';
+import { PageRequest } from '../../../core/models/paging/page-request';
+import {
+  differenceBetweenBusinessDateTimeKeys,
+  getBusinessDateKey,
+  getBusinessDateTimeKey,
+  toBusinessDateTimeKey,
+} from '../../../core/services/business-date-time';
 
 type ReservationTone = 'good' | 'fair' | 'low';
 
@@ -68,8 +75,13 @@ export class ReservationComponent
 
   onlyToday = false;
   onlyUpcoming = false;
-  dateFromValue: Date | null = null;
-  dateToValue: Date | null = null;
+  readonly searchControl = new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] });
+  readonly reservationStatusControl = new FormControl<ReservationStatus | null>(null);
+  readonly paymentStatusControl = new FormControl<PaymentStatus | null>(null);
+  readonly dateFromControl = new FormControl<Date | null>(null);
+  readonly dateToControl = new FormControl<Date | null>(null);
+  readonly onlyTodayControl = new FormControl(false, { nonNullable: true });
+  readonly onlyUpcomingControl = new FormControl(false, { nonNullable: true });
 
   constructor() {
     super();
@@ -162,13 +174,13 @@ export class ReservationComponent
   }
 
   onDateFromChange(value: Date | string | null): void {
-    this.dateFromValue = this.normalizePickerDate(value);
+    this.dateFromControl.setValue(this.normalizePickerDate(value), { emitEvent: false });
     this.request.dateFrom = this.toIsoDate(value);
     this.refreshFromFirstPage();
   }
 
   onDateToChange(value: Date | string | null): void {
-    this.dateToValue = this.normalizePickerDate(value);
+    this.dateToControl.setValue(this.normalizePickerDate(value), { emitEvent: false });
     this.request.dateTo = this.toIsoDate(value);
     this.refreshFromFirstPage();
   }
@@ -177,6 +189,7 @@ export class ReservationComponent
     this.onlyToday = checked;
     if (checked) {
       this.onlyUpcoming = false;
+      this.onlyUpcomingControl.setValue(false, { emitEvent: false });
     }
 
     this.refreshFromFirstPage();
@@ -186,6 +199,7 @@ export class ReservationComponent
     this.onlyUpcoming = checked;
     if (checked) {
       this.onlyToday = false;
+      this.onlyTodayControl.setValue(false, { emitEvent: false });
     }
 
     this.refreshFromFirstPage();
@@ -197,8 +211,13 @@ export class ReservationComponent
     this.request.paymentTypeName = null;
     this.request.dateFrom = null;
     this.request.dateTo = null;
-    this.dateFromValue = null;
-    this.dateToValue = null;
+    this.searchControl.setValue('', { emitEvent: false });
+    this.reservationStatusControl.setValue(null, { emitEvent: false });
+    this.paymentStatusControl.setValue(null, { emitEvent: false });
+    this.dateFromControl.setValue(null, { emitEvent: false });
+    this.dateToControl.setValue(null, { emitEvent: false });
+    this.onlyTodayControl.setValue(false, { emitEvent: false });
+    this.onlyUpcomingControl.setValue(false, { emitEvent: false });
     this.onlyToday = false;
     this.onlyUpcoming = false;
     this.refreshFromFirstPage();
@@ -460,10 +479,10 @@ export class ReservationComponent
       return;
     }
 
-    const now = Date.now();
+    const now = getBusinessDateTimeKey();
     this.items = this.items.filter((item) => {
-      const start = this.parseStartDateTime(item);
-      return !start || start.getTime() >= now;
+      const start = this.getStartDateTimeKey(item);
+      return !start || start >= now;
     });
   }
 
@@ -488,12 +507,15 @@ export class ReservationComponent
   }
 
   private getFallbackStatus(r: ListReservationQueryDto): { label: string; className: ReservationTone } {
-    const start = this.parseStartDateTime(r);
+    const start = this.getStartDateTimeKey(r);
     if (!start) {
       return { label: 'Unknown', className: 'low' };
     }
 
-    const diffMs = start.getTime() - Date.now();
+    const diffMs = differenceBetweenBusinessDateTimeKeys(start, getBusinessDateTimeKey());
+    if (diffMs == null) {
+      return { label: 'Unknown', className: 'low' };
+    }
     if (diffMs < 0) {
       return { label: 'Past', className: 'low' };
     }
@@ -618,19 +640,14 @@ export class ReservationComponent
       .replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
-  private parseStartDateTime(r: ListReservationQueryDto): Date | null {
-    const parsedStart = this.tryParseDate(r.startTime);
-    if (parsedStart) {
-      return parsedStart;
-    }
-
+  private getStartDateTimeKey(r: ListReservationQueryDto): string | null {
     const day = this.extractDatePart(r.date);
     const time = this.normalizeTime(r.startTime);
     if (!day || !time) {
       return null;
     }
 
-    return this.tryParseDate(`${day}T${time}`);
+    return toBusinessDateTimeKey(day, time);
   }
 
   private normalizeTime(value?: string | null): string | null {
@@ -704,11 +721,14 @@ export class ReservationComponent
       return Number.isNaN(value.getTime()) ? null : value;
     }
 
-    return this.tryParseDate(value);
+    const datePart = this.extractDatePart(value);
+    if (!datePart) return null;
+    const [year, month, day] = datePart.split('-').map(Number);
+    return new Date(year, month - 1, day);
   }
 
   private getTodayIsoDate(): string {
-    return this.toIsoDate(new Date()) ?? '';
+    return getBusinessDateKey();
   }
 
   private normalizeKey(value: string | number | null | undefined): string {
@@ -749,12 +769,12 @@ export class ReservationComponent
   }
 
   private isStartingSoon(r: ListReservationQueryDto): boolean {
-    const start = this.parseStartDateTime(r);
+    const start = this.getStartDateTimeKey(r);
     if (!start) {
       return false;
     }
 
-    const diffMs = start.getTime() - Date.now();
-    return diffMs >= 0 && diffMs <= 90 * 60 * 1000;
+    const diffMs = differenceBetweenBusinessDateTimeKeys(start, getBusinessDateTimeKey());
+    return diffMs != null && diffMs >= 0 && diffMs <= 90 * 60 * 1000;
   }
 }

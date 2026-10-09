@@ -1,11 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   ListPaymentTypesRequest,
   ListPaymentTypesResponse,
-  ListPaymentTypesQueryDto,
   GetPaymentTypeByIdQueryDto,
   CreatePaymentTypeCommand,
   UpdatePaymentTypeCommand,
@@ -19,18 +18,11 @@ export class PaymentTypesApiService {
 
   list(request?: ListPaymentTypesRequest): Observable<ListPaymentTypesResponse> {
     const params = request ? buildHttpParams(request) : undefined;
-    return this.http.get<ListPaymentTypesResponse>(this.baseUrl, { params }).pipe(
-      map((response) => ({
-        ...response,
-        items: response.items.map((item) => this.mapListItem(item)),
-      }))
-    );
+    return this.http.get<ListPaymentTypesResponse>(this.baseUrl, { params });
   }
 
   getById(id: number): Observable<GetPaymentTypeByIdQueryDto> {
-    return this.http.get<GetPaymentTypeByIdQueryDto>(`${this.baseUrl}/${id}`).pipe(
-      map((item) => this.mapDetails(item))
-    );
+    return this.http.get<GetPaymentTypeByIdQueryDto>(`${this.baseUrl}/${id}`);
   }
 
   create(payload: CreatePaymentTypeCommand): Observable<{ id: number }> {
@@ -53,43 +45,5 @@ export class PaymentTypesApiService {
     return this.http.put<void>(`${this.baseUrl}/${id}/disable`, {});
   }
 
-  private mapListItem(item: ListPaymentTypesQueryDto): ListPaymentTypesQueryDto {
-    return {
-      ...item,
-      allowedOnline: this.normalizeBoolean(item.allowedOnline),
-      allowedAtDesk: this.normalizeBoolean(item.allowedAtDesk),
-      isEnabled: this.normalizeBoolean(item.isEnabled),
-    };
-  }
-
-  private mapDetails(item: GetPaymentTypeByIdQueryDto): GetPaymentTypeByIdQueryDto {
-    return {
-      ...item,
-      allowedOnline: this.normalizeBoolean(item.allowedOnline),
-      allowedAtDesk: this.normalizeBoolean(item.allowedAtDesk),
-      isEnabled: this.normalizeBoolean(item.isEnabled),
-    };
-  }
-
-  private normalizeBoolean(value: unknown): boolean {
-    if (typeof value === 'boolean') {
-      return value;
-    }
-
-    if (typeof value === 'number') {
-      return value !== 0;
-    }
-
-    const normalized = String(value ?? '').trim().toLowerCase();
-
-    if (normalized === 'true' || normalized === '1') {
-      return true;
-    }
-
-    if (normalized === 'false' || normalized === '0') {
-      return false;
-    }
-
-    return Boolean(value);
-  }
+ 
 }

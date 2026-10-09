@@ -62,6 +62,8 @@ public sealed class ExpiredReservationCancellationService
 
         var context = scope.ServiceProvider
             .GetRequiredService<IAppDbContext>();
+        var stripePaymentService = scope.ServiceProvider
+            .GetRequiredService<IStripePaymentService>();
 
         var now = DateTime.UtcNow;
         var expirationThreshold =
@@ -71,6 +73,7 @@ public sealed class ExpiredReservationCancellationService
        .Include(payment => payment.PaymentType)
        .Include(payment => payment.PaymentReservations)
            .ThenInclude(link => link.Reservation)
+       .Include(payment => payment.PaymentAttempts)
        .Where(payment =>
            !payment.IsDeleted &&
            payment.Status == PaymentStatus.Pending &&
@@ -86,6 +89,27 @@ public sealed class ExpiredReservationCancellationService
 
         foreach (var payment in expiredPayments)
         {
+            var activeAttempt = payment.PaymentAttempts
+                .SingleOrDefault(attempt => attempt.IsActive);
+
+            if (activeAttempt?.StripeCheckoutSessionId is { Length: > 0 } sessionId)
+            {
+                var stripeSessionExpired = await stripePaymentService
+                    .ExpireCheckoutSessionAsync(sessionId, cancellationToken);
+
+                if (!stripeSessionExpired)
+                {
+                    _logger.LogWarning(
+                        "Stripe session {SessionId} could not be expired; payment {PaymentId} remains pending.",
+                        sessionId,
+                        payment.Id);
+                    continue;
+                }
+
+                activeAttempt.Status = PaymentAttemptStatus.Expired;
+                activeAttempt.IsActive = false;
+            }
+
             payment.Status = PaymentStatus.Cancelled;
             payment.PaymentDate = null;
             payment.ModifiedAtUtc = now;

@@ -7,10 +7,10 @@ import { BasePagedQuery } from '../../core/models/paging/base-paged-query';
  * Equipment item status enum.
  */
 export enum EquipmentItemStatus {
-  Available = 'Available',
-  InUse = 'InUse',
-  Maintenance = 'Maintenance',
-  Lost = 'Lost',
+  Available = 0,
+  InUse = 1,
+  Maintenance = 2,
+  Lost = 3,
 }
 
 // === QUERIES (READ) ===

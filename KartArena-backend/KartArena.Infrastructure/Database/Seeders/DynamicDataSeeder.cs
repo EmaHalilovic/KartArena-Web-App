@@ -23,8 +23,8 @@ public static class DynamicDataSeeder
         await SeedTracksAsync(context);
         await SeedKartsAsync(context);
         await EquipmentSeeder(context);
-        await SeedPaymentsAsync(context);
-        await SeedReservationsAsync(context);
+        //await SeedReservationsAsync(context);
+       // await SeedPaymentsAsync(context);
     }
 
     private static async Task SeedCitiesAsync(DatabaseContext context)
@@ -78,7 +78,7 @@ public static class DynamicDataSeeder
                 Name = "Cash payment",
                 Code = "DESK_CASH",
                 Description = "Payment made in cash at the front desk",
-                AllowedOnline = false,
+                AllowedOnline = true,
                 AllowedAtDesk = true,
                 IsDeleted = false,
                 isEnabled = true,
@@ -137,20 +137,20 @@ public static class DynamicDataSeeder
     {
         if (await context.Roles.AnyAsync())
         {
-            Console.WriteLine("ℹ️ Dynamic seed: roles already exist.");
+            Console.WriteLine("Dynamic seed: roles already exist.");
             return;
         }
 
         var now = DateTime.UtcNow;
 
         context.Roles.AddRange(
-            new RoleEntity { Name = "Admin (demo)", CreatedAtUtc = now },
-            new RoleEntity { Name = "User (demo)", CreatedAtUtc = now },
-            new RoleEntity { Name = "Employee (demo)", CreatedAtUtc = now }
+            new RoleEntity { Name = "Admin", CreatedAtUtc = now },
+            new RoleEntity { Name = "User", CreatedAtUtc = now },
+            new RoleEntity { Name = "Employee", CreatedAtUtc = now }
         );
 
         await context.SaveChangesAsync();
-        Console.WriteLine("✅ Dynamic seed: roles added.");
+        Console.WriteLine("Dynamic seed: roles added.");
     }
 
     private static async Task SeedUsersAsync(
@@ -863,6 +863,7 @@ public static class DynamicDataSeeder
                 SurfaceType = "Asphalt",
                 Outdoors = true,
                 CityId = cityId,
+                isEnabled=true,
                 CreatedAtUtc = now
             },
             new TrackEntity
@@ -872,6 +873,7 @@ public static class DynamicDataSeeder
                 SurfaceType = "Concrete",
                 Outdoors = false,
                 CityId = cityId,
+                isEnabled=true,
                 CreatedAtUtc = now
             }
         );
@@ -905,6 +907,7 @@ public static class DynamicDataSeeder
                 PricePerSession = 25,
                 Description = "Demo kart for testing reservations",
                 PowertrainTypeId = powertrainId,
+                isEnabled=true,
                 CreatedAtUtc = now
             },
             new KartEntity
@@ -917,6 +920,7 @@ public static class DynamicDataSeeder
                 PricePerSession = 30,
                 Description = "Demo kart for testing reservations",
                 PowertrainTypeId = powertrainId,
+                isEnabled=true,
                 CreatedAtUtc = now
             },
             new KartEntity
@@ -929,6 +933,7 @@ public static class DynamicDataSeeder
                 PricePerSession = 28,
                 Description = "Demo kart for testing reservations",
                 PowertrainTypeId = powertrainId,
+                isEnabled=true,
                 CreatedAtUtc = now
             }
         );

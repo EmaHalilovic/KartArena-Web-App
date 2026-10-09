@@ -1,7 +1,5 @@
 ﻿using KartArena.Application.Abstractions;
-using KartArena.Application.Abstractions;
 using KartArena.Application.Modules.Catalog.Payments.Stripe;
-using KartArena.Infrastructure.BackgroundServices;
 using KartArena.Infrastructure.Common;
 using KartArena.Infrastructure.Database;
 using KartArena.Infrastructure.Payments;
@@ -13,8 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Stripe;
 
-
-namespace KartArena.Infrastructure;
+namespace KartArena.Infrastructure.BackgroundServices;
 
 public static class DependencyInjection
 {
@@ -55,18 +52,16 @@ public static class DependencyInjection
 
         var stripeSecretKey = configuration["Stripe:SecretKey"];
 
-        if (string.IsNullOrWhiteSpace(stripeSecretKey))
+        if (!string.IsNullOrWhiteSpace(stripeSecretKey))
         {
-            throw new InvalidOperationException(
-                "Stripe secret key is not configured.");
+            StripeConfiguration.ApiKey = stripeSecretKey;
         }
 
-        StripeConfiguration.ApiKey = stripeSecretKey;
+        services.Configure<RegionalSettings>(configuration.GetSection(
+        RegionalSettings.SectionName));
 
         services.AddScoped<IStripePaymentService, StripePaymentService>();
         services.AddScoped<IStripeWebhookService, StripeWebhookService>();
-
-
 
         services.AddOptions<JwtOptions>()
         .Bind(configuration.GetSection(JwtOptions.SectionName))
@@ -82,8 +77,9 @@ public static class DependencyInjection
 
         //// TimeProvider (if used in handlers/services)
         services.AddSingleton<TimeProvider>(TimeProvider.System);
-
         services.AddHostedService<ExpiredReservationCancellationService>();
+
+        services.AddSingleton<IBusinessClock, BusinessClock>();
 
         return services;
     }

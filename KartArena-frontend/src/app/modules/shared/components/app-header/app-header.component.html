@@ -6,13 +6,16 @@
     </a>
 
     <nav class="nav">
-      <a routerLink="/tracks" routerLinkActive="active">PREGLED STAZA</a>
-      <a routerLink="/karts" routerLinkActive="active">PREGLED KARTOVA</a>
-      <a routerLink="/prices" routerLinkActive="active">CIJENE</a>
-      <a [routerLink]="['/']" fragment="contact" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">KONTAKT</a>
-      <a routerLink="/stats" routerLinkActive="active">STATISTIKE</a>
+      <a routerLink="/tracks" routerLinkActive="active">TRACKS</a>
+      <a routerLink="/karts" routerLinkActive="active">KARTS</a>
+      <a routerLink="/prices" routerLinkActive="active">PRICING</a>
+      <a [routerLink]="['/']" fragment="contact" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">CONTACT</a>
+      <a routerLink="/stats" routerLinkActive="active">STATISTICS</a>
     </nav>
 
-    <a class="cta" routerLink="/reservations">REZERVACIJA</a>
+    <div class="header-actions">
+      <a class="login-link" routerLink="/auth/login">LOGIN</a>
+      <a class="cta" routerLink="/reservations">MAKE A RESERVATION</a>
+    </div>
   </div>
 </header>

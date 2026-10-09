@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KartArena.Application.Modules.Catalog.Reservations.Queries.Availability;
 
-public sealed class GetReservationAvailabilityQueryHandler(IAppDbContext ctx)
+public sealed class GetReservationAvailabilityQueryHandler(
+    IAppDbContext ctx,
+    IBusinessClock businessClock)
     : IRequestHandler<GetReservationAvailabilityQuery, GetReservationAvailabilityDto>
 {
     private const int MaxDriversPerTrackSlot = 6;
@@ -13,17 +15,18 @@ public sealed class GetReservationAvailabilityQueryHandler(IAppDbContext ctx)
         GetReservationAvailabilityQuery request,
         CancellationToken ct)
     {
-        if (request.Duration != 10 && request.Duration != 15)
-            throw new Exception("Invalid duration.");
+       ValidateDuration(request.Duration);
 
         var date = request.Date.Date;
 
         var tracks = await ctx.Tracks
             .AsNoTracking()
+            .Where(x=>x.isEnabled && !x.IsDeleted)
             .ToListAsync(ct);
 
         var karts = await ctx.Karts
             .AsNoTracking()
+            .Where(x=>x.isEnabled && !x.IsDeleted && x.PricePerSession.HasValue)
             .ToListAsync(ct);
 
         var reservations = await ctx.Reservations
@@ -41,6 +44,9 @@ public sealed class GetReservationAvailabilityQueryHandler(IAppDbContext ctx)
             var startTime = date.Add(ParseTime(startTimeString));
             var endTime = startTime.AddMinutes(request.Duration);
 
+            if (startTime <= businessClock.Now)
+                continue;
+
             var availableTime = new AvailableTimeDto
             {
                 StartTime = startTime.ToString("HH:mm"),
@@ -52,8 +58,11 @@ public sealed class GetReservationAvailabilityQueryHandler(IAppDbContext ctx)
                 var overlappingTrackReservations = reservations
                     .Where(r =>
                         r.TrackId == track.Id &&
-                        r.StartTime < endTime &&
-                        r.EndTime > startTime)
+                        IsOverlapping(
+                            r.StartTime,
+                            r.EndTime,
+                            startTime,
+                            endTime))
                     .ToList();
 
                 if (overlappingTrackReservations.Count >= MaxDriversPerTrackSlot)
@@ -63,8 +72,11 @@ public sealed class GetReservationAvailabilityQueryHandler(IAppDbContext ctx)
                 var availableKarts = karts
                     .Where(kart => !reservations.Any(r =>
                         r.KartId == kart.Id &&
-                        r.StartTime < endTime &&
-                        r.EndTime > startTime))
+                        IsOverlapping(
+                            r.StartTime,
+                            r.EndTime,
+                            startTime,
+                            endTime)))
                     .Select(kart => new AvailableKartDto
                     {
                         KartId = kart.Id,
@@ -98,6 +110,26 @@ public sealed class GetReservationAvailabilityQueryHandler(IAppDbContext ctx)
         return response;
     }
 
+    private static void ValidateDuration(int duration)
+    {
+        if (duration is not 10 and not 15)
+        {
+            throw new MarketBusinessRuleException(
+                "INVALID_RESERVATION_DURATION",
+                "Only 10-minute and 15-minute sessions are allowed.");
+        }
+    }
+
+    private static bool IsOverlapping(
+        DateTime existingStart,
+        DateTime existingEnd,
+        DateTime requestedStart,
+        DateTime requestedEnd)
+    {
+        return existingStart < requestedEnd &&
+               existingEnd > requestedStart;
+    }
+
     private static List<string> BuildTimeOptions()
     {
         var options = new List<string>();
@@ -107,9 +139,12 @@ public sealed class GetReservationAvailabilityQueryHandler(IAppDbContext ctx)
             foreach (var minute in new[] { 0, 15, 30, 45 })
             {
                 if (hour == 22 && minute > 0)
+                {
                     continue;
+                }
 
-                options.Add($"{hour:00}:{minute:00}");
+                options.Add(
+                    $"{hour:00}:{minute:00}");
             }
         }
 
@@ -119,9 +154,16 @@ public sealed class GetReservationAvailabilityQueryHandler(IAppDbContext ctx)
     private static TimeSpan ParseTime(string time)
     {
         var parts = time.Split(':');
-        var hours = int.Parse(parts[0]);
-        var minutes = int.Parse(parts[1]);
 
-        return new TimeSpan(hours, minutes, 0);
+        var hours =
+            int.Parse(parts[0]);
+
+        var minutes =
+            int.Parse(parts[1]);
+
+        return new TimeSpan(
+            hours,
+            minutes,
+            0);
     }
 }

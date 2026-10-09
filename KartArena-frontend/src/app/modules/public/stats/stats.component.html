@@ -3,10 +3,10 @@
 <div class="container page">
   <div class="top">
     <div>
-      <h1>Statistika</h1>
-      <p class="muted">Pregled ključnih metrika i trendova (demo podaci).</p>
+      <h1>Statistics</h1>
+      <p class="muted">Overview of key metrics and trends (demo data).</p>
     </div>
-    <button class="k-btn primary" (click)="exportReport()">Izvezi izvještaj</button>
+    <button class="k-btn primary" (click)="exportReport()">Export report</button>
   </div>
 
   <div class="cards">
@@ -19,7 +19,7 @@
 
   <div class="grid">
     <div class="k-card box">
-      <div class="hd">Rezervacije po danima</div>
+      <div class="hd">Reservations by day</div>
       <apx-chart
         class="chart"
         [series]="lineSeries"
@@ -34,9 +34,9 @@
       ></apx-chart>
     </div>
 
-    <!-- ✅ donut centriran -->
+    <!-- Centered donut chart -->
     <div class="k-card box donutBox">
-      <div class="hd">Tip kartova</div>
+      <div class="hd">Kart types</div>
 
       <div class="donutWrap">
         <div class="chart">
@@ -55,7 +55,7 @@
     </div>
 
     <div class="k-card box wide">
-      <div class="hd">Najpopularnije staze</div>
+      <div class="hd">Most popular tracks</div>
       <apx-chart
         class="chart"
         [series]="barSeries"

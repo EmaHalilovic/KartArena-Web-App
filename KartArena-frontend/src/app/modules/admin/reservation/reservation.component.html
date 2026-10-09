@@ -13,8 +13,8 @@
           <input
             matInput
             placeholder="Search reservations..."
-            [ngModel]="request.search"
-            (ngModelChange)="onSearch($event)"
+            [formControl]="searchControl"
+            (input)="onSearch(searchControl.value)"
           />
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
@@ -24,7 +24,7 @@
     <div class="filters-grid">
       <mat-form-field appearance="fill" floatLabel="always">
         <mat-label>Reservation status</mat-label>
-        <mat-select [ngModel]="request.status" (ngModelChange)="onReservationStatusChange($event)">
+        <mat-select [formControl]="reservationStatusControl" (selectionChange)="onReservationStatusChange($event.value)">
           <mat-option *ngFor="let option of reservationStatusOptions" [value]="option.value">
             {{ option.label }}
           </mat-option>
@@ -33,7 +33,7 @@
 
       <mat-form-field appearance="fill" floatLabel="always">
         <mat-label>Payment status</mat-label>
-        <mat-select [ngModel]="request.paymentStatus" (ngModelChange)="onPaymentStatusChange($event)">
+        <mat-select [formControl]="paymentStatusControl" (selectionChange)="onPaymentStatusChange($event.value)">
           <mat-option *ngFor="let option of paymentStatusOptions" [value]="option.value">
             {{ option.label }}
           </mat-option>
@@ -45,7 +45,7 @@
         <input
           matInput
           [matDatepicker]="dateFromPicker"
-          [ngModel]="dateFromValue"
+          [formControl]="dateFromControl"
           (dateChange)="onDateFromChange($event.value ?? null)"
         />
         <mat-datepicker-toggle matSuffix [for]="dateFromPicker"></mat-datepicker-toggle>
@@ -57,7 +57,7 @@
         <input
           matInput
           [matDatepicker]="dateToPicker"
-          [ngModel]="dateToValue"
+          [formControl]="dateToControl"
           (dateChange)="onDateToChange($event.value ?? null)"
         />
         <mat-datepicker-toggle matSuffix [for]="dateToPicker"></mat-datepicker-toggle>
@@ -73,10 +73,10 @@
     </div>
 
     <div class="quick-filters">
-      <mat-slide-toggle [ngModel]="onlyToday" (ngModelChange)="onOnlyTodayChange($event)">
+      <mat-slide-toggle [formControl]="onlyTodayControl" (change)="onOnlyTodayChange(onlyTodayControl.value)">
         Only today
       </mat-slide-toggle>
-      <mat-slide-toggle [ngModel]="onlyUpcoming" (ngModelChange)="onOnlyUpcomingChange($event)">
+      <mat-slide-toggle [formControl]="onlyUpcomingControl" (change)="onOnlyUpcomingChange(onlyUpcomingControl.value)">
         Only upcoming
       </mat-slide-toggle>
     </div>

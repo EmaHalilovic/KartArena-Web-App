@@ -3,7 +3,7 @@
     "TITLE": "Welcome to our app",
     "DESCRIPTION": "This is an example of localization."
   },
-  "REPORTS": {
+   "REPORTS": {
     "NAV": "Reports",
     "EYEBROW": "Administration",
     "TITLE": "PDF Reports",

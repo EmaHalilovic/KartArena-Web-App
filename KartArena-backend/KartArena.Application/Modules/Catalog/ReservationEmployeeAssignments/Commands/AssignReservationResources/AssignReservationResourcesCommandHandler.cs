@@ -25,10 +25,10 @@ public class AssignReservationResourcesCommandHandler : IRequestHandler<AssignRe
                 .FirstOrDefaultAsync(x => x.Id == request.ReservationId && !x.IsDeleted, cancellationToken);
 
             if (reservation is null)
-                throw new KeyNotFoundException("Reservation not found.");
+                throw new MarketNotFoundException("Reservation not found.");
 
             if (reservation.Status != ReservationStatus.Confirmed)
-                throw new InvalidOperationException("Only confirmed reservations can be assigned.");
+                throw new MarketBusinessRuleException("RESERVATION_NOT_CONFIRMED","Only confirmed reservations can be assigned.");
 
             var employeeId = await ResolveEmployeeIdAsync(request, cancellationToken);
 
@@ -58,7 +58,7 @@ public class AssignReservationResourcesCommandHandler : IRequestHandler<AssignRe
                 .ToListAsync(cancellationToken);
 
             if (validEquipmentIds.Count != requestedEquipmentIds.Count)
-                throw new InvalidOperationException("One or more selected equipment items do not exist or are not available.");
+                throw new MarketBusinessRuleException("EQUIPMENT_NOT_AVAILABLE", "One or more selected equipment items do not exist or are not available.");
 
             var conflictingEquipmentIds = await _context.ReservationEmployees
                 .Where(x =>
@@ -78,8 +78,8 @@ public class AssignReservationResourcesCommandHandler : IRequestHandler<AssignRe
 
             if (conflictingEquipmentIds.Count > 0)
             {
-                throw new InvalidOperationException(
-                    $"Some equipment items are already assigned in this time slot: {string.Join(", ", conflictingEquipmentIds)}");
+                throw new MarketBusinessRuleException(
+                    "EQUIPMENT_CONFLICT", $"Some equipment items are already assigned in this time slot: {string.Join(", ", conflictingEquipmentIds)}");
             }
 
             if (request.ReplaceExistingAssignments)
@@ -152,7 +152,7 @@ public class AssignReservationResourcesCommandHandler : IRequestHandler<AssignRe
                 .AnyAsync(x => x.Id == request.EmployeeId.Value && !x.IsDeleted, cancellationToken);
 
             if (!employeeExists)
-                throw new KeyNotFoundException("Employee not found.");
+                throw new MarketNotFoundException("Employee not found.");
 
             return request.EmployeeId.Value;
         }
@@ -160,7 +160,7 @@ public class AssignReservationResourcesCommandHandler : IRequestHandler<AssignRe
         var employeeName = request.EmployeeName?.Trim();
 
         if (string.IsNullOrWhiteSpace(employeeName))
-            throw new InvalidOperationException("Employee is required.");
+            throw new MarketBusinessRuleException("EMPLOYEE_REQUIRED", "Employee is required.");
 
         var matches = await _context.Users
             .Where(x =>
@@ -174,12 +174,10 @@ public class AssignReservationResourcesCommandHandler : IRequestHandler<AssignRe
             .ToListAsync(cancellationToken);
 
         if (matches.Count == 0)
-            throw new KeyNotFoundException("Employee not found.");
+            throw new MarketNotFoundException("Employee not found.");
 
         if (matches.Count > 1)
-            throw new InvalidOperationException(
-                "Multiple employees match the provided value. Please enter a unique employee name, username, or email.");
-
+            throw new MarketBusinessRuleException("EMPLOYEE_NOT_UNIQUE", "Multiple employees match the provided value. Please enter a unique employee name, username, or email.");
         return matches[0].Id;
 
     }

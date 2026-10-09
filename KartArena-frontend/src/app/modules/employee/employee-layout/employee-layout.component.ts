@@ -1,5 +1,7 @@
 import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+
 import { AuthFacadeService } from '../../../core/services/auth/auth-facade.service';
 
 @Component({
@@ -10,6 +12,8 @@ import { AuthFacadeService } from '../../../core/services/auth/auth-facade.servi
 })
 export class EmployeeLayoutComponent {
   private translate = inject(TranslateService);
+  private router = inject(Router);
+
   auth = inject(AuthFacadeService);
 
   sidebarOpened = true;
@@ -36,5 +40,13 @@ export class EmployeeLayoutComponent {
 
   getCurrentLanguage() {
     return this.languages.find(lang => lang.code === this.currentLang);
+  }
+
+  logout(): void {
+    this.auth.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/auth/login']);
+      }
+    });
   }
 }

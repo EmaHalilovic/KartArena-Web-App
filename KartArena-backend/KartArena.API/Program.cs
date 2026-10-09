@@ -3,8 +3,13 @@ using KartArena.API.Middleware;
 using KartArena.Application;
 using KartArena.Application.Modules.Catalog.Payments.Stripe;
 using KartArena.Infrastructure;
+using KartArena.Infrastructure.BackgroundServices;
+using KartArena.Infrastructure.Common;
+using Microsoft.AspNetCore.Localization;
 using Serilog;
 using Stripe;
+using System.Globalization;
+
 
 public partial class Program
 {
@@ -58,16 +63,31 @@ public partial class Program
                     policy =>
                     {
                         policy
-                            .WithOrigins("http://localhost:4200") // kao string array može i više URL-ova
+                            .WithOrigins("http://localhost:4200") 
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials();
                     });
             });
-           
 
+            var regionalSettings = builder.Configuration
+                 .GetSection(RegionalSettings.SectionName)
+                 .Get<RegionalSettings>()
+                 ?? new RegionalSettings();
+
+            var culture = new CultureInfo(regionalSettings.Culture);
+
+
+            builder.Services.Configure<RequestLocalizationOptions>(options =>
+            {
+                options.DefaultRequestCulture = new RequestCulture(culture);
+                options.SupportedCultures = [culture];
+                options.SupportedUICultures = [culture];
+            });
 
             var app = builder.Build();
+
+            app.UseRequestLocalization();
 
             // ---------------------------------------------------------
             // 4. Middleware pipeline
@@ -99,8 +119,7 @@ public partial class Program
         }
         catch (HostAbortedException)
         {
-            // EF Core tools abortiraju host nakon što uzmu DbContext.
-            // Ovo nije runtime greška – samo tiho izađi.
+            
             Log.Information("Host aborted by EF Core tooling (design-time) - its ok.");
         }
         catch (Exception ex)

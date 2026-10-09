@@ -62,12 +62,12 @@ export class ReservationEditComponent implements OnInit {
 
   const raw = this.form.getRawValue() as any;
 
-  // reservationDate može biti Date ili string
+  
   const date = this.toShortIsoDate(raw.reservationDate);
 
   // start/end iz input type="time" dolaze kao "HH:mm"
   const command: UpdateReservationCommand = {
-    userId: Number(raw.userId),
+    
     trackId: Number(raw.trackId),
     kartId: Number(raw.kartId),
     reservationDate: date as any,

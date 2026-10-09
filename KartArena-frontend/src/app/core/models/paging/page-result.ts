@@ -2,8 +2,7 @@
 
 export interface PageResult<T> {
   items: T[];
-  /** Total number of matching records returned by the backend. */
-  total?: number;
+   total?: number;
 
   /** Legacy/derived paging fields retained for existing frontend adapters. */
   pageSize?: number;

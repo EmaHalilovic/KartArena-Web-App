@@ -3,7 +3,7 @@
     "TITLE": "Dobrodošli u našu aplikaciju",
     "DESCRIPTION": "Ovo je primjer lokalizacije."
   },
-  "REPORTS": {
+   "REPORTS": {
     "NAV": "Izvještaji",
     "EYEBROW": "Administracija",
     "TITLE": "PDF izvještaji",

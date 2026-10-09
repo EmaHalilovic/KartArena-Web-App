@@ -1,4 +1,11 @@
-﻿namespace KartArena.Application.Modules.Catalog.Users.Commands.Update
+﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace KartArena.Application.Modules.Catalog.Users.Commands.Update
 {
     public sealed class UpdateUserCommandHandler(IAppDbContext context)
          : IRequestHandler<UpdateUserCommand, Unit>

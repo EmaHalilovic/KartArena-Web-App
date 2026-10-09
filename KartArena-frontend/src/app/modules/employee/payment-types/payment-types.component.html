@@ -5,43 +5,40 @@
         <h1><mat-icon>receipt_long</mat-icon>Payment Types</h1>
       </div>
 
-     
     </div>
 
     <div class="toolbar">
       <mat-form-field class="search-field" appearance="fill">
-        <mat-label>Name</mat-label>
+         <mat-label>Name</mat-label>
         <input
           matInput
           placeholder="Filter by name"
-          (ngModelChange)="onNameFilterChange($event)"
-          [(ngModel)]="request.name"
+          [formControl]="nameControl"
+          (input)="onNameFilterChange(nameControl.value)"
         />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
-
-      <mat-form-field appearance="fill">
+<mat-form-field appearance="fill">
         <mat-label>Code</mat-label>
         <input
           matInput
           placeholder="Filter by code"
-          (ngModelChange)="onCodeFilterChange($event)"
-          [(ngModel)]="request.code"
+          [formControl]="codeControl"
+          (input)="onCodeFilterChange(codeControl.value)"
         />
       </mat-form-field>
-
       <mat-form-field appearance="fill">
         <mat-label>Payment method</mat-label>
-        <mat-select [ngModel]="paymentMethodFilter" (ngModelChange)="onPaymentMethodFilterChange($event)">
+        <mat-select [formControl]="paymentMethodControl" (selectionChange)="onPaymentMethodFilterChange($event.value)">
           <mat-option value="all">All methods</mat-option>
           <mat-option value="online">Only online</mat-option>
           <mat-option value="desk">Only at desk</mat-option>
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="fill">
+        <mat-form-field appearance="fill">
         <mat-label>Allowed online</mat-label>
-        <mat-select [ngModel]="request.allowedOnline" (ngModelChange)="onAllowedOnlineFilterChange($event)">
+        <mat-select [formControl]="allowedOnlineControl" (selectionChange)="onAllowedOnlineFilterChange($event.value)">
           <mat-option [value]="null">All</mat-option>
           <mat-option [value]="true">Yes</mat-option>
           <mat-option [value]="false">No</mat-option>
@@ -50,8 +47,8 @@
 
       <mat-slide-toggle
         class="active-toggle"
-        [ngModel]="request.onlyEnabled"
-        (ngModelChange)="onToggleEnabledFilter($event)"
+        [formControl]="enabledOnlyControl"
+        (change)="onToggleEnabledFilter(enabledOnlyControl.value)"
       >
         Active only
       </mat-slide-toggle>
@@ -137,7 +134,7 @@
 
       <tr class="mat-row" *matNoDataRow>
         <td class="mat-cell" colspan="7">
-          {{ request.name || request.code || request.paymentMethod || request.allowedOnline != null
+           {{ request.name || request.code || request.paymentMethod || request.allowedOnline != null
             ? 'No payment types match the current filters.'
             : 'No payment types found.' }}
         </td>

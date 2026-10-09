@@ -96,6 +96,23 @@ $hover-bg: rgba(240, 13, 13, 0.08);
   border: 1px solid $border-color;
   position: relative;
   min-height: 400px;
+// Native date/time controls can ignore Material theme colors in Chromium.
+  // Force readable values and picker icons on the dark form background.
+  ::ng-deep input.mat-mdc-input-element {
+    color: #f5f7fb !important;
+    -webkit-text-fill-color: #f5f7fb !important;
+    caret-color: $primary-color !important;
+    opacity: 1 !important;
+  }
+
+  ::ng-deep input[type='time'] {
+    color-scheme: dark;
+  }
+
+  ::ng-deep input[type='time']::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.85;
+  }
 
   // Native date/time controls can ignore Material theme colors in Chromium.
   // Force readable values and picker icons on the dark form background.
@@ -448,7 +465,7 @@ $hover-bg: rgba(240, 13, 13, 0.08);
   }
 }
 
-// Responzivnost
+
 @media (max-width: 768px) {
   .container {
     padding: 16px;

@@ -18,7 +18,6 @@ import { EquipmentEditItemDialogComponent } from './equipment/dialogs/equipment-
 
 import { ReservationComponent } from './reservation/reservation.component';
 import { ReservationAddComponent } from './reservation/reservation-add/reservation-add.component';
-import { ReservationEditComponent } from './reservation/reservation-edit/reservation-edit.component';
 import { ReservationDetailsComponent } from './reservation/reservation-details/reservation-details.component';
 import { ConfirmDeleteDialogReservationComponent } from './reservation/dialogs/confirm-delete/confirm-delete-dialog.component';
 import { ReservationCashPaymentDialogComponent } from './reservation/dialogs/reservation-cash-payment-dialog/reservation-cash-payment-dialog.component';
@@ -28,11 +27,14 @@ import { PaymentsComponent } from './payments/payments.component';
 import { PaymentTypesComponent } from './payment-types/payment-types.component';
 import { PaymentTypesEditComponent } from './payment-types/payment-types-edit/payment-types-edit.component';
 import { ConfirmDeletePaymentTypeDialogComponent } from './payment-types/dialogs/confirm-delete/confirm-delete-dialog.component';
+import { ReservationEditComponent } from './reservation/reservation-edit/reservation-edit.component';
+import { EmployeeDashboardComponent } from './dashboard/employee-dashboard.component';
 
 
 @NgModule({
   declarations: [
     EmployeeLayoutComponent,
+    EmployeeDashboardComponent,
     EmployeeSettingsComponent,
     EquipmentComponent,
     EquipmentAddComponent,
@@ -44,7 +46,6 @@ import { ConfirmDeletePaymentTypeDialogComponent } from './payment-types/dialogs
     EquipmentEditItemDialogComponent,
     ReservationComponent,
     ReservationAddComponent,
-    ReservationEditComponent,
     ReservationDetailsComponent,
     ConfirmDeleteDialogReservationComponent,
     ReservationCashPaymentDialogComponent,
@@ -54,6 +55,7 @@ import { ConfirmDeletePaymentTypeDialogComponent } from './payment-types/dialogs
     PaymentTypesComponent,
     PaymentTypesEditComponent,
     ConfirmDeletePaymentTypeDialogComponent,
+    ReservationEditComponent,
   ],
   imports: [
     EmployeeRoutingModule,

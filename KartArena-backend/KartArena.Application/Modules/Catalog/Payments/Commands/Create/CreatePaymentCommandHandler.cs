@@ -1,9 +1,10 @@
+using KartArena.Application.Abstractions;
 using KartArena.Domain.Entities.Payments;
 using Microsoft.EntityFrameworkCore;
 
 namespace KartArena.Application.Modules.Catalog.Payments.Commands.Create;
 
-public sealed class CreatePaymentCommandHandler(IAppDbContext context)
+public sealed class CreatePaymentCommandHandler(IAppDbContext context, IBusinessClock businessClock)
     : IRequestHandler<CreatePaymentCommand, int>
 {
     public async Task<int> Handle(
@@ -34,12 +35,15 @@ public sealed class CreatePaymentCommandHandler(IAppDbContext context)
                 $"Payment type with id {request.PaymentTypeId} was not found.");
         }
 
+
         if (!paymentType.isEnabled)
         {
             throw new MarketBusinessRuleException(
                 "payment.create.payment_type_disabled",
                 "Selected payment type is disabled.");
         }
+
+
 
         var alreadyHasActivePayment =
             await context.PaymentReservations
@@ -58,12 +62,16 @@ public sealed class CreatePaymentCommandHandler(IAppDbContext context)
                 "The reservation already has an active payment.");
         }
 
+      
+
         var payment = new PaymentEntity
         {
             PaymentTypeId = request.PaymentTypeId,
             Amount = request.Amount,
             Currency = "bam",
-            PaymentDate = request.PaymentDate,
+            PaymentDate = request.PaymentDate.HasValue
+        ? businessClock.ToUtc(request.PaymentDate.Value)
+        : null,
             TransactionReference =
                 request.TransactionReference?.Trim(),
             Note = request.Note?.Trim(),

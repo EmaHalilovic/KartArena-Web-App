@@ -16,14 +16,14 @@ type QuickFilter =
   standalone: false,
   template: `
     <section class="karts-page">
-      <!-- HEADER (uvijek gore, full width) -->
+      <!-- Full-width header that remains at the top -->
       <app-header class="hdr"></app-header>
 
       <div class="container">
         <div class="layout">
           <!-- LEFT STRIP -->
           <aside class="side">
-            <div class="vertical">PONUDA KARTOVA</div>
+            <div class="vertical">AVAILABLE KARTS</div>
           </aside>
 
           <!-- MAIN -->
@@ -37,10 +37,10 @@ type QuickFilter =
                     type="text"
                     [(ngModel)]="q"
                     name="q"
-                    placeholder="Pretraži kartove (naziv, proizvođač, boja)..."
-                    aria-label="Pretraži kartove"
+                    placeholder="Search karts (name, manufacturer, colour)..."
+                    aria-label="Search karts"
                   />
-                  <button class="sbtn" type="submit">Traži</button>
+                  <button class="sbtn" type="submit">Search</button>
                 </form>
 
                 <button class="btn ghost" type="button" (click)="reset()">Reset</button>
@@ -55,7 +55,7 @@ type QuickFilter =
                     (click)="setFilter({ kind: 'all' })"
                     type="button"
                   >
-                    Sve
+                    All
                   </button>
 
                   <button
@@ -64,7 +64,7 @@ type QuickFilter =
                     (click)="setFilter({ kind: 'enabled', only: true })"
                     type="button"
                   >
-                    Samo aktivni
+                    Active only
                   </button>
 
                   <button
@@ -91,7 +91,7 @@ type QuickFilter =
                     (click)="setFilter({ kind: 'powertrain', id: 3 })"
                     type="button"
                   >
-                    Električni
+                    Electric
                   </button>
                 </div>
 
@@ -104,7 +104,7 @@ type QuickFilter =
                     type="button"
                     (click)="setSort('name')"
                   >
-                    Naziv
+                    Name
                   </button>
 
                   <button
@@ -113,7 +113,7 @@ type QuickFilter =
                     type="button"
                     (click)="setSort('price')"
                   >
-                    Cijena
+                    Price
                   </button>
 
                   <button class="pill ghost" type="button" (click)="toggleDir()">
@@ -125,7 +125,7 @@ type QuickFilter =
               <!-- GRID -->
               <div class="grid" *ngIf="!loading; else loadingTpl">
                 <div class="empty" *ngIf="viewKarts.length === 0">
-                  Nema kartova za prikaz.
+                  No karts to display.
                 </div>
 
                 <article class="card" *ngFor="let k of viewKarts" (click)="openDetails(k.id)">
@@ -154,7 +154,7 @@ type QuickFilter =
                     </p>
 
                     <div class="cta">
-                      <span class="link">Detalji</span>
+                      <span class="link">Details</span>
                       <span class="arrow">→</span>
                     </div>
                   </div>
@@ -162,7 +162,7 @@ type QuickFilter =
               </div>
 
               <ng-template #loadingTpl>
-                <div class="loading">Učitavanje...</div>
+                <div class="loading">Loading...</div>
               </ng-template>
             </div>
           </main>
@@ -201,7 +201,7 @@ type QuickFilter =
     /* SIDE STRIP */
     .side{
       position: sticky;
-      top: 92px; /* da stoji ispod headera */
+      top: 92px; /* Keep the strip below the header. */
       height: calc(100vh - 110px);
       display:flex;
       align-items:center;

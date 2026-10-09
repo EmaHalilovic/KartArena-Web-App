@@ -23,7 +23,7 @@ import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.com
     FitLoadingBarComponent,
     FitTableSkeletonComponent,
     AppHeaderComponent,
-    ThemeToggleComponent,
+    ThemeToggleComponent
   ],
   imports: [
     RouterModule,
@@ -38,8 +38,8 @@ import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.com
   ],
   exports:[
     AppHeaderComponent,
-    ThemeToggleComponent,
     RouterModule,
+    ThemeToggleComponent,
     FitPaginatorBarComponent,
     CommonModule,
     ReactiveFormsModule,

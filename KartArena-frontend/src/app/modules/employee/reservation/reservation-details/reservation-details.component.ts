@@ -13,6 +13,7 @@ import {
 import { PaymentStatus } from '../../../../api-services/payments/payments-api.models';
 import { ReservationApiService } from '../../../../api-services/reservations/reservation-api.service';
 import { ToasterService } from '../../../../core/services/toaster.service';
+import { formatBusinessInstant, getBusinessDateKey } from '../../../../core/services/business-date-time';
 import { ConfirmDeleteDialogReservationComponent } from '../dialogs/confirm-delete/confirm-delete-dialog.component';
 import { ReservationCashPaymentDialogComponent } from '../dialogs/reservation-cash-payment-dialog/reservation-cash-payment-dialog.component';
 import { ReservationAssignDialogComponent } from '../dialogs/reservation-assign-dialog/reservation-assign-dialog.component';
@@ -85,15 +86,13 @@ export class ReservationDetailsComponent implements OnInit {
   goBack(): void {
     this.router.navigate(['/employee/reservations']);
   }
-
-  openEdit(): void {
+openEdit(): void {
     if (this.reservationId == null || !this.canEdit()) {
       return;
     }
 
     this.router.navigate(['/employee/reservation/edit', this.reservationId]);
   }
-
   openMarkCashPaid(): void {
     if (!this.reservation) {
       return;
@@ -220,8 +219,7 @@ export class ReservationDetailsComponent implements OnInit {
 
     return userName || customerName || (reservation.userId ? `#${reservation.userId}` : '-');
   }
-
-  changeReservationStatus(status: ReservationStatus.Completed | ReservationStatus.Cancelled): void {
+changeReservationStatus(status: ReservationStatus.Completed | ReservationStatus.Cancelled): void {
     if (!this.reservation || !this.canCloseReservation()) {
       this.toaster.error('Confirmed reservations can only be closed on their reservation date');
       return;
@@ -351,21 +349,19 @@ export class ReservationDetailsComponent implements OnInit {
       && this.hasPaymentStatus(reservation, ['pending', 'awaitingpayment', 'processing']);
   }
 
-  canEdit(): boolean {
-    const reservation = this.reservation;
-    return !!reservation && this.isConfirmedReservation(reservation);
-  }
-
   canAssignResources(): boolean {
     const reservation = this.reservation;
     return !!reservation && this.isConfirmedReservation(reservation);
   }
-
-  canCloseReservation(): boolean {
+  canEdit(): boolean {
+    const reservation = this.reservation;
+    return !!reservation && this.isConfirmedReservation(reservation);
+  }
+ canCloseReservation(): boolean {
     const reservation = this.reservation;
     return !!reservation
       && this.isConfirmedReservation(reservation)
-      && this.toShortDate(reservation.date) === this.toLocalIsoDate(new Date());
+      && this.toShortDate(reservation.date) === getBusinessDateKey();
   }
 
   private toLocalIsoDate(value: Date): string {
@@ -401,8 +397,7 @@ export class ReservationDetailsComponent implements OnInit {
       return '-';
     }
 
-    const parsed = this.tryParseDate(value);
-    return parsed ? parsed.toLocaleString() : value;
+    return formatBusinessInstant(value) ?? value;
   }
 
   private runRowAction(operation$: Observable<unknown>, successMessage: string, errorMessage: string): void {
@@ -499,8 +494,6 @@ export class ReservationDetailsComponent implements OnInit {
           return { label: 'Paid', className: 'good' };
         case PaymentStatus.Failed:
           return { label: 'Failed', className: 'low' };
-        case PaymentStatus.Cancelled:
-          return { label: 'Cancelled', className: 'low' };
         case PaymentStatus.Refunded:
           return { label: 'Refunded', className: 'neutral' };
         default:
@@ -536,15 +529,6 @@ export class ReservationDetailsComponent implements OnInit {
       .replace(/\s+/g, ' ')
       .trim()
       .replace(/\b\w/g, (char) => char.toUpperCase());
-  }
-
-  private tryParseDate(value?: string | null): Date | null {
-    if (!value) {
-      return null;
-    }
-
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
   }
 
   private normalizeKey(value: string | number | null | undefined): string {

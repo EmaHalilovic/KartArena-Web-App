@@ -35,7 +35,7 @@ public sealed class JwtTokenService : IJwtTokenService
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(ClaimTypes.NameIdentifier,   user.Id.ToString()),
             new(ClaimTypes.Email,            user.Email),
-            new(ClaimTypes.Role, user.Role?.Name ?? string.Empty),
+            new(ClaimTypes.Role, NormalizeRoleName(user.Role?.Name)),
             new(JwtRegisteredClaimNames.Iat, ToUnixTimeSeconds(nowInstant).ToString(), ClaimValueTypes.Integer64),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
         };
@@ -68,6 +68,16 @@ public sealed class JwtTokenService : IJwtTokenService
             RefreshTokenHash = refreshHash,
             RefreshTokenExpiresAtUtc = refreshExpires
         };
+    }
+
+    private static string NormalizeRoleName(string? roleName)
+    {
+        if (string.IsNullOrWhiteSpace(roleName)) return string.Empty;
+        if (roleName.StartsWith("Admin", StringComparison.OrdinalIgnoreCase)) return "Admin";
+        if (roleName.StartsWith("Employee", StringComparison.OrdinalIgnoreCase)) return "Employee";
+        if (roleName.StartsWith("Manager", StringComparison.OrdinalIgnoreCase)) return "Manager";
+        if (roleName.StartsWith("User", StringComparison.OrdinalIgnoreCase)) return "User";
+        return roleName.Trim();
     }
 
     public string HashRefreshToken(string rawToken)

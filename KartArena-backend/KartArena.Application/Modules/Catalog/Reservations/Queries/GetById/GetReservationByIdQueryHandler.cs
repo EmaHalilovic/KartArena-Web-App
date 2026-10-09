@@ -101,7 +101,7 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Queries.GetById
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (dto is null)
-                throw new Exception("Reservation not found.");
+                throw new MarketNotFoundException("Reservation not found.");
 
             return dto;
         }

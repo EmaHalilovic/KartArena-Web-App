@@ -30,11 +30,11 @@ export class StatsComponent {
   }
 
   exportReport(): void {
-    alert('Izvoz (demo) — ovdje kasnije ide PDF/CSV.');
+    alert('Demo export — PDF/CSV support will be added here.');
   }
 
-  // ===================== LINE (rezervacije) =====================
-  lineSeries: ApexAxisChartSeries = [{ name: 'Rezervacije', data: [12, 18, 9, 22, 30, 26, 34] }];
+  // ===================== LINE (reservations) =====================
+  lineSeries: ApexAxisChartSeries = [{ name: 'Reservations', data: [12, 18, 9, 22, 30, 26, 34] }];
 
   lineChart: ApexChart = {
     type: 'line',
@@ -44,7 +44,7 @@ export class StatsComponent {
     background: 'transparent',
   };
 
-  lineXAxis: ApexXAxis = { categories: ['Pon', 'Uto', 'Sri', 'Čet', 'Pet', 'Sub', 'Ned'] };
+  lineXAxis: ApexXAxis = { categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] };
   lineYAxis: ApexYAxis = {};
   lineStroke: ApexStroke = { curve: 'smooth', width: 3 };
   lineDataLabels: ApexDataLabels = { enabled: false };
@@ -52,7 +52,7 @@ export class StatsComponent {
   lineTooltip: ApexTooltip = { theme: 'dark' };
   lineLegend: ApexLegend = { show: false };
 
-  // ===================== DONUT (tip) =====================
+  // ===================== DONUT (type) =====================
   donutSeries: ApexNonAxisChartSeries = [62, 38];
   donutLabels = ['Gasoline', 'Electric'];
 
@@ -72,7 +72,7 @@ export class StatsComponent {
         size: '70%',
         labels: {
           show: true,
-          total: { show: true, label: 'Ukupno' },
+          total: { show: true, label: 'Total' },
         },
       },
     },
@@ -82,8 +82,8 @@ export class StatsComponent {
   donutTooltip: ApexTooltip = { theme: 'dark' };
   donutFill: ApexFill = { type: 'solid' };
 
-  // ===================== BAR (staze) =====================
-  barSeries: ApexAxisChartSeries = [{ name: 'Rezervacije', data: [48, 62, 39] }];
+  // ===================== BAR (tracks) =====================
+  barSeries: ApexAxisChartSeries = [{ name: 'Reservations', data: [48, 62, 39] }];
 
   barChart: ApexChart = {
     type: 'bar',

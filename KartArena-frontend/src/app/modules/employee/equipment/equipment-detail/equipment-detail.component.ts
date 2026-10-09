@@ -1,4 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -38,7 +39,12 @@ import { ConfirmDeleteDialogComponent } from '../dialogs/confirm-delete/confirm-
 })
 export class EquipmentDetailComponent extends BaseComponent implements OnInit {
   protected readonly itemStatus = EquipmentItemStatus;
-  protected readonly itemStatusOptions = Object.values(EquipmentItemStatus);
+  protected readonly itemStatusOptions = [
+  EquipmentItemStatus.Available,
+  EquipmentItemStatus.InUse,
+  EquipmentItemStatus.Maintenance,
+  EquipmentItemStatus.Lost,
+];
 
   private api = inject(EquipmentApiService);
   private route = inject(ActivatedRoute);
@@ -50,8 +56,8 @@ export class EquipmentDetailComponent extends BaseComponent implements OnInit {
 
   equipmentId!: number;
   equipment?: GetEquipmentByIdQueryDto;
-  itemSearch = '';
-  selectedItemStatus: EquipmentItemStatus | 'all' = 'all';
+  readonly itemSearchControl = new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] });
+  readonly itemStatusControl = new FormControl<EquipmentItemStatus | 'all'>('all', { nonNullable: true });
   summaryCards = buildEquipmentSummaryCards({
     id: 0,
     name: '',
@@ -177,6 +183,9 @@ export class EquipmentDetailComponent extends BaseComponent implements OnInit {
     });
   }
 
+ 
+  
+
   getStockTone(): string {
     return this.equipment ? getEquipmentStockTone(this.equipment.stockStatus) : 'neutral';
   }
@@ -199,7 +208,7 @@ export class EquipmentDetailComponent extends BaseComponent implements OnInit {
 
   get filteredItems(): GetEquipmentByIdQueryDtoItem[] {
     const items = this.equipment?.items ?? [];
-    const search = this.itemSearch.trim().toLowerCase();
+    const search = this.itemSearchControl.value.trim().toLowerCase();
 
     return items.filter((item) => {
       const matchesSearch =
@@ -207,7 +216,7 @@ export class EquipmentDetailComponent extends BaseComponent implements OnInit {
         item.itemCode.toLowerCase().includes(search) ;
 
       const matchesStatus =
-        this.selectedItemStatus === 'all' || item.status === this.selectedItemStatus;
+        this.itemStatusControl.value === 'all' || item.status === this.itemStatusControl.value;
 
       return matchesSearch && matchesStatus;
     });
@@ -316,5 +325,7 @@ export class EquipmentDetailComponent extends BaseComponent implements OnInit {
     });
   }
 
+  
+  
 }
 

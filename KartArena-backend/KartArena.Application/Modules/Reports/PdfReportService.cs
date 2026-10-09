@@ -4,7 +4,7 @@ using QuestPDF.Infrastructure;
 
 namespace KartArena.Application.Modules.Reports;
 
-public sealed class PdfReportService
+public sealed class PdfReportService(IBusinessClock businessClock)
 {
     public byte[] Generate(string title, string filters, IReadOnlyList<string> headers,
         IReadOnlyList<IReadOnlyList<string>> rows) => Document.Create(document =>
@@ -17,7 +17,7 @@ public sealed class PdfReportService
             page.Header().Column(column =>
             {
                 column.Item().Text(title).FontSize(20).Bold().FontColor(Colors.Red.Darken1);
-                column.Item().PaddingTop(4).Text($"Generated: {DateTime.Now:dd.MM.yyyy HH:mm}");
+                column.Item().PaddingTop(4).Text($"Generated: {businessClock.Now:dd.MM.yyyy HH:mm}");
                 column.Item().Text($"Filters: {filters}").FontColor(Colors.Grey.Darken2);
             });
             page.Content().PaddingVertical(14).Table(table =>

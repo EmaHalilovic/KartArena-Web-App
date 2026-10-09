@@ -10,7 +10,7 @@ export interface ConfirmDeleteDialogData {
 }
 
 @Component({
-  selector: 'app-confirm-delete-dialog',
+  selector: 'app-confirm-delete-reservation-dialog',
   templateUrl: './confirm-delete-dialog.component.html',
   styleUrl: './confirm-delete-dialog.component.scss',
   standalone: false,

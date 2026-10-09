@@ -7,10 +7,7 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Create
     {
         public CreateReservationCommandValidator()
         {
-            RuleFor(x => x.UserId)
-                .GreaterThan(0)
-                .When(x => x.UserId.HasValue);
-
+            
             RuleFor(x => x.TrackId)
                 .GreaterThan(0);
 

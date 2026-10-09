@@ -13,10 +13,12 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Delete
                 .FirstOrDefaultAsync(r => r.Id == request.ReservationId && !r.IsDeleted, ct);
 
             if (reservation is null)
-                throw new Exception("Reservation not found.");
+                throw new MarketNotFoundException("Reservation not found.");
 
             if (reservation.Status is not ReservationStatus.Completed and not ReservationStatus.Cancelled)
-                throw new Exception("Only completed or cancelled reservations can be deleted.");
+                throw new MarketBusinessRuleException(
+                    "RESERVATION_NOT_COMPLETED_OR_CANCELLED",
+                    "Only completed or cancelled reservations can be deleted.");
 
             reservation.IsDeleted = true;
             await ctx.SaveChangesAsync(ct);

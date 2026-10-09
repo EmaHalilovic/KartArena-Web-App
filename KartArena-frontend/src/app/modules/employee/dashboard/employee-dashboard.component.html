@@ -1,0 +1,54 @@
+<section class="dashboard-page">
+  <header class="dashboard-header">
+    <div>
+      <p class="eyebrow">Work overview</p>
+      <h1>Employee Dashboard</h1>
+      <p>Stay on top of today's reservations and operational tasks.</p>
+    </div>
+    <button mat-stroked-button type="button" (click)="loadDashboard()" [disabled]="loading"><mat-icon>refresh</mat-icon>Refresh</button>
+  </header>
+
+  <div class="loading" *ngIf="loading"><mat-spinner diameter="34"></mat-spinner><span>Loading work overview…</span></div>
+
+  <ng-container *ngIf="!loading">
+    <div class="metric-grid">
+      <article class="metric-card"><mat-icon>today</mat-icon><div><span>Today's reservations</span><strong>{{ todayCount }}</strong><small>Scheduled sessions</small></div></article>
+      <article class="metric-card tone-blue"><mat-icon>upcoming</mat-icon><div><span>Upcoming reservations</span><strong>{{ upcomingCount }}</strong><small>Next scheduled sessions</small></div></article>
+      <article class="metric-card tone-amber"><mat-icon>construction</mat-icon><div><span>Equipment attention</span><strong>{{ lowStockEquipment.length }}</strong><small>Low or out of stock</small></div></article>
+    </div>
+
+    <div class="content-grid">
+      <article class="panel">
+        <div class="panel-heading"><div><p>Today's schedule</p><h2>Reservations</h2></div><a mat-stroked-button routerLink="/employee/reservations">View all</a></div>
+        <div class="list" *ngIf="todayReservations.length; else emptyToday">
+          <a *ngFor="let reservation of todayReservations" [routerLink]="['/employee/reservations', reservation.id]">
+            <strong>{{ reservation.startTime }}</strong><span>{{ reservation.customerFirstName || reservation.userFirstName || 'Guest' }} {{ reservation.customerLastName || reservation.userLastName || '' }}</span><em [class]="'status-' + statusLabel(reservation.status).toLowerCase()">{{ statusLabel(reservation.status) }}</em><mat-icon>chevron_right</mat-icon>
+          </a>
+        </div>
+        <ng-template #emptyToday><p class="empty">No reservations are scheduled for today.</p></ng-template>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading"><div><p>Inventory</p><h2>Equipment attention</h2></div><a mat-stroked-button routerLink="/employee/equipment">Open equipment</a></div>
+        <div class="list" *ngIf="lowStockEquipment.length; else emptyEquipment">
+          <a *ngFor="let item of lowStockEquipment" [routerLink]="['/employee/equipment', item.id]">
+            <mat-icon>construction</mat-icon><span>{{ item.name }} · {{ item.size }}</span><em class="status-low">{{ item.stockStatus === 1 ? 'Low stock' : 'Out of stock' }}</em><mat-icon>chevron_right</mat-icon>
+          </a>
+        </div>
+        <ng-template #emptyEquipment><p class="empty">All active equipment is sufficiently stocked.</p></ng-template>
+      </article>
+    </div>
+
+    <article class="panel upcoming-panel" *ngIf="showUpcoming">
+      <div class="panel-heading"><div><p>Plan ahead</p><h2>Upcoming reservations</h2></div><a mat-stroked-button routerLink="/employee/reservations">Reservation list</a></div>
+      <div class="list" *ngIf="upcomingReservations.length; else emptyUpcoming">
+        <a *ngFor="let reservation of upcomingReservations" [routerLink]="['/employee/reservations', reservation.id]">
+          <strong>{{ reservation.date | date : 'EEE, MMM d' }} · {{ reservation.startTime }}</strong><span>{{ reservation.customerFirstName || reservation.userFirstName || 'Guest' }} {{ reservation.customerLastName || reservation.userLastName || '' }}</span><em [class]="'status-' + statusLabel(reservation.status).toLowerCase()">{{ statusLabel(reservation.status) }}</em><mat-icon>chevron_right</mat-icon>
+        </a>
+      </div>
+      <ng-template #emptyUpcoming><p class="empty">No upcoming reservations were found.</p></ng-template>
+    </article>
+
+    <div class="quick-actions"><a mat-flat-button routerLink="/employee/reservation/add"><mat-icon>add_circle</mat-icon>New reservation</a><a mat-stroked-button routerLink="/employee/equipment/add"><mat-icon>add</mat-icon>Add equipment</a></div>
+  </ng-container>
+</section>

@@ -10,7 +10,7 @@ namespace KartArena.API.Controllers
     public class StripeWebhookController : ControllerBase
     {
         private readonly IStripeWebhookService
-            _stripeWebhookService;
+             _stripeWebhookService;
 
         private readonly ILogger<StripeWebhookController>
             _logger;

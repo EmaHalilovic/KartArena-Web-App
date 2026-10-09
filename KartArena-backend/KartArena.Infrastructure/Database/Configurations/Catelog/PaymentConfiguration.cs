@@ -44,6 +44,8 @@ namespace KartArena.Infrastructure.Persistence.Configurations
 
             builder.HasIndex(x => x.StripePaymentIntentId);
 
+
+
           
 
             builder.HasOne(x => x.PaymentType)

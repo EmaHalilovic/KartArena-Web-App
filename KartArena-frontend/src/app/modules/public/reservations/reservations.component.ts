@@ -21,6 +21,10 @@ import {
 } from '../../../api-services/reservations/reservation-api.models';
 import { ReservationApiService } from '../../../api-services/reservations/reservation-api.service';
 import { ToasterService } from '../../../core/services/toaster.service';
+import {
+  formatLocalCalendarDate,
+  getBusinessToday,
+} from '../../../core/services/business-date-time';
 
 interface ReservationOption {
   id: number;
@@ -74,7 +78,7 @@ export class ReservationsComponent implements OnInit, OnDestroy {
   };
   timeOptions: string[] = [];
   availability: GetReservationAvailabilityDto | null = null;
-  readonly steps = ['Detalji rezervacije', 'Dodatne informacije', 'Pregled i potvrda'];
+  readonly steps = ['Reservation details', 'Additional information', 'Review and confirm'];
 
   tracks: ReservationOption[] = [];
   karts: ReservationOption[] = [];
@@ -185,7 +189,7 @@ this.subscriptions.add(
   }
 
   get durationLabel(): string {
-    return `${this.form.controls.duration.value ?? 10} minuta`;
+    return `${this.form.controls.duration.value ?? 10} minutes`;
   }
 
   get cartCount(): number {
@@ -228,7 +232,7 @@ this.subscriptions.add(
     this.syncPaymentAmount();
     this.applyKartsForSelectedTrack();
 
-    this.toaster.success('Rezervacija je dodana u korpu.');
+    this.toaster.success('Reservation added to cart.');
     this.resetForm();
   }
 
@@ -251,7 +255,7 @@ this.subscriptions.add(
     this.saveSavedItems();
     this.handleActiveCartChanged();
 
-    this.toaster.success('Rezervacija je sacuvana za kasnije.');
+    this.toaster.success('Reservation saved for later.');
   }
 
   moveSavedItemToCart(id: string): void {
@@ -267,14 +271,14 @@ this.subscriptions.add(
     this.saveCart();
     this.syncPaymentAmount();
 
-    this.toaster.success('Rezervacija je vracena u korpu.');
+    this.toaster.success('Reservation moved back to the cart.');
   }
 
   removeSavedItem(id: string): void {
     this.savedItems = this.savedItems.filter((item) => item.id !== id);
     this.saveSavedItems();
 
-    this.toaster.success('Sacuvana rezervacija je uklonjena.');
+    this.toaster.success('Saved reservation removed.');
   }
 
   clearCart(): void {
@@ -303,7 +307,7 @@ this.subscriptions.add(
 
   continueToCustomer(): void {
     if (this.cartItems.length === 0) {
-      this.toaster.error('Dodajte barem jedan termin u korpu.');
+      this.toaster.error('Add at least one time slot to the cart.');
       return;
     }
 
@@ -364,7 +368,7 @@ this.subscriptions.add(
             return;
           }
 
-          this.toaster.success('Reservations have been submitted and are waiting for confirmation.');
+          this.toaster.success('Your reservation is confirmed. Please pay at reception.');
           this.resetCheckoutState();
         },
         error: (err) => {
@@ -469,39 +473,7 @@ this.subscriptions.add(
     this.form.controls.endTime.disable();
   }
 
-  // private loadOptions(): void {
-  //   this.isLoadingOptions = true;
-
-  //   const tracks$ = of(this.getMockTracks());
-  //   const kartsRequest = new ListKartsRequest();
-
-  //   const karts$ = this.kartsApi.list(kartsRequest).pipe(
-  //     tap((res) => {
-  //       console.log('Karts options response:', res);
-
-  //       if (!res.items?.length) {
-  //         console.warn('Karts options list is empty.', res);
-  //       }
-  //     }),
-  //     map((res) => (res.items ?? []).map((kart) => this.mapKartOption(kart))),
-  //     catchError((err) => {
-  //       console.error('Load karts options error:', err);
-  //       this.toaster.error('Kartove nije moguce ucitati. Pokusajte ponovo.');
-  //       return of([] as ReservationOption[]);
-  //     })
-  //   );
-
-  //   forkJoin({ tracks: tracks$, karts: karts$ })
-  //     .pipe(finalize(() => (this.isLoadingOptions = false)))
-  //     .subscribe(({ tracks, karts }) => {
-  //       this.tracks = tracks;
-  //       this.karts = karts;
-  //       this.kartsSource = 'backend';
-
-  //       this.syncPaymentAmount();
-  //     });
-  // }
-
+ 
   private loadPaymentTypes(): void {
     this.isLoadingPaymentTypes = true;
 
@@ -532,7 +504,7 @@ this.subscriptions.add(
         error: (err) => {
           console.error('Load payment types error:', err);
           this.paymentTypes = [];
-          this.toaster.error('Nacine placanja nije moguce ucitati. Pokusajte ponovo.');
+          this.toaster.error('Payment methods could not be loaded. Please try again.');
         },
       });
   }
@@ -590,18 +562,11 @@ this.subscriptions.add(
   }
 
   private formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = `${date.getMonth() + 1}`.padStart(2, '0');
-    const day = `${date.getDate()}`.padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
+    return formatLocalCalendarDate(date);
   }
 
   private getTodayDate(): Date {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    return today;
+    return getBusinessToday();
   }
 
   private toIsoDateTime(date: string, time: string): string {
@@ -660,13 +625,7 @@ this.subscriptions.add(
     localStorage.setItem(this.savedCartStorageKey, JSON.stringify(this.savedItems));
   }
 
-  // private getMockTracks(): ReservationOption[] {
-  //   // Temporary mock data: replace with a TracksApiService when a public tracks endpoint exists.
-  //   return [
-  //     { id: 1, name: 'Indoor Sprint', detail: 'Tehnicka staza' },
-  //     { id: 2, name: 'Outdoor GP', detail: 'Brza staza' },
-  //   ];
-  // }
+
 
   private loadAvailability(): void {
   const raw = this.form.getRawValue();
@@ -708,33 +667,14 @@ this.subscriptions.add(
     .pipe(finalize(() => (this.isLoadingOptions = false)))
     .subscribe({
       next: (availability) => {
-        const availableTimes = availability.availableTimes.filter((slot) =>
-          this.isFutureStartTime(date, slot.startTime)
-        );
-
-        this.availability = { ...availability, availableTimes };
-        this.timeOptions = availableTimes.map((slot) => slot.startTime);
+        this.availability = availability;
+        this.timeOptions = availability.availableTimes.map((slot) => slot.startTime);
       },
       error: (err) => {
         console.error('Load availability error:', err);
-        this.toaster.error('Dostupni termini se nisu mogli učitati.');
+        this.toaster.error('Available time slots could not be loaded.');
       },
     });
-}
-
-private isFutureStartTime(date: string, startTime: string): boolean {
-  const today = this.formatDate(new Date());
-
-  if (date !== today) {
-    return true;
-  }
-
-  const normalizedTime = startTime.includes('T')
-    ? startTime.split('T')[1]?.split('.')[0]
-    : startTime.split('.')[0];
-  const slotStart = new Date(`${date}T${normalizedTime}`);
-
-  return !Number.isNaN(slotStart.getTime()) && slotStart.getTime() > Date.now();
 }
 
 private applyTracksForSelectedTime(): void {
@@ -755,7 +695,7 @@ private applyTracksForSelectedTime(): void {
   this.tracks = slot.tracks.map((track) => ({
     id: track.trackId,
     name: track.trackName,
-    detail: `${track.availableSlots} slobodnih mjesta`,
+    detail: `${track.availableSlots} available slots`,
   }));
 }
 

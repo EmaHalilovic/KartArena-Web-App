@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace KartArena.Application.Modules.Catalog.Reservations.Commands.MarkCashPaymentAsPaid;
 
 public sealed class MarkCashReservationPaymentAsPaidCommandHandler(
-    IAppDbContext ctx)
+    IAppDbContext ctx, IBusinessClock businessClock)
     : IRequestHandler<MarkCashReservationPaymentAsPaidCommand, int>
 {
     public async Task<int> Handle(
@@ -21,7 +21,7 @@ public sealed class MarkCashReservationPaymentAsPaidCommandHandler(
 
         if (!reservationExists)
         {
-            throw new InvalidOperationException(
+            throw new MarketNotFoundException(
                 "Reservation not found.");
         }
 
@@ -39,32 +39,36 @@ public sealed class MarkCashReservationPaymentAsPaidCommandHandler(
 
         if (payment is null)
         {
-            throw new InvalidOperationException(
+            throw new MarketNotFoundException(
                 "Payment does not exist for this reservation.");
         }
 
         if (payment.Status != PaymentStatus.Pending)
         {
-            throw new InvalidOperationException(
-                "Only pending payments can be confirmed.");
+            throw new MarketBusinessRuleException(
+             "PAYMENT_NOT_PENDING",
+             "Only pending payments can be confirmed.");
         }
 
         if (payment.PaymentType is null)
         {
-            throw new InvalidOperationException(
-                "Payment type is missing.");
+            throw new MarketBusinessRuleException(
+     "PAYMENT_TYPE_MISSING",
+     "Payment type is missing.");
         }
 
         if (!payment.PaymentType.isEnabled)
         {
-            throw new InvalidOperationException(
-                "Payment type is not active.");
+            throw new MarketBusinessRuleException(
+    "PAYMENT_TYPE_DISABLED",
+    "Payment type is not active.");
         }
 
         if (!payment.PaymentType.AllowedAtDesk)
         {
-            throw new InvalidOperationException(
-                "Payment type is not available at arena.");
+            throw new MarketBusinessRuleException(
+     "PAYMENT_TYPE_NOT_ALLOWED_AT_DESK",
+     "Payment type is not available at the arena.");
         }
 
         if (!string.Equals(
@@ -72,18 +76,18 @@ public sealed class MarkCashReservationPaymentAsPaidCommandHandler(
                 "DESK_CASH",
                 StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException(
-                "Only cash payments can be confirmed manually.");
+            throw new MarketBusinessRuleException(
+    "PAYMENT_NOT_CASH",
+    "Only cash payments can be confirmed manually.");
         }
 
-        var now = DateTime.UtcNow;
+       
 
         payment.Status = PaymentStatus.Paid;
-        payment.PaymentDate = now;
+        payment.PaymentDate = businessClock.UtcNow;
         payment.TransactionReference =
             request.TransactionReference?.Trim();
         payment.Note = request.Note?.Trim();
-        payment.ModifiedAtUtc = now;
 
         /*
          * Confirm all reservations linked to this payment.
@@ -102,7 +106,6 @@ public sealed class MarkCashReservationPaymentAsPaidCommandHandler(
                     ReservationStatus.Confirmed;
             }
 
-            reservation.ModifiedAtUtc = now;
         }
 
         await ctx.SaveChangesAsync(ct);

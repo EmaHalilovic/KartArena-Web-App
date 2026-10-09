@@ -32,7 +32,6 @@ public sealed class ListEquipmentQueryHandler(IAppDbContext ctx)
             q = q.Where(x => x.Size.ToLower().Contains(size));
         }
 
-
         var projectedQuery = q.OrderBy(x => x.Name)
             .ThenBy(x => x.Size)
             .Select(x => new ListEquipmentQueryDto

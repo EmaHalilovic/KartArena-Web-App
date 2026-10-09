@@ -1,5 +1,6 @@
 ﻿using KartArena.Application.Abstractions;
 using KartArena.Application.Modules.Catalog.Payments.Stripe;
+using KartArena.Application.Modules.Catalog.Reservations.Services;
 using KartArena.Domain.Entities.Payments;
 using KartArena.Domain.Entities.Reservations;
 using MediatR;
@@ -9,12 +10,12 @@ namespace KartArena.Application.Modules.Catalog.Reservations.Commands.Checkout;
 
 public sealed class CheckoutReservationsCommandHandler(
     IAppDbContext ctx,
-    IStripePaymentService stripePaymentService)
+    IStripePaymentService stripePaymentService,
+    IReservationRulesService reservationRulesService)
     : IRequestHandler<
         CheckoutReservationsCommand,
         CheckoutReservationsResponse>
 {
-    private const int MaxDriversPerTrackSlot = 6;
     private const string StripePaymentCode = "STRIPE";
     private const string DeskCashPaymentCode = "DESK_CASH";
     private const string DefaultCurrency = "bam";
@@ -25,11 +26,10 @@ public sealed class CheckoutReservationsCommandHandler(
     {
         if (request.Items.Count == 0)
         {
-            throw new InvalidOperationException(
+            throw new MarketBusinessRuleException(
+                "CART_IS_EMPTY",
                 "Cart is empty.");
         }
-
-        ValidateCustomerInfo(request);
 
         if (request.UserId.HasValue)
         {
@@ -40,14 +40,14 @@ public sealed class CheckoutReservationsCommandHandler(
 
             if (!userExists)
             {
-                throw new InvalidOperationException(
-                    "User does not exist.");
+                throw new MarketNotFoundException("User does not exist.");
             }
         }
 
         if (!request.PaymentTypeId.HasValue)
         {
-            throw new InvalidOperationException(
+            throw new MarketBusinessRuleException(
+                "PAYMENT_TYPE_REQUIRED",
                 "Payment type is required.");
         }
 
@@ -59,164 +59,63 @@ public sealed class CheckoutReservationsCommandHandler(
 
         if (paymentType is null)
         {
-            throw new InvalidOperationException(
+            throw new MarketNotFoundException(
                 "Selected payment type does not exist.");
         }
 
         if (!paymentType.isEnabled)
         {
-            throw new InvalidOperationException(
-                "Selected payment type is not active.");
+            throw new MarketBusinessRuleException(
+                "PAYMENT_TYPE_NOT_ENABLED",
+                "Selected payment type is not enabled.");
         }
 
         if (!paymentType.AllowedOnline)
         {
-            throw new InvalidOperationException(
+            throw new MarketBusinessRuleException(
+                "PAYMENT_TYPE_NOT_ALLOWED_ONLINE",
                 "Selected payment type is not available for online payment.");
         }
 
         var isDeskCashPayment = string.Equals(
-    paymentType.Code,
-    DeskCashPaymentCode,
-    StringComparison.OrdinalIgnoreCase);
+            paymentType.Code,
+            DeskCashPaymentCode,
+            StringComparison.OrdinalIgnoreCase);
 
-        var kartIds = request.Items
-            .Select(x => x.KartId)
-            .Distinct()
-            .ToList();
+        var ruleRequests = request.Items
+        .Select(item => new ReservationRulesRequest(
+            item.ReservationDate,
+            item.StartTime,
+            item.EndTime,
+            item.TrackId,
+            item.KartId))
+        .ToList();
 
-        var selectedKarts = await ctx.Karts
-            .Where(x =>
-                kartIds.Contains(x.Id) &&
-                !x.IsDeleted)
-            .ToListAsync(ct);
+        var ruleResults = await reservationRulesService
+            .ValidateBatchAsync(
+                ruleRequests,
+                ct);
 
-        if (selectedKarts.Count != kartIds.Count)
-        {
-            throw new InvalidOperationException(
-                "One or more selected karts do not exist.");
-        }
-
-        
-
-        var calculatedTotalAmount = request.Items.Sum(item =>
-        {
-            var kart = selectedKarts
-                .Single(x => x.Id == item.KartId);
-
-            if (!kart.PricePerSession.HasValue)
-            {
-                throw new InvalidOperationException(
-                    $"Kart {kart.Name ?? kart.Id.ToString()} " +
-                    "does not have a price.");
-            }
-
-            return kart.PricePerSession.Value;
-        });
-
-        if (request.Amount.HasValue &&
-            request.Amount.Value != calculatedTotalAmount)
-        {
-            throw new InvalidOperationException(
-                "Submitted amount does not match calculated amount.");
-        }
 
         await using var transaction =
             await ctx.Database.BeginTransactionAsync(ct);
+        var transactionCommitted = false;
 
         try
         {
             var reservationsToCreate =
                 new List<ReservationEntity>();
 
-            foreach (var item in request.Items)
+            for (var index = 0;
+                 index < request.Items.Count;
+                 index++)
             {
-                ValidateReservationItem(item);
-
-                var date = item.ReservationDate.Date;
-
-                var trackExists = await ctx.Tracks.AnyAsync(
-                    x => x.Id == item.TrackId &&
-                         !x.IsDeleted,
-                    ct);
-
-                if (!trackExists)
-                {
-                    throw new InvalidOperationException(
-                        $"Track with ID {item.TrackId} does not exist.");
-                }
-
-                var kart = selectedKarts
-                    .Single(x => x.Id == item.KartId);
-
-                var itemAmount = kart.PricePerSession!.Value;
-
-                var kartBusyInDatabase =
-                    await ctx.Reservations.AnyAsync(
-                        reservation =>
-                            !reservation.IsDeleted &&
-                            reservation.KartId == item.KartId &&
-                            reservation.Date.Date == date &&
-                            reservation.StartTime < item.EndTime &&
-                            reservation.EndTime > item.StartTime &&
-                            reservation.Status !=
-                                ReservationStatus.Cancelled,
-                        ct);
-
-                if (kartBusyInDatabase)
-                {
-                    throw new InvalidOperationException(
-                        $"Kart {item.KartId} is not available " +
-                        "for the chosen time.");
-                }
-
-                var kartBusyInsideCurrentCart =
-                    reservationsToCreate.Any(
-                        reservation =>
-                            reservation.KartId == item.KartId &&
-                            reservation.Date.Date == date &&
-                            reservation.StartTime < item.EndTime &&
-                            reservation.EndTime > item.StartTime);
-
-                if (kartBusyInsideCurrentCart)
-                {
-                    throw new InvalidOperationException(
-                        $"Kart {item.KartId} is already selected " +
-                        "in this cart for the same time.");
-                }
-
-                var existingTrackReservationsCount =
-                    await ctx.Reservations
-                        .Where(reservation =>
-                            !reservation.IsDeleted &&
-                            reservation.TrackId == item.TrackId &&
-                            reservation.Date.Date == date &&
-                            reservation.StartTime < item.EndTime &&
-                            reservation.EndTime > item.StartTime &&
-                            reservation.Status !=
-                                ReservationStatus.Cancelled)
-                        .CountAsync(ct);
-
-                var cartTrackReservationsCount =
-                    reservationsToCreate.Count(
-                        reservation =>
-                            reservation.TrackId == item.TrackId &&
-                            reservation.Date.Date == date &&
-                            reservation.StartTime < item.EndTime &&
-                            reservation.EndTime > item.StartTime);
-
-                if (existingTrackReservationsCount +
-                    cartTrackReservationsCount >=
-                    MaxDriversPerTrackSlot)
-                {
-                    throw new InvalidOperationException(
-                        "Track is not available. Maximum 6 drivers " +
-                        "are allowed for this time slot.");
-                }
+                var item = request.Items[index];
+                var rulesResult = ruleResults[index];
 
                 var reservation = new ReservationEntity
                 {
-                    UserId = request.UserId,
+                    UserId = null,
 
                     CustomerFirstName =
                         request.CustomerFirstName.Trim(),
@@ -239,22 +138,34 @@ public sealed class CheckoutReservationsCommandHandler(
                     TrackId = item.TrackId,
                     KartId = item.KartId,
 
-                    Date = date,
+                    Date = item.ReservationDate.Date,
                     StartTime = item.StartTime,
                     EndTime = item.EndTime,
 
-                    TotalPrice = itemAmount,
-
+                    TotalPrice = rulesResult.TotalPrice,
 
                     Status = isDeskCashPayment
                         ? ReservationStatus.Confirmed
                         : ReservationStatus.Pending,
+
                     PaymentStatus = PaymentStatus.Pending,
 
                     IsDeleted = false
                 };
 
                 reservationsToCreate.Add(reservation);
+            }
+
+            var calculatedTotalAmount =
+                reservationsToCreate.Sum(
+                    x => x.TotalPrice);
+
+            if (request.Amount.HasValue &&
+                request.Amount.Value != calculatedTotalAmount)
+            {
+                throw new MarketBusinessRuleException(
+                    "AMOUNT_MISMATCH",
+                    "Submitted amount does not match calculated amount.");
             }
 
             await ctx.Reservations.AddRangeAsync(
@@ -276,29 +187,33 @@ public sealed class CheckoutReservationsCommandHandler(
                     ? null
                     : request.PaymentNote.Trim(),
 
-                IsDeleted = false
+                IsDeleted = false,
+                isEnabled = true
             };
 
-            await ctx.Payments.AddAsync(payment, ct);
+            await ctx.Payments.AddAsync(
+                payment,
+                ct);
 
-            
-            foreach (var reservation in reservationsToCreate)
-            {
-                var paymentReservation =
-                    new PaymentReservationEntity
-                    {
-                        Payment = payment,
-                        Reservation = reservation
-                    };
+            var paymentReservations =
+                reservationsToCreate
+                    .Select(reservation =>
+                        new PaymentReservationEntity
+                        {
+                            Payment = payment,
+                            Reservation = reservation
+                        })
+                    .ToList();
 
-                ctx.PaymentReservations.Add(
-                    paymentReservation);
-            }
+            await ctx.PaymentReservations.AddRangeAsync(
+                paymentReservations,
+                ct);
 
             await ctx.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
-         
+            transactionCommitted = true;
+
             if (string.Equals(
                     paymentType.Code,
                     StripePaymentCode,
@@ -329,7 +244,6 @@ public sealed class CheckoutReservationsCommandHandler(
                 };
             }
 
-          
             return new CheckoutReservationsResponse
             {
                 ReservationIds = reservationsToCreate
@@ -348,78 +262,13 @@ public sealed class CheckoutReservationsCommandHandler(
         }
         catch
         {
-            await transaction.RollbackAsync(ct);
+            if (!transactionCommitted)
+            {
+                await transaction.RollbackAsync(ct);
+            }
             throw;
         }
     }
 
-    private static void ValidateCustomerInfo(
-        CheckoutReservationsCommand request)
-    {
-        if (string.IsNullOrWhiteSpace(
-                request.CustomerFirstName))
-        {
-            throw new InvalidOperationException(
-                "First name is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(
-                request.CustomerLastName))
-        {
-            throw new InvalidOperationException(
-                "Last name is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(
-                request.CustomerEmail))
-        {
-            throw new InvalidOperationException(
-                "Email is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(
-                request.CustomerPhone))
-        {
-            throw new InvalidOperationException(
-                "Phone number is required.");
-        }
-    }
-
-    private static void ValidateReservationItem(
-        CheckoutReservationItemDto item)
-    {
-        if (item.TrackId <= 0)
-        {
-            throw new InvalidOperationException(
-                "Track is required.");
-        }
-
-        if (item.KartId <= 0)
-        {
-            throw new InvalidOperationException(
-                "Kart is required.");
-        }
-
-        if (item.StartTime >= item.EndTime)
-        {
-            throw new InvalidOperationException(
-                "End time must be after start time.");
-        }
-
-        if (item.ReservationDate.Date !=
-                item.StartTime.Date ||
-            item.ReservationDate.Date !=
-                item.EndTime.Date)
-        {
-            throw new InvalidOperationException(
-                "Reservation date, start time and end time " +
-                "must be on the same day.");
-        }
-
-        if (item.StartTime <= DateTime.UtcNow)
-        {
-            throw new InvalidOperationException(
-                "Reservation time must be in the future.");
-        }
-    }
+   
 }

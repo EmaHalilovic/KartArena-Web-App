@@ -16,6 +16,7 @@ public sealed class RefreshTokenCommandHandler(
         // 2) Find the valid refresh token in the database (TRACKING because we will modify it)
         var rt = await ctx.RefreshTokens
             .Include(x => x.User)
+            .ThenInclude(user => user.Role)
             .FirstOrDefaultAsync(x =>
                 x.TokenHash == incomingHash &&
                 !x.IsRevoked &&
@@ -24,19 +25,22 @@ public sealed class RefreshTokenCommandHandler(
         var nowUtc = timeProvider.GetUtcNow().UtcDateTime;
 
         if (rt is null || rt.ExpiresAtUtc <= nowUtc)
-            throw new MarketConflictException("Refresh token je nevažeći ili je istekao.");
+            throw new MarketConflictException(
+    "The refresh token is invalid or has expired.");
 
         // (optional) Fingerprint check
         if (rt.Fingerprint is not null &&
             request.Fingerprint is not null &&
             rt.Fingerprint != request.Fingerprint)
         {
-            throw new MarketConflictException("Neispravan klijentski otisak.");
+            throw new MarketConflictException(
+    "The client fingerprint is invalid.");
         }
 
         var user = rt.User;
         if (user is null || !user.isEnabled || user.IsDeleted)
-            throw new MarketConflictException("Korisnički nalog je nevažeći.");
+            throw new MarketConflictException(
+    "The user account is invalid.");
 
         // 3) Rotation: revoke the old one
         rt.IsRevoked = true;

@@ -5,10 +5,11 @@ using KartArena.Application.Modules.Catalog.Payments.Commands.Update;
 using KartArena.Application.Modules.Catalog.Payments.Queries.GetById;
 using KartArena.Application.Modules.Catalog.Payments.Queries.List;
 using KartArena.Application.Modules.Catalog.Payments.Stripe.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace KartArena.API.Controllers
 {
-    [AllowAnonymous]
+    [Authorize(Roles = "Admin,Employee")]
     [ApiController]
     [Route("payments/controller")]
     public class PaymentsController(
@@ -26,9 +27,7 @@ namespace KartArena.API.Controllers
 
             int id = await sender.Send(command, ct);
 
-            return Created(
-                $"/payments/controller/{id}",
-                new { id });
+            return Created($"/payments/controller/{id}", new { id });
         }
 
         [HttpGet("{id:int}")]
@@ -72,36 +71,19 @@ namespace KartArena.API.Controllers
                 cancellationToken);
         }
 
+        [AllowAnonymous]
         [HttpPost("checkout-session")]
         public async Task<ActionResult<CreateCheckoutSessionResponse>>
             CreateCheckoutSession(
                 [FromBody] CreateCheckoutSessionRequest request,
                 CancellationToken cancellationToken)
         {
-            try
-            {
-                var response =
-                    await stripePaymentService
-                        .CreateCheckoutSessionAsync(
-                            request.PaymentId,
-                            cancellationToken);
+            var response =
+                await stripePaymentService.CreateCheckoutSessionAsync(
+                    request.PaymentId,
+                    cancellationToken);
 
-                return Ok(response);
-            }
-            catch (KeyNotFoundException exception)
-            {
-                return NotFound(new
-                {
-                    message = exception.Message
-                });
-            }
-            catch (InvalidOperationException exception)
-            {
-                return BadRequest(new
-                {
-                    message = exception.Message
-                });
-            }
+            return Ok(response);
         }
     }
 }

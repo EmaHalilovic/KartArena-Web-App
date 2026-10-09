@@ -88,7 +88,6 @@ export interface CreateReservationRequest {
   reservationDate: string;
   startTime: string;
   endTime: string;
-  userId: number | null;
   customerFirstName: string;
   customerLastName: string;
   customerEmail: string;
@@ -114,15 +113,18 @@ export interface CheckoutReservationsRequest {
 }
 
 export interface CheckoutReservationItemRequest {
-  reservationDate: string | Date;
-  startTime: string | Date;
-  endTime: string | Date;
+  /** Business-local date in yyyy-MM-dd format (Europe/Sarajevo). */
+  reservationDate: string;
+  /** Business-local date-time without an offset: yyyy-MM-ddTHH:mm:ss. */
+  startTime: string;
+  /** Business-local date-time without an offset: yyyy-MM-ddTHH:mm:ss. */
+  endTime: string;
   trackId: number;
   kartId: number;
 }
 
 export interface UpdateReservationCommand {
-  userId?: number | null;
+ 
   trackId?: number | null;
   kartId?: number | null;
   reservationDate?: string | null;

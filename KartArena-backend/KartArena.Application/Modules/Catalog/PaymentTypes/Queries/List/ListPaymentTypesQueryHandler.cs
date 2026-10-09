@@ -14,7 +14,6 @@ public sealed class ListPaymentTypesQueryHandler(IAppDbContext context)
                 (x.Name != null && x.Name.Contains(search)) ||
                 (x.Description != null && x.Description.Contains(search)));
         }
-
         if (!string.IsNullOrWhiteSpace(request.Name))
         {
             var name = request.Name.Trim();
@@ -34,7 +33,6 @@ public sealed class ListPaymentTypesQueryHandler(IAppDbContext context)
 
         if (request.AllowedOnline.HasValue)
             q = q.Where(x => x.AllowedOnline == request.AllowedOnline.Value);
-
         if (request.OnlyEnabled.HasValue)
             q = q.Where(x => x.isEnabled == request.OnlyEnabled.Value);
 

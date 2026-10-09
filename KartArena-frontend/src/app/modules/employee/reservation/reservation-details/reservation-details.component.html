@@ -46,7 +46,7 @@
             <mat-icon>assignment_ind</mat-icon>
             Assign
           </button>
-          <button *ngIf="canCloseReservation()" mat-flat-button type="button" class="accent-button" (click)="changeReservationStatus(ReservationStatus.Completed)">
+           <button *ngIf="canCloseReservation()" mat-flat-button type="button" class="accent-button" (click)="changeReservationStatus(ReservationStatus.Completed)">
             <mat-icon>task_alt</mat-icon>
             Complete
           </button>
@@ -115,7 +115,7 @@
             <span>Customer</span>
             <strong>{{ userLabel }}</strong>
           </div>
-          <div class="info-item">
+              <div class="info-item">
             <span>Email</span>
             <strong>{{ reservation.customerEmail || '-' }}</strong>
           </div>
@@ -175,7 +175,7 @@
           </div>
           <div class="info-item">
             <span>Transaction reference</span>
-            <strong class="transaction-reference">{{ reservation.transactionReference || '-' }}</strong>
+             <strong class="transaction-reference">{{ reservation.transactionReference || '-' }}</strong>
           </div>
           <div class="info-item info-item-wide">
             <span>Payment note</span>

@@ -10,7 +10,7 @@ import { GetKartByIdQueryDto } from '../../../api-services/karts/karts-api.model
   template: `
     <section class="details">
       <div class="container" *ngIf="kart; else loadingTpl">
-        <button class="back" (click)="back()">← Nazad</button>
+        <button class="back" (click)="back()">← Back</button>
 
         <div class="hero">
           <img class="img" [src]="kart.imageUrl || 'https://placehold.co/1200x700'" alt="Kart image" />
@@ -27,20 +27,20 @@ import { GetKartByIdQueryDto } from '../../../api-services/karts/karts-api.model
           </div>
 
           <div class="price" *ngIf="kart.pricePerSession != null">
-            {{ kart.pricePerSession }} KM / vožnja
+            {{ kart.pricePerSession }} KM / ride
           </div>
 
           <p class="desc" *ngIf="kart.description">{{ kart.description }}</p>
 
           <div class="specs">
-            <div class="spec"><span>Šasija</span><b>{{ kart.chassisNumber || '—' }}</b></div>
+            <div class="spec"><span>Chassis</span><b>{{ kart.chassisNumber || '—' }}</b></div>
             <div class="spec"><span>Powertrain</span><b>{{ kart.powertrainTypeName || '—' }}</b></div>
           </div>
         </div>
       </div>
 
       <ng-template #loadingTpl>
-        <div class="loading container">Učitavanje...</div>
+        <div class="loading container">Loading...</div>
       </ng-template>
     </section>
   `,

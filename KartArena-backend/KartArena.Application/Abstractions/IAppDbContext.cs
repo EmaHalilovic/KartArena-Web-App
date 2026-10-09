@@ -15,12 +15,13 @@ public interface IAppDbContext
     //payments
     DbSet<PaymentTypeEntity> PaymentTypes { get; }
     DbSet<PaymentEntity> Payments { get; }
-    DbSet<PaymentReservationEntity> PaymentReservations { get; }
+    DbSet<PaymentAttemptEntity> PaymentAttempts { get; }
 
     DbSet<ReservationEntity> Reservations { get; }
     DbSet<EquipmentTypeEntity> EquipmentEntity { get; }
     DbSet<EquipmentItemEntity> EquipmentItemEntity { get; }
     DbSet<ReservationEmployeeEntity> ReservationEmployees { get; }
+    DbSet<PaymentReservationEntity> PaymentReservations { get; }
     //karts
     DbSet<KartEntity> Karts { get; }
     DbSet<TrackEntity> Tracks { get; }

@@ -61,7 +61,6 @@ export class ReservationAddComponent
       reservationDate,
       startTime: this.toIsoDateTime(reservationDate, value.startTime),
       endTime: this.toIsoDateTime(reservationDate, value.endTime),
-      userId: this.toNullableNumber(value.userId),
       customerFirstName: value.customerFirstName.trim(),
       customerLastName: value.customerLastName.trim(),
       customerEmail: value.customerEmail.trim(),

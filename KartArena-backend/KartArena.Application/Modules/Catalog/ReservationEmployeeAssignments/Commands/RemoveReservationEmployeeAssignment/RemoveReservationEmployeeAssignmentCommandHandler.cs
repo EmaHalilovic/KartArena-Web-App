@@ -18,7 +18,7 @@ public class RemoveReservationEmployeeAssignmentCommandHandler : IRequestHandler
             .FirstOrDefaultAsync(x => x.Id == request.Id && !x.IsDeleted, cancellationToken);
 
         if (entity is null)
-            throw new KeyNotFoundException("Assignment not found.");
+            throw new MarketNotFoundException("Assignment not found.");
 
         entity.IsDeleted = true;
         entity.ModifiedAtUtc = DateTime.UtcNow;

@@ -64,7 +64,7 @@ public sealed class RequestResponseLoggingMiddleware(
             {
                 logger.LogWarning("[SLOW REQUEST] {Path} took {Elapsed} ms", request.Path, elapsed);
 
-                // >>> Bugfix 27.10.2025: sigurno pisanje na disk (ne ruši response ako folder ne postoji)
+                
                 try
                 {
                     var logDir = Path.Combine(AppContext.BaseDirectory, "Logs");

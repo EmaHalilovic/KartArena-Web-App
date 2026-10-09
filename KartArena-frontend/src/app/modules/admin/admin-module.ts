@@ -6,7 +6,6 @@ import { SharedModule } from '../shared/shared-module';
 
 import { AdminLayoutComponent } from './admin-layout/admin-layout.component';
 import { AdminSettingsComponent } from './admin-settings/admin-settings.component';
-import { ReportsComponent } from './reports/reports.component';
 
 import { EquipmentComponent } from './equipment/equipment.component';
 import { EquipmentAddComponent } from './equipment/equipment-add/equipment-add.component';
@@ -35,13 +34,14 @@ import { PaymentTypesComponent } from './payment-types/payment-types.component';
 import { PaymentTypesAddComponent } from './payment-types/payment-types-add/payment-types-add.component';
 import { PaymentTypesEditComponent } from './payment-types/payment-types-edit/payment-types-edit.component';
 import { ConfirmDeletePaymentTypeDialogComponent } from './payment-types/dialogs/confirm-delete/confirm-delete-dialog.component';
+import { ReportsComponent } from './reports/reports.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 
 @NgModule({
   declarations: [
     AdminLayoutComponent,
     AdminSettingsComponent,
-    ReportsComponent,
     EquipmentComponent,
     EquipmentAddComponent,
     EquipmentEditComponent,
@@ -66,6 +66,8 @@ import { ConfirmDeletePaymentTypeDialogComponent } from './payment-types/dialogs
     PaymentTypesAddComponent,
     PaymentTypesEditComponent,
     ConfirmDeletePaymentTypeDialogComponent,
+    ReportsComponent,
+    DashboardComponent
   ],
   imports: [
     AdminRoutingModule,

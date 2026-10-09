@@ -21,10 +21,7 @@ export class KartsApiService {
     const params = buildHttpParams(request);
     return this.http.get<any>(this.baseUrl, { params }).pipe(
       map((res) => {
-        // Backend-i znaju vraćati razne oblike odgovora:
-        // 1) Paged: { items, totalItems } ili { Items, Total }
-        // 2) Wrapped: { data: {...} } ili { result: {...} }
-        // 3) Plain list: [ ... ]
+        
         const payload = res?.data ?? res?.result ?? res?.value ?? res;
 
         const isArray = Array.isArray(payload);

@@ -18,5 +18,7 @@ namespace KartArena.Application.Modules.Catalog.Payments.Stripe.Models
 
         public List<int> ReservationIds { get; set; }
             = new();
+
+
     }
 }

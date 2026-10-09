@@ -11,10 +11,10 @@ type Slide = { src: string; alt: string };
 export class HomeComponent {
   galleryIndex = 0;
 
-  // NOTE: slike stavi u src/assets/ (npr. assets/Karting.jpg, assets/fia-2.jpg, assets/hero-2.jpg)
+  // NOTE: Place images in src/assets/ (for example, assets/Karting.jpg or assets/fia-2.jpg).
   slides: Slide[] = [
-    { src: '/assets/karting.jpg', alt: 'KartArena - kartovi' },
-    { src: '/assets/fia-2.jpg', alt: 'KartArena - trka' },
+    { src: '/assets/karting.jpg', alt: 'KartArena - karts' },
+    { src: '/assets/fia-2.jpg', alt: 'KartArena - race' },
   ];
 
   prev() {
@@ -50,8 +50,8 @@ setSlide(i: number) {
 
     if (!email) return;
 
-    // TODO: ovdje pozovi svoj API (npr. NewsletterService)
-    // Za sada samo reset.
+    // TODO: Call the newsletter API here (for example, NewsletterService).
+    // Reset the form until the API integration is available.
     form.reset();
   }
 }

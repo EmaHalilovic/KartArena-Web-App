@@ -13,23 +13,23 @@ namespace KartArena.Application.Modules.Catalog.Karts.Queries.GetAll
                 .Include(x => x.PowertrainType)
                 .AsQueryable();
 
-            // Filtriranje po nazivu
+            
             if (!string.IsNullOrWhiteSpace(request.Search))
             {
                 var searchTerm = request.Search.Trim().ToLower();
                 query = query.Where(x => x.Name.ToLower().Contains(searchTerm));
             }
 
-            // Filtriranje po statusu
+           
             if (request.IsEnabled.HasValue)
             {
                 query = query.Where(x => x.isEnabled == request.IsEnabled.Value);
             }
 
-            // Ukupan broj zapisa prije paginacije
+           
             var totalCount = await query.CountAsync(cancellationToken);
 
-            // Primjena paginacije
+          
             var items = await query
                 .OrderBy(x => x.Name)
                 .Skip((request.PageNumber - 1) * request.PageSize)

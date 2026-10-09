@@ -719,6 +719,68 @@ namespace KartArena.Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("KartArena.Domain.Entities.Payments.PaymentAttemptEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CheckoutUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StripeCheckoutSessionId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("StripeEventId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("isEnabled")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("PaymentId")
+                        .IsUnique()
+                        .HasFilter("[IsActive] = 1");
+
+                    b.HasIndex("StripeCheckoutSessionId")
+                        .IsUnique()
+                        .HasFilter("[StripeCheckoutSessionId] IS NOT NULL");
+
+                    b.ToTable("PaymentAttempts", (string)null);
+                });
+
             modelBuilder.Entity("KartArena.Domain.Entities.Payments.PaymentEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -1115,6 +1177,17 @@ namespace KartArena.Infrastructure.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("KartArena.Domain.Entities.Payments.PaymentAttemptEntity", b =>
+                {
+                    b.HasOne("KartArena.Domain.Entities.Payments.PaymentEntity", "Payment")
+                        .WithMany("PaymentAttempts")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
+                });
+
             modelBuilder.Entity("KartArena.Domain.Entities.Payments.PaymentEntity", b =>
                 {
                     b.HasOne("KartArena.Domain.Entities.Payments.PaymentTypeEntity", "PaymentType")
@@ -1263,6 +1336,8 @@ namespace KartArena.Infrastructure.Migrations
 
             modelBuilder.Entity("KartArena.Domain.Entities.Payments.PaymentEntity", b =>
                 {
+                    b.Navigation("PaymentAttempts");
+
                     b.Navigation("PaymentReservations");
                 });
 

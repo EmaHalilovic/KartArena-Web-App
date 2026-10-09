@@ -1,3 +1,4 @@
+using KartArena.Domain.Entities.Payments;
 using Microsoft.EntityFrameworkCore;
 
 namespace KartArena.Application.Modules.Catalog.Payments.Queries.GetById;
@@ -11,13 +12,12 @@ public sealed class GetPaymentByIdQueryHandler(IAppDbContext context)
     {
         var dto = await context.Payments
             .AsNoTracking()
-            .Where(x =>
+             .Where(x =>
                 x.Id == request.Id &&
                 !x.IsDeleted)
             .Select(x => new GetPaymentByIdQueryDto
             {
                 Id = x.Id,
-
                 Reservations = x.PaymentReservations
                     .OrderBy(link => link.Reservation.Date)
                     .ThenBy(link => link.Reservation.StartTime)
@@ -60,23 +60,16 @@ public sealed class GetPaymentByIdQueryHandler(IAppDbContext context)
                     .ToList(),
 
                 Amount = x.Amount,
-
                 Currency = x.Currency,
-
                 PaymentDate = x.PaymentDate,
-
                 PaymentTypeId = x.PaymentTypeId,
-
                 PaymentTypeName =
                     x.PaymentType != null
                         ? x.PaymentType.Name
                         : null,
-
                 Status = x.Status,
-
                 TransactionReference =
                     x.TransactionReference,
-
                 Note = x.Note
             })
             .FirstOrDefaultAsync(cancellationToken);

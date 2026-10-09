@@ -1,4 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 import {
   ListPaymentsQueryDto,
   ListPaymentsRequest,
@@ -11,6 +12,7 @@ import {
 } from '../../../api-services/payment-types/payment-types-api.models';
 import { PaymentTypesApiService } from '../../../api-services/payment-types/payment-types-api.service';
 import { BaseListPagedComponent } from '../../../core/components/base-classes/base-list-paged-component';
+import { formatBusinessInstant } from '../../../core/services/business-date-time';
 
 @Component({
   selector: 'app-payments',
@@ -43,6 +45,9 @@ export class PaymentsComponent
     { value: PaymentStatus.Refunded, label: 'Refunded' },
   ];
   paymentTypeOptions: ListPaymentTypesQueryDto[] = [];
+  readonly searchControl = new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] });
+  readonly paymentTypeControl = new FormControl<number | null>(null);
+  readonly statusControl = new FormControl<PaymentStatus | null>(null);
 
   constructor() {
     super();
@@ -100,6 +105,10 @@ export class PaymentsComponent
 
   formatPaymentType(r: ListPaymentsQueryDto): string {
     return (r.paymentTypeName ?? '').trim() || '-';
+  }
+
+  formatPaymentDate(value?: string | null): string {
+    return value ? (formatBusinessInstant(value) ?? '-') : '-';
   }
 
   getStatusTone(status: PaymentStatus): 'good' | 'fair' | 'low' | 'neutral' {

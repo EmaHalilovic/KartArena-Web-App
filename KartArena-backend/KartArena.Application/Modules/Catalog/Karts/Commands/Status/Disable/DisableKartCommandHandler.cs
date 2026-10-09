@@ -10,14 +10,14 @@ namespace KartArena.Application.Modules.Catalog.Karts.Commands.Status.Disable
     {
         public async Task<Unit> Handle(DisableKartCommand request, CancellationToken cancellationToken)
         {
-            // Pronađi kart po ID-u
+            
             var kart = await context.Karts
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (kart == null)
                 throw new System.ComponentModel.DataAnnotations.ValidationException($"Kart with ID {request.Id} was not found.");
 
-            // Postavi status na onemogućen
+           
             kart.isEnabled = false;
 
             context.Karts.Update(kart);

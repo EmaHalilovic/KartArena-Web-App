@@ -1,8 +1,9 @@
 ﻿using KartArena.Application.Common.Behaviors;
-using Microsoft.Extensions.DependencyInjection;
 using KartArena.Application.Modules.Reports;
-using QuestPDF.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using QuestPDF.Infrastructure;
+using KartArena.Application.Modules.Catalog.Reservations.Services;
 
 namespace KartArena.Application;
 
@@ -26,6 +27,7 @@ public static class DependencyInjection
         services.AddSingleton<PdfReportService>();
         QuestPDF.Settings.License = LicenseType.Community;
 
+        services.AddScoped<IReservationRulesService, ReservationRulesService>();
         return services;
     }
 }

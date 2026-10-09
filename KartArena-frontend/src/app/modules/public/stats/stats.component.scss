@@ -6,13 +6,12 @@
               #0b0c10;
 }
 
-/* wrapper */
+/* Page wrapper */
 .page{
   padding: 26px 0 44px;
   color:#fff;
 }
 
-/* ako ti container već ima max-width super, ako ne — ovo fino “centira” sadržaj */
 .container{
   max-width: 1180px;
 }
@@ -51,7 +50,7 @@ h1{
   color:#000;
 }
 
-/* TAMNE kartice (ovo je glavna razlika) */
+/* Dark cards */
 .k-card{
   border-radius: 16px;
   background: rgba(18, 20, 28, .92);
@@ -111,7 +110,7 @@ h1{
   color: rgba(255,255,255,.88);
 }
 
-/* ApexCharts ponekad ubaci bijelu pozadinu; ovo je “force dark” */
+/* Prevent ApexCharts from adding a white background. */
 .chart{ width: 100%; }
 .chart ::ng-deep .apexcharts-canvas,
 .chart ::ng-deep svg{
@@ -126,7 +125,7 @@ h1{
   stroke: rgba(255,255,255,.08) !important;
 }
 
-/* ✅ DONUT: savršeno centriranje */
+
 .donutBox{
   display: flex;
   flex-direction: column;

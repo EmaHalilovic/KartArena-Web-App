@@ -8,6 +8,7 @@ public sealed class UpdatePaymentTypeCommand : IRequest<Unit>
     public int Id { get; set; }
 
     public required string Name { get; set; }
+    public required string Code { get; set; }
 
     public bool AllowedOnline { get; set; }
 

@@ -5,7 +5,6 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { AdminLayoutComponent } from './admin-layout/admin-layout.component';
 import { AdminSettingsComponent } from './admin-settings/admin-settings.component';
-import { ReportsComponent } from './reports/reports.component';
 
 import { EquipmentComponent } from './equipment/equipment.component';
 import { EquipmentAddComponent } from './equipment/equipment-add/equipment-add.component';
@@ -24,12 +23,18 @@ import { KartsEditComponent } from './karts/karts-edit/karts-edit.component';
 import { PaymentTypesComponent } from './payment-types/payment-types.component';
 import { PaymentTypesAddComponent } from './payment-types/payment-types-add/payment-types-add.component';
 import { PaymentTypesEditComponent } from './payment-types/payment-types-edit/payment-types-edit.component';
+import { ReportsComponent } from './reports/reports.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 const routes: Routes = [
   {
     path: '',
     component: AdminLayoutComponent,
     children: [
+      {
+        path: 'dashboard',
+        component: DashboardComponent,
+      },
       // EQUIPMENT
       {
         path: 'equipment/add',
@@ -96,26 +101,25 @@ const routes: Routes = [
         path: 'karts/:id/edit',
         component: KartsEditComponent,
       },
-
+  {
+        path: 'reports',
+        component: ReportsComponent,
+      },
       // SETTINGS (optional)
       {
         path: 'settings',
         component: AdminSettingsComponent,
       },
-      {
-        path: 'reports',
-        component: ReportsComponent,
-      },
 
       // default admin route → /admin/equipment
       {
         path: '',
-        redirectTo: 'karts',
+        redirectTo: 'dashboard',
         pathMatch: 'full',
       },
       {
         path: '**',
-        redirectTo: 'karts',
+        redirectTo: 'dashboard',
       },
     ],
   },

@@ -43,7 +43,10 @@ public sealed class MarketExceptionHandler(
             MarketNotFoundException => StatusCodes.Status404NotFound,
             MarketConflictException or MarketBusinessRuleException => StatusCodes.Status409Conflict,
             ValidationException => StatusCodes.Status400BadRequest,
+            MarketExternalServiceException => StatusCodes.Status502BadGateway,
+            MarketConfigurationException => StatusCodes.Status500InternalServerError,
             _ => StatusCodes.Status500InternalServerError
+
         };
 
         var error = BuildErrorDto(ex, env.IsDevelopment(), traceId);
@@ -60,16 +63,37 @@ public sealed class MarketExceptionHandler(
         switch (ex)
         {
             case MarketNotFoundException:
-            case MarketConflictException:
-            case MarketBusinessRuleException:
-                code = "entity.error";
+                code = "entity.not_found";
                 message = ex.Message;
                 break;
 
-            case ValidationException vex:
+            case MarketConflictException:
+                code = "entity.conflict";
+                message = ex.Message;
+                break;
+
+            case MarketBusinessRuleException businessException:
+                code = businessException.Code;
+                message = businessException.Message;
+                break;
+
+            case MarketExternalServiceException externalException:
+                code = externalException.Code;
+                message = externalException.Message;
+                break;
+
+            case MarketConfigurationException configurationException:
+                code = configurationException.Code;
+                message = configurationException.Message;
+                break;
+
+            case ValidationException validationException:
                 code = "validation.error";
                 message = "Validation failed: " +
-                          string.Join("; ", vex.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+                    string.Join(
+                        "; ",
+                        validationException.Errors.Select(error =>
+                            $"{error.PropertyName}: {error.ErrorMessage}"));
                 break;
         }
 

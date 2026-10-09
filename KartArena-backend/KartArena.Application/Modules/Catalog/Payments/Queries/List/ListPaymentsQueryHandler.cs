@@ -7,8 +7,8 @@ public sealed class ListPaymentsQueryHandler(IAppDbContext context)
     : IRequestHandler<ListPaymentsQuery, PageResult<ListPaymentsQueryDto>>
 {
     public async Task<PageResult<ListPaymentsQueryDto>> Handle(
-        ListPaymentsQuery request,
-        CancellationToken ct)
+         ListPaymentsQuery request,
+         CancellationToken ct)
     {
         var q = context.Payments
             .AsNoTracking()
@@ -29,10 +29,8 @@ public sealed class ListPaymentsQueryHandler(IAppDbContext context)
                     link.Reservation.CustomerLastName.Contains(search) ||
 
                     link.Reservation.CustomerEmail.Contains(search)) ||
-
                 x.Amount.ToString().Contains(search) ||
-
-                (x.TransactionReference != null &&
+                 (x.TransactionReference != null &&
                  x.TransactionReference.Contains(search)) ||
 
                 (x.Note != null &&
@@ -70,7 +68,6 @@ public sealed class ListPaymentsQueryHandler(IAppDbContext context)
             .Select(x => new ListPaymentsQueryDto
             {
                 Id = x.Id,
-
                 CustomerName = x.PaymentReservations
                     .OrderBy(link => link.ReservationId)
                     .Select(link =>
@@ -103,13 +100,9 @@ public sealed class ListPaymentsQueryHandler(IAppDbContext context)
                             : string.Empty
                     })
                     .ToList(),
-
                 Amount = x.Amount,
-
                 Currency = x.Currency,
-
                 PaymentDate = x.PaymentDate,
-
                 PaymentTypeName = x.PaymentType != null
                     ? x.PaymentType.Name
                     : null,
@@ -118,9 +111,9 @@ public sealed class ListPaymentsQueryHandler(IAppDbContext context)
             });
 
         return await PageResult<ListPaymentsQueryDto>
-            .FromQueryableAsync(
-                projected,
-                request.Paging,
-                ct);
+             .FromQueryableAsync(
+                 projected,
+                 request.Paging,
+                 ct);
     }
 }

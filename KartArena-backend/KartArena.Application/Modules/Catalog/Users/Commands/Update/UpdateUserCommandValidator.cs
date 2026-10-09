@@ -1,4 +1,11 @@
-﻿namespace KartArena.Application.Modules.Catalog.Users.Commands.Update
+﻿using KartArena.Application.Modules.Catalog.Payments.Commands.Update;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace KartArena.Application.Modules.Catalog.Users.Commands.Update
 {
     public sealed class UpdateUserCommandValidator
         : AbstractValidator<UpdateUserCommand>

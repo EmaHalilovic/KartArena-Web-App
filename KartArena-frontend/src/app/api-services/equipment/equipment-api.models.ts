@@ -7,30 +7,30 @@ import { BasePagedQuery } from '../../core/models/paging/base-paged-query';
  * Equipment stock status enum.
  */
 export enum EquipmentStockStatus {
-  Good = 'Good',
-  Low = 'Low',
-  OutOfStock = 'OutOfStock',
+  Good = 0,
+  Low = 1,
+  OutOfStock = 2,
 }
 
 /**
  * Equipment item status enum.
  */
 export enum EquipmentItemStatus {
-  Available = 'Available',
-  InUse = 'InUse',
-  Maintenance = 'Maintenance',
-  Lost = 'Lost',
+  Available = 0,
+  InUse = 1,
+  Maintenance = 2,
+  Lost = 3,
 }
 
 /**
  * Equipment category enum.
  */
 export enum EquipmentCategory {
-  Helmet = 'Helmet',
-  Suit = 'Suit',
-  Gloves = 'Gloves',
-  Balaclava = 'Balaclava',
-  Other = 'Other',
+  Helmet = 0,
+  Suit = 1,
+  Gloves = 2,
+  Balaclava = 3,
+  Other = 4,
 }
 
 // === QUERIES (READ) ===
@@ -44,10 +44,6 @@ export class ListEquipmentRequest extends BasePagedQuery {
   category?: EquipmentCategory | null;
   stockStatus?: EquipmentStockStatus | null;
   size?: string | null;
-
-  constructor() {
-    super();
-  }
 }
 
 /**

@@ -15,11 +15,11 @@ export class AppComponent implements OnInit {
   constructor(private translate: TranslateService, private themeService: ThemeService) {
     console.log('AppComponent constructor - initializing TranslateService');
 
-    // Inicijalizacija translate servisa
+   
     this.translate.addLangs(['en', 'bs']);
     this.translate.setDefaultLang('bs');
 
-    // Učitaj jezik iz localStorage ili koristi default
+ 
     const savedLang = localStorage.getItem('language') || 'bs';
     this.currentLang = savedLang;
 
@@ -37,16 +37,16 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     // Test translation
-    this.translate.get('PRODUCTS.TITLE').subscribe((res: string) => {
-      console.log('Translation for PRODUCTS.TITLE:', res);
-      if (res === 'PRODUCTS.TITLE') {
-        console.error('⚠️ Translation not working! Key returned instead of value.');
-        console.error('Possible causes:');
-        console.error('1. Translation files not in /i18n/ folder');
-        console.error('2. JSON files have syntax errors');
-        console.error('3. TranslateService not properly initialized');
-      }
-    });
+    // this.translate.get('PRODUCTS.TITLE').subscribe((res: string) => {
+    //   console.log('Translation for PRODUCTS.TITLE:', res);
+    //   if (res === 'PRODUCTS.TITLE') {
+    //     console.error('⚠️ Translation not working! Key returned instead of value.');
+    //     console.error('Possible causes:');
+    //     console.error('1. Translation files not in /i18n/ folder');
+    //     console.error('2. JSON files have syntax errors');
+    //     console.error('3. TranslateService not properly initialized');
+    //   }
+    // });
   }
 
   switchLanguage(lang: string): void {

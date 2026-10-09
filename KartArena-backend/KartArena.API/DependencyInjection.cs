@@ -82,7 +82,7 @@ public static class DependencyInjection
             var bearer = new OpenApiSecurityScheme
             {
                 Name = "Authorization",
-                Description = "Unesi JWT token. Format: **Bearer {token}**",
+                Description = "Enter the JWT token. Format: **Bearer {token}**",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
                 Scheme = "bearer",

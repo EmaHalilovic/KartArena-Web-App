@@ -15,7 +15,6 @@ public sealed class CheckoutReservationsCommand
 
     public int? PaymentTypeId { get; set; }
 
-    // Frontend može poslati amount, ali backend ga ne smije slijepo koristiti.
     public decimal? Amount { get; set; }
 
     public string? PaymentNote { get; set; }

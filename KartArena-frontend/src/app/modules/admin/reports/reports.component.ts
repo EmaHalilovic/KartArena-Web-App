@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { finalize, Observable } from 'rxjs';
 import { PdfReportFilter, ReportsApiService } from '../../../api-services/reports/reports-api.service';
@@ -19,11 +20,14 @@ export class ReportsComponent {
   private readonly translate = inject(TranslateService);
 
   readonly reportTypes: ReportType[] = ['reservations', 'payments'];
-  filters: Record<ReportType, PdfReportFilter> = { reservations: {}, payments: {} };
+  readonly reportForms: Record<ReportType, FormGroup> = {
+    reservations: this.createReportForm(),
+    payments: this.createReportForm(),
+  };
   loading: Record<ReportType, boolean> = { reservations: false, payments: false };
 
   generate(type: ReportType): void {
-    const filter = this.filters[type];
+    const filter = this.reportForms[type].getRawValue() as PdfReportFilter;
     if (filter.dateFrom && filter.dateTo && filter.dateFrom > filter.dateTo) {
       this.toaster.error(this.translate.instant('REPORTS.MESSAGES.INVALID_RANGE'));
       return;
@@ -45,6 +49,14 @@ export class ReportsComponent {
           error.status === 400 ? 'REPORTS.MESSAGES.INVALID_FILTERS' : 'REPORTS.MESSAGES.ERROR';
         this.toaster.error(this.translate.instant(key));
       },
+    });
+  }
+
+  private createReportForm(): FormGroup {
+    return new FormGroup({
+      id: new FormControl<number | null>(null, [Validators.min(1)]),
+      dateFrom: new FormControl<string>(''),
+      dateTo: new FormControl<string>(''),
     });
   }
 

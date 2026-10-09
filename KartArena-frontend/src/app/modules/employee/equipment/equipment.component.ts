@@ -1,4 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
@@ -34,6 +35,8 @@ export class EquipmentComponent
   private dialog = inject(MatDialog);
   private toaster = inject(ToasterService);
 
+readonly stockStatusLabel = getEquipmentStockLabel;
+
   displayedColumns: string[] = [
     'name',
     'category',
@@ -46,14 +49,23 @@ export class EquipmentComponent
     'actions',
   ];
 
-  stockStatusOptions = Object.values(EquipmentStockStatus);
+  stockStatusOptions = [
+    EquipmentStockStatus.Good,
+    EquipmentStockStatus.Low,
+    EquipmentStockStatus.OutOfStock,
+  ];
   categoryOptions = getEquipmentCategories();
   onlyActive = true;
+  readonly searchControl = new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] });
+  readonly categoryControl = new FormControl<EquipmentCategory | null>(null);
+  readonly stockStatusControl = new FormControl<EquipmentStockStatus | null>(null);
+  readonly sizeControl = new FormControl('', { nonNullable: true, validators: [Validators.maxLength(50)] });
+  readonly activeOnlyControl = new FormControl(true, { nonNullable: true });
 
   constructor() {
     super();
     this.request = new ListEquipmentRequest();
-    this.request.paging.pageSize = 10;
+     this.request.paging.pageSize = 10;
     this.request.onlyActive = this.onlyActive;
   }
 
@@ -66,7 +78,7 @@ export class EquipmentComponent
 
     this.api.list(this.buildApiRequest()).subscribe({
       next: (response) => {
-        this.handlePageResult(response);
+         this.handlePageResult(response);
         this.stopLoading();
       },
       error: (err) => {
@@ -180,6 +192,8 @@ export class EquipmentComponent
     return request;
   }
 
+ 
+
   private performDelete(item: ListEquipmentQueryDto): void {
     this.startLoading();
 
@@ -195,5 +209,6 @@ export class EquipmentComponent
     });
   }
 
+ 
 }
 
